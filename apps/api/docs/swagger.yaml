@@ -1,0 +1,87 @@
+basePath: /api/v1
+definitions:
+  common.DateTime:
+    type: object
+  registrations.FindRegistrationResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/registrations.Registration'
+        type: array
+      page:
+        type: integer
+    type: object
+  registrations.Registration:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      isProcessed:
+        type: boolean
+      note:
+        type: string
+      parentName:
+        type: string
+      phoneNumber:
+        type: string
+      studentClass:
+        type: string
+      studentDob:
+        $ref: '#/definitions/common.DateTime'
+      studentName:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+info:
+  contact:
+    email: fiber@swagger.io
+    name: API Support
+  description: This is a sample swagger for Fiber
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Fiber Example API
+  version: "1.0"
+paths:
+  /registrations:
+    get:
+      consumes:
+      - application/json
+      description: Get list registration nutrients and rate
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registrations.FindRegistrationResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get list registration details api
+      tags:
+      - Registration
+swagger: "2.0"
