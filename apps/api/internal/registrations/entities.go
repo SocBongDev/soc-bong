@@ -2,16 +2,25 @@ package registrations
 
 import (
 	"github.com/SocBongDev/soc-bong/internal/common"
-	"gorm.io/datatypes"
 )
 
-type Registrations struct {
+type CreateRegistrationRequest struct {
+	Note         string          `json:"note"`
+	ParentName   string          `json:"parentName"`
+	PhoneNumber  string          `json:"phoneNumber"`
+	StudentClass string          `json:"studentClass"`
+	StudentDob   common.DateTime `json:"studentDob"`
+	StudentName  string          `json:"studentName"`
+}
+
+type Registration struct {
 	common.BaseEntity
-	IsProcessed  bool
-	Note         string
-	ParentName   string
-	PhoneNumber  string
-	StudentClass string
-	StudentDob   datatypes.Date
-	StudentName  string
+	CreateRegistrationRequest
+	IsProcessed bool `json:"isProcessed"`
+}
+
+type RegistrationQuery struct {
+	common.Pagination
+	common.Sorter
+	Search string `json:"search"`
 }
