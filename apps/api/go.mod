@@ -1,6 +1,8 @@
 module github.com/SocBongDev/soc-bong
 
-go 1.22.0
+go 1.22
+
+toolchain go1.22.0
 
 require (
 	github.com/auth0/go-jwt-middleware/v2 v2.2.1
@@ -12,6 +14,7 @@ require (
 	github.com/pocketbase/dbx v1.10.1
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
+	github.com/swaggo/swag v1.16.3
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240409095100-b3f915fbd79c
 )
 
@@ -43,7 +46,6 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
-	github.com/swaggo/swag v1.16.3 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
