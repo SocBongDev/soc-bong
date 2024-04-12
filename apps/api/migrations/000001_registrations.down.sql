@@ -1,1 +1,2 @@
 DROP TABLE registrations;
+DROP TRIGGER update_timestamp_registrations;
