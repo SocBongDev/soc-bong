@@ -6,4 +6,5 @@ type RegistrationRepository interface {
 	FindOne(*Registration) error
 	Insert(*Registration) error
 	Update(*Registration) error
+	MarkAsDone(*Registration) error
 }

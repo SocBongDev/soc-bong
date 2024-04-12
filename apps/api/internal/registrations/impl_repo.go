@@ -46,6 +46,16 @@ func (r *RegistrationRepo) Update(req *Registration) error {
 	return r.db.Model(req).Exclude("Id", "CreatedAt", "UpdatedAt").Update()
 }
 
+func (r *RegistrationRepo) MarkAsDone(req *Registration) error {
+	_, err := r.db.Update(
+		"registrations",
+		dbx.Params{"is_processed": true},
+		dbx.HashExp{"id": req.Id},
+	).
+		Execute()
+	return err
+}
+
 func NewRepo(db *dbx.DB) RegistrationRepository {
 	return &RegistrationRepo{db}
 }
