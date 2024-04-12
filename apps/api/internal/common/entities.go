@@ -3,14 +3,14 @@ package common
 import "time"
 
 type BaseEntity struct {
-	Id        int
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Id        int       `json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 type FindResponse[T any] struct {
-	Data []T
-	Page int64
+	Data []T   `json:"data"`
+	Page int64 `json:"page"`
 }
 
 type Pagination struct {
