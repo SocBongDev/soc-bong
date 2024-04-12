@@ -25,7 +25,7 @@ const docTemplate = `{
     "paths": {
         "/registrations": {
             "get": {
-                "description": "Get list registration nutrients and rate",
+                "description": "Get list registration",
                 "consumes": [
                     "application/json"
                 ],
@@ -78,13 +78,155 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Insert registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Create registration api",
+                "parameters": [
+                    {
+                        "description": "Create registration body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/registrations.WriteRegistrationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registrations.Registration"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/registrations/{id}": {
+            "get": {
+                "description": "Get one registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Get registration details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Registration ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registrations.Registration"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Update registration api",
+                "parameters": [
+                    {
+                        "description": "Update registration body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/registrations.WriteRegistrationRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Registration ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registrations.Registration"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Delete registration api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Registration ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/registrations.Registration"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
-        "common.DateTime": {
-            "type": "object"
-        },
         "registrations.FindRegistrationResp": {
             "type": "object",
             "properties": {
@@ -121,15 +263,50 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "studentClass": {
-                    "type": "string"
+                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "type": "string",
+                    "enum": [
+                        "buds",
+                        "seed",
+                        "leaf"
+                    ]
                 },
                 "studentDob": {
-                    "$ref": "#/definitions/common.DateTime"
+                    "type": "string"
                 },
                 "studentName": {
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "registrations.WriteRegistrationRequest": {
+            "type": "object",
+            "properties": {
+                "note": {
+                    "type": "string"
+                },
+                "parentName": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "studentClass": {
+                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "type": "string",
+                    "enum": [
+                        "buds",
+                        "seed",
+                        "leaf"
+                    ]
+                },
+                "studentDob": {
+                    "type": "string"
+                },
+                "studentName": {
                     "type": "string"
                 }
             }
