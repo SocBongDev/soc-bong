@@ -39,5 +39,5 @@ func (h *RegistrationHandler) Update(c *fiber.Ctx) error {
 
 	log.Printf("UpdateRegistration success. Response: %#v\n", body)
 
-	return c.JSON(body)
+	return c.JSON(req)
 }

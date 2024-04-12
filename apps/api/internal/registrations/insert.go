@@ -31,5 +31,5 @@ func (h *RegistrationHandler) Insert(c *fiber.Ctx) error {
 
 	log.Printf("InsertRegistration success. Response: %#v\n", body)
 
-	return c.JSON(body)
+	return c.JSON(req)
 }
