@@ -183,6 +183,26 @@ paths:
       summary: Get registration details api
       tags:
       - Registration
+    patch:
+      consumes:
+      - application/json
+      description: Mark a registration as processed
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Mark as done registration api
+      tags:
+      - Registration
     put:
       consumes:
       - application/json
