@@ -1,11 +1,16 @@
-# Standard Library/Golang: API Basic Role-Based Access Control (RBAC) Code Sample
+# Prerequisite
+- [Go version `1.22+`](https://go.dev/doc/install)
+- [Golang-migrate CLI](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate#unversioned)
+- [Swaggo CLI](https://github.com/swaggo/swag?tab=readme-ov-file#getting-started)
+- [Air CLI (optional)](https://github.com/cosmtrek/air?tab=readme-ov-file#installation)
 
-This Golang code sample demonstrates **how to implement Role-Based Access Control (RBAC)** in Standard Library API servers using Auth0.
+# Getting started
+First thing first, in order to create an API, you will need to follow those steps:
 
-This code sample is part of the ["Auth0 Developer Resources"](https://developer.auth0.com/resources), a place where you can explore the authentication and authorization features of the Auth0 Identity Platform.
+1. Create migration files (up/down) with this migrate CLI command:
 
-Visit the ["Standard Library/Golang Code Sample: Role-Based Access Control For Basic APIs"](https://developer.auth0.com/resources/code-samples/api/standard-library/basic-role-based-access-control) page for instructions on how to configure and run this code sample and how to integrate it with a Single-Page Application (SPA) of your choice.
-
-## Why Use Auth0?
-
-Auth0 is a flexible drop-in solution to add authentication and authorization services to your applications. Your team and organization can avoid the cost, time, and risk that come with building your own solution to authenticate and authorize users. We offer tons of guidance and SDKs for you to get started and [integrate Auth0 into your stack easily](https://developer.auth0.com/resources/code-samples/full-stack).
+```sh
+migrate create -ext sql -dir migrations/ -seq my_table_name
+```
+2. Write entities and interfaces.
+3. Implement them and make sure to test the API before commit it and there you go. It is that simple :P.
