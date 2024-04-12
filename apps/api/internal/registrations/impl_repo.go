@@ -16,13 +16,13 @@ func (r *RegistrationRepo) Find(query *RegistrationQuery) ([]Registration, error
 		From("registrations").
 		Offset(query.GetOffset()).
 		Limit(query.GetPageSize()).
-		OrderBy("created desc")
+		OrderBy("created_at desc")
 	if query.Search != "" {
 		q = q.Where(
 			dbx.Or(
-				dbx.Like("parentName"),
-				dbx.Like("studentName"),
-				dbx.Like("phoneNumber"),
+				dbx.Like("parent_name", query.Search),
+				dbx.Like("student_name", query.Search),
+				dbx.Like("phone_number", query.Search),
 			),
 		)
 	}
@@ -39,11 +39,21 @@ func (r *RegistrationRepo) FindOne(req *Registration) error {
 }
 
 func (r *RegistrationRepo) Insert(req *Registration) error {
-	return r.db.Model(req).Insert()
+	return r.db.Model(req).Exclude("Id", "CreatedAt", "UpdatedAt").Insert()
 }
 
 func (r *RegistrationRepo) Update(req *Registration) error {
-	return r.db.Model(req).Update()
+	return r.db.Model(req).Exclude("Id", "CreatedAt", "UpdatedAt").Update()
+}
+
+func (r *RegistrationRepo) MarkAsDone(req *Registration) error {
+	_, err := r.db.Update(
+		"registrations",
+		dbx.Params{"is_processed": true},
+		dbx.HashExp{"id": req.Id},
+	).
+		Execute()
+	return err
 }
 
 func NewRepo(db *dbx.DB) RegistrationRepository {

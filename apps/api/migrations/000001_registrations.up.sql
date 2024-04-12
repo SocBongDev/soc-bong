@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS registrations (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     is_processed BOOLEAN DEFAULT FALSE NOT NULL,
@@ -10,3 +10,9 @@ CREATE TABLE IF NOT EXISTS registrations (
     student_dob DATE NOT NULL,
     student_name TEXT NOT NULL
 );
+
+CREATE TRIGGER update_timestamp_registrations AFTER UPDATE ON registrations
+FOR EACH ROW
+BEGIN
+    UPDATE registrations SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+END;

@@ -1,7 +1,5 @@
 basePath: /api/v1
 definitions:
-  common.DateTime:
-    type: object
   registrations.FindRegistrationResp:
     properties:
       data:
@@ -26,12 +24,45 @@ definitions:
       phoneNumber:
         type: string
       studentClass:
+        description: |-
+          Class type:
+          * buds - Children who is 3 yo.
+          * seed - Children who is 4 yo.
+          * leaf - Children who is 5 yo.
+        enum:
+        - buds
+        - seed
+        - leaf
         type: string
       studentDob:
-        $ref: '#/definitions/common.DateTime'
+        type: string
       studentName:
         type: string
       updatedAt:
+        type: string
+    type: object
+  registrations.WriteRegistrationRequest:
+    properties:
+      note:
+        type: string
+      parentName:
+        type: string
+      phoneNumber:
+        type: string
+      studentClass:
+        description: |-
+          Class type:
+          * buds - Children who is 3 yo.
+          * seed - Children who is 4 yo.
+          * leaf - Children who is 5 yo.
+        enum:
+        - buds
+        - seed
+        - leaf
+        type: string
+      studentDob:
+        type: string
+      studentName:
         type: string
     type: object
 info:
@@ -50,7 +81,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get list registration nutrients and rate
+      description: Get list registration
       parameters:
       - description: Page
         in: query
@@ -82,6 +113,122 @@ paths:
           schema:
             type: string
       summary: Get list registration details api
+      tags:
+      - Registration
+    post:
+      consumes:
+      - application/json
+      description: Insert registration
+      parameters:
+      - description: Create registration body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/registrations.WriteRegistrationRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registrations.Registration'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create registration api
+      tags:
+      - Registration
+  /registrations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete registration
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registrations.Registration'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete registration api
+      tags:
+      - Registration
+    get:
+      consumes:
+      - application/json
+      description: Get one registration
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registrations.Registration'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get registration details api
+      tags:
+      - Registration
+    patch:
+      consumes:
+      - application/json
+      description: Mark a registration as processed
+      parameters:
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Mark as done registration api
+      tags:
+      - Registration
+    put:
+      consumes:
+      - application/json
+      description: Update registration
+      parameters:
+      - description: Update registration body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/registrations.WriteRegistrationRequest'
+      - description: Registration ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/registrations.Registration'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update registration api
       tags:
       - Registration
 swagger: "2.0"

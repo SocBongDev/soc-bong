@@ -11,7 +11,7 @@ type FindRegistrationResp common.FindResponse[Registration]
 
 // @FindRegistration godoc
 // @Summary Get list registration details api
-// @Description Get list registration nutrients and rate
+// @Description Get list registration
 // @Tags Registration
 // @Accept json
 // @Param  page query int false "Page"
