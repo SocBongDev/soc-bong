@@ -25,6 +25,11 @@ const docTemplate = `{
     "paths": {
         "/registrations": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get list registration",
                 "consumes": [
                     "application/json"
@@ -80,6 +85,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Insert registration",
                 "consumes": [
                     "application/json"
@@ -117,6 +127,11 @@ const docTemplate = `{
         },
         "/registrations/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get one registration",
                 "consumes": [
                     "application/json"
@@ -150,6 +165,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update registration",
                 "consumes": [
                     "application/json"
@@ -192,6 +212,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete registration",
                 "consumes": [
                     "application/json"
@@ -225,6 +250,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Mark a registration as processed",
                 "consumes": [
                     "application/json"
@@ -340,6 +370,14 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Apply \"bearer \" before token in authorization",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
