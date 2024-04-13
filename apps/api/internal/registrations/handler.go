@@ -18,23 +18,28 @@ func (h *RegistrationHandler) RegisterRoute(group fiber.Router) {
 		middlewares.ValidatePermissions([]string{"delete:registrations"}),
 		h.Delete,
 	)
-	r.Get("/",
+	r.Get(
+		"/",
 		middlewares.ValidatePermissions([]string{"read:registrations"}),
 		h.Find,
 	)
-	r.Get("/:id<int,min(1)>",
+	r.Get(
+		"/:id<int,min(1)>",
 		middlewares.ValidatePermissions([]string{"read:registrations"}),
 		h.FindOne,
 	)
-	r.Patch("/:id<int,min(1)>",
+	r.Patch(
+		"/:id<int,min(1)>",
 		middlewares.ValidatePermissions([]string{"update:registrations"}),
 		h.Patch,
 	)
-	r.Post("/",
+	r.Post(
+		"/",
 		middlewares.ValidatePermissions([]string{"create:registrations"}),
 		h.Insert,
 	)
-	r.Put("/:id<int,min(1)>",
+	r.Put(
+		"/:id<int,min(1)>",
 		middlewares.ValidatePermissions([]string{"update:registrations"}),
 		h.Update,
 	)
