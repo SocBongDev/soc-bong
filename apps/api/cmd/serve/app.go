@@ -39,7 +39,7 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	protected.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
 
 	registrationRepo := registrations.NewRepo(db)
-	registrationHandler := registrations.New(registrationRepo, a.config)
+	registrationHandler := registrations.New(registrationRepo)
 	registrationHandler.RegisterRoute(protected)
 }
 

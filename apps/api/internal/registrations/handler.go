@@ -1,14 +1,12 @@
 package registrations
 
 import (
-	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
 
 type RegistrationHandler struct {
 	repo RegistrationRepository
-	cfg  *config.Config
 }
 
 func (h *RegistrationHandler) RegisterRoute(group fiber.Router) {
@@ -45,6 +43,6 @@ func (h *RegistrationHandler) RegisterRoute(group fiber.Router) {
 	)
 }
 
-func New(repo RegistrationRepository, cfg *config.Config) *RegistrationHandler {
-	return &RegistrationHandler{repo, cfg}
+func New(repo RegistrationRepository) *RegistrationHandler {
+	return &RegistrationHandler{repo}
 }
