@@ -112,6 +112,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Get list registration details api
       tags:
       - Registration
@@ -135,6 +137,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Create registration api
       tags:
       - Registration
@@ -158,6 +162,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Delete registration api
       tags:
       - Registration
@@ -180,6 +186,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Get registration details api
       tags:
       - Registration
@@ -200,6 +208,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Mark as done registration api
       tags:
       - Registration
@@ -228,7 +238,15 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Update registration api
       tags:
       - Registration
+securityDefinitions:
+  ApiKeyAuth:
+    description: Apply "bearer " before token in authorization
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

@@ -16,6 +16,7 @@ import (
 // @Param id path int true "Registration ID"
 // @Success 200 {object} Registration
 // @Failure 500 {string} string
+// @Security ApiKeyAuth
 // @Router /registrations/{id} [put]
 func (h *RegistrationHandler) Update(c *fiber.Ctx) error {
 	body := new(WriteRegistrationRequest)

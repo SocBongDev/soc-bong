@@ -18,6 +18,11 @@
     "paths": {
         "/registrations": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get list registration",
                 "consumes": [
                     "application/json"
@@ -73,6 +78,11 @@
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Insert registration",
                 "consumes": [
                     "application/json"
@@ -110,6 +120,11 @@
         },
         "/registrations/{id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get one registration",
                 "consumes": [
                     "application/json"
@@ -143,6 +158,11 @@
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Update registration",
                 "consumes": [
                     "application/json"
@@ -185,6 +205,11 @@
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Delete registration",
                 "consumes": [
                     "application/json"
@@ -218,6 +243,11 @@
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Mark a registration as processed",
                 "consumes": [
                     "application/json"
@@ -333,6 +363,14 @@
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Apply \"bearer \" before token in authorization",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

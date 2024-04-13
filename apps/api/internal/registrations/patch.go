@@ -15,6 +15,7 @@ import (
 // @Param id path int true "Registration ID"
 // @Success 200
 // @Failure 500 {string} string
+// @Security ApiKeyAuth
 // @Router /registrations/{id} [patch]
 func (h *RegistrationHandler) Patch(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
