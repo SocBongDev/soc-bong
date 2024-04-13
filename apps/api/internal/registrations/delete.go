@@ -15,6 +15,7 @@ import (
 // @Param id path int true "Registration ID"
 // @Success 200 {object} Registration
 // @Failure 500 {string} string
+// @Security ApiKeyAuth
 // @Router /registrations/{id} [delete]
 func (h *RegistrationHandler) Delete(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")

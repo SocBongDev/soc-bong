@@ -20,6 +20,7 @@ type FindRegistrationResp common.FindResponse[Registration]
 // @Param  search query string false "Search term"
 // @Success 200 {object} FindRegistrationResp
 // @Failure 500 {string} string
+// @Security ApiKeyAuth
 // @Router /registrations [get]
 func (h *RegistrationHandler) Find(c *fiber.Ctx) error {
 	query := &RegistrationQuery{}

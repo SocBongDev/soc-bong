@@ -14,6 +14,7 @@ import (
 // @Param post body WriteRegistrationRequest true "Create registration body"
 // @Success 200 {object} Registration
 // @Failure 500 {string} string
+// @Security ApiKeyAuth
 // @Router /registrations [post]
 func (h *RegistrationHandler) Insert(c *fiber.Ctx) error {
 	body := new(WriteRegistrationRequest)
