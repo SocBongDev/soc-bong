@@ -23,6 +23,157 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/attendances": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get list attendance",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Get list attendance details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attendances.FindAttendanceResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert attendance",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Create attendance api",
+                "parameters": [
+                    {
+                        "description": "Create attendance body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attendances.CreateAttendanceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attendances.Attendance"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/attendances/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Patch attendance",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Patch attendance api",
+                "parameters": [
+                    {
+                        "description": "Patch attendance body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attendances.UpdateAttendanceRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Attendance ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/attendances.Attendance"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/registrations": {
             "get": {
                 "security": [
@@ -287,6 +438,74 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "attendances.Attendance": {
+            "type": "object",
+            "properties": {
+                "attendedAt": {
+                    "type": "string"
+                },
+                "classId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isAttended": {
+                    "type": "boolean"
+                },
+                "studentId": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "attendances.CreateAttendanceRequest": {
+            "type": "object",
+            "properties": {
+                "attendedAt": {
+                    "type": "string"
+                },
+                "classId": {
+                    "type": "integer"
+                },
+                "isAttended": {
+                    "type": "boolean"
+                },
+                "studentId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "attendances.FindAttendanceResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/attendances.Attendance"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "attendances.UpdateAttendanceRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "isAttended": {
+                    "type": "boolean"
+                }
+            }
+        },
         "registrations.FindRegistrationResp": {
             "type": "object",
             "properties": {

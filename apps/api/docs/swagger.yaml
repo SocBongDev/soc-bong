@@ -1,5 +1,49 @@
 basePath: /api/v1
 definitions:
+  attendances.Attendance:
+    properties:
+      attendedAt:
+        type: string
+      classId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      isAttended:
+        type: boolean
+      studentId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  attendances.CreateAttendanceRequest:
+    properties:
+      attendedAt:
+        type: string
+      classId:
+        type: integer
+      isAttended:
+        type: boolean
+      studentId:
+        type: integer
+    type: object
+  attendances.FindAttendanceResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/attendances.Attendance'
+        type: array
+      page:
+        type: integer
+    type: object
+  attendances.UpdateAttendanceRequest:
+    properties:
+      id:
+        type: integer
+      isAttended:
+        type: boolean
+    type: object
   registrations.FindRegistrationResp:
     properties:
       data:
@@ -77,6 +121,102 @@ info:
   title: Fiber Example API
   version: "1.0"
 paths:
+  /attendances:
+    get:
+      consumes:
+      - application/json
+      description: Get list attendance
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attendances.FindAttendanceResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list attendance details api
+      tags:
+      - Attendance
+    post:
+      consumes:
+      - application/json
+      description: Insert attendance
+      parameters:
+      - description: Create attendance body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/attendances.CreateAttendanceRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attendances.Attendance'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create attendance api
+      tags:
+      - Attendance
+  /attendances/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Patch attendance
+      parameters:
+      - description: Patch attendance body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/attendances.UpdateAttendanceRequest'
+      - description: Attendance ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attendances.Attendance'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Patch attendance api
+      tags:
+      - Attendance
   /registrations:
     get:
       consumes:
