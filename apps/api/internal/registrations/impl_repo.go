@@ -1,6 +1,9 @@
 package registrations
 
-import "github.com/pocketbase/dbx"
+import (
+	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/pocketbase/dbx"
+)
 
 type RegistrationRepo struct {
 	db *dbx.DB
@@ -39,11 +42,11 @@ func (r *RegistrationRepo) FindOne(req *Registration) error {
 }
 
 func (r *RegistrationRepo) Insert(req *Registration) error {
-	return r.db.Model(req).Exclude("Id", "CreatedAt", "UpdatedAt").Insert()
+	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
 func (r *RegistrationRepo) Update(req *Registration) error {
-	return r.db.Model(req).Exclude("Id", "CreatedAt", "UpdatedAt").Update()
+	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
 func (r *RegistrationRepo) MarkAsDone(req *Registration) error {

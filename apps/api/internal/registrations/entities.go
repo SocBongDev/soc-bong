@@ -2,7 +2,6 @@ package registrations
 
 import (
 	"github.com/SocBongDev/soc-bong/internal/common"
-	"github.com/pocketbase/dbx"
 )
 
 type WriteRegistrationRequest struct {
@@ -29,8 +28,6 @@ type Registration struct {
 	WriteRegistrationRequest
 	IsProcessed bool `json:"isProcessed"`
 }
-
-var _ = (*dbx.TableModel)(nil)
 
 func (e *Registration) TableName() string {
 	return "registrations"
