@@ -37,11 +37,11 @@ func index(c *fiber.Ctx) error {
 func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	v1 := api.Group("/v1")
 
+	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
+
 	attendanceRepo := attendances.NewRepo(db)
 	attendanceHandler := attendances.New(attendanceRepo)
 	attendanceHandler.RegisterRoute(v1)
-
-	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
 
 	registrationRepo := registrations.NewRepo(db)
 	registrationHandler := registrations.New(registrationRepo)
