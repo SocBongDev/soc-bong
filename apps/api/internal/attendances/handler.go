@@ -11,10 +11,18 @@ type AttendanceHandler struct {
 
 func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 	r := group.Group("/attendances")
-	r.Get("/", middlewares.ValidatePermissions([]string{"read:attendances"}), h.Find)
-	r.Post("/", middlewares.ValidatePermissions([]string{"create:attendances"}), h.Insert)
-	r.Put(
-		"/:id<int,min(1)>",
+	r.Get(
+		"/",
+		middlewares.ValidatePermissions([]string{"read:attendances"}),
+		h.Find,
+	)
+	r.Post(
+		"/",
+		middlewares.ValidatePermissions([]string{"create:attendances"}),
+		h.Insert,
+	)
+	r.Patch(
+		"/",
 		middlewares.ValidatePermissions([]string{"update:attendances"}),
 		h.Patch,
 	)

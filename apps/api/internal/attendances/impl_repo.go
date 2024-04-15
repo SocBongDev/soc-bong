@@ -60,13 +60,27 @@ func (r *AttendanceRepo) Insert(req []Attendance) error {
 	return err
 }
 
-func (r *AttendanceRepo) Update(req *Attendance) error {
-	_, err := r.db.Update(
-		"attendances",
-		dbx.Params{"is_attended": req.IsAttended},
-		dbx.HashExp{"id": req.Id},
-	).
-		Execute()
+func (r *AttendanceRepo) Update(req []Attendance) error {
+	cases, ids := make([]string, len(req)+1), make([]string, len(req))
+	for i, v := range req {
+		cases[i] = fmt.Sprintf("WHEN %d THEN %t", v.Id, v.IsAttended)
+		ids[i] = fmt.Sprint(v.Id)
+	}
+
+	_, err := r.db.NewQuery(
+		fmt.Sprintf(
+			`
+            UPDATE attendances
+            SET 'is_attended' = CASE
+            %v
+            ELSE is_attended
+            END
+            WHERE id IN (%v)
+            `,
+			strings.Join(cases, " "),
+			strings.Join(ids, ", "),
+		),
+	).Execute()
 	return err
 }
 

@@ -12,30 +12,26 @@ import (
 // @Description Patch attendance
 // @Tags Attendance
 // @Accept json
-// @Param post body UpdateAttendanceRequest true "Patch attendance body"
-// @Param id path int true "Attendance ID"
+// @Param post body []UpdateAttendanceRequest true "Patch attendance body"
 // @Success 200 {object} Attendance
 // @Failure 500 {string} string
-// @Security ApiKeyAuth
-// @Router /attendances/{id} [patch]
+// @Router /attendances [patch]
 func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
-	body := new(UpdateAttendanceRequest)
-	if err := c.BodyParser(body); err != nil {
+	body := []UpdateAttendanceRequest{}
+	if err := c.BodyParser(&body); err != nil {
 		log.Println("PatchAttendance.BodyParser err: ", err)
 		return fiber.ErrBadRequest
 	}
 
-	id, err := c.ParamsInt("id")
-	if err != nil {
-		log.Println("PatchAttendance.ParamsInt err: ", err)
-		return fiber.ErrBadRequest
+	log.Printf("PatchAttendance request: %#v\n", body)
+	req := make([]Attendance, len(body))
+	for i, v := range body {
+		req[i] = Attendance{
+			CreateAttendanceRequest: CreateAttendanceRequest{IsAttended: v.IsAttended},
+			BaseEntity:              common.BaseEntity{Id: v.Id},
+		}
 	}
 
-	log.Printf("PatchAttendance request: %#v\n", body)
-	req := &Attendance{
-		CreateAttendanceRequest: CreateAttendanceRequest{IsAttended: body.IsAttended},
-		BaseEntity:              common.BaseEntity{Id: id},
-	}
 	if err := h.repo.Update(req); err != nil {
 		log.Println("PatchAttendance.Patch err: ", err)
 		return fiber.ErrInternalServerError
