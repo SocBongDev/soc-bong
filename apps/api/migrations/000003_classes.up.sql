@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS classes (
     teacher_id TEXT NOT NULL,
 
     FOREIGN KEY (agency_id) REFERENCES agencies (id)
+    UNIQUE(name, grade, agency_id, teacher_id)
 );
 
 CREATE TRIGGER update_timestamp_classes AFTER UPDATE ON classes
