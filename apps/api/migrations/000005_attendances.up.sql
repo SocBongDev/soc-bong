@@ -12,6 +12,9 @@ CREATE TABLE IF NOT EXISTS attendances (
     FOREIGN KEY (student_id) REFERENCES students (id)
 );
 
+CREATE INDEX class_id_checked_at_idx 
+ON attendances (class_id, attended_at);
+
 CREATE TRIGGER update_timestamp_attendances AFTER UPDATE ON attendances
 FOR EACH ROW
 BEGIN

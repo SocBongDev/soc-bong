@@ -3,9 +3,13 @@ CREATE TABLE IF NOT EXISTS classes (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    teacher_id TEXT NOT NULL,
     name TEXT NOT NULL,
-    grade TEXT NOT NULL
+    grade TEXT NOT NULL,
+
+    agency_id INTEGER NOT NULL,
+    teacher_id TEXT NOT NULL,
+
+    FOREIGN KEY (agency_id) REFERENCES agencies (id)
 );
 
 CREATE TRIGGER update_timestamp_classes AFTER UPDATE ON classes
