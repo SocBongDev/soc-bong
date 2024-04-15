@@ -2,6 +2,7 @@ package registrations
 
 import (
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -27,6 +28,11 @@ func (h *RegistrationHandler) Insert(c *fiber.Ctx) error {
 	req := &Registration{WriteRegistrationRequest: *body}
 	if err := h.repo.Insert(req); err != nil {
 		log.Println("InsertRegistration.Insert err: ", err)
+
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			return fiber.ErrUnprocessableEntity
+		}
+
 		return fiber.ErrInternalServerError
 	}
 
