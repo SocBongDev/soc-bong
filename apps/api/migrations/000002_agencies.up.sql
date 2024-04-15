@@ -1,0 +1,18 @@
+CREATE TABLE IF NOT EXISTS agencies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+    name TEXT NOT NULL,
+    address TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    email TEXT NOT NULL
+
+    UNIQUE(name, address, phone, email)
+);
+
+CREATE TRIGGER update_timestamp_agencies AFTER UPDATE ON agencies
+FOR EACH ROW
+BEGIN
+    UPDATE agencies SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+END;

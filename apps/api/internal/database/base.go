@@ -2,5 +2,6 @@ package database
 
 type Migrator interface {
 	Up() error
-	Down(steps int) error
+	Down(int) error
+	Force(int) error
 }

@@ -60,3 +60,5 @@ func (s *Sorter) GetSortBy() string {
 
 	return s.SortBy
 }
+
+var BaseExcludeFields []string = []string{"Id", "CreatedAt", "UpdatedAt"}

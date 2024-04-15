@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/SocBongDev/soc-bong/internal/attendances"
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
@@ -35,12 +36,16 @@ func index(c *fiber.Ctx) error {
 
 func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	v1 := api.Group("/v1")
-	protected := v1.Group("")
-	protected.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
+
+	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
+
+	attendanceRepo := attendances.NewRepo(db)
+	attendanceHandler := attendances.New(attendanceRepo)
+	attendanceHandler.RegisterRoute(v1)
 
 	registrationRepo := registrations.NewRepo(db)
 	registrationHandler := registrations.New(registrationRepo)
-	registrationHandler.RegisterRoute(protected)
+	registrationHandler.RegisterRoute(v1)
 }
 
 func (a *App) RunHttpServer() {

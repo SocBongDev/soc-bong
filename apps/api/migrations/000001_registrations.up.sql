@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
     is_processed BOOLEAN DEFAULT FALSE NOT NULL,
     note TEXT,
     parent_name TEXT NOT NULL,
@@ -9,6 +10,8 @@ CREATE TABLE IF NOT EXISTS registrations (
     student_class TEXT NOT NULL,
     student_dob DATE NOT NULL,
     student_name TEXT NOT NULL
+
+    UNIQUE(parent_name, phone_number, student_class, student_dob, student_name)
 );
 
 CREATE TRIGGER update_timestamp_registrations AFTER UPDATE ON registrations

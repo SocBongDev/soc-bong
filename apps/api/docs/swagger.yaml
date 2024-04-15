@@ -1,5 +1,40 @@
 basePath: /api/v1
 definitions:
+  attendances.Attendance:
+    properties:
+      attendedAt:
+        type: string
+      classId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      isAttended:
+        type: boolean
+      studentId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  attendances.CreateAttendanceRequest:
+    properties:
+      attendedAt:
+        type: string
+      classId:
+        type: integer
+      isAttended:
+        type: boolean
+      studentId:
+        type: integer
+    type: object
+  attendances.UpdateAttendanceRequest:
+    properties:
+      id:
+        type: integer
+      isAttended:
+        type: boolean
+    type: object
   registrations.FindRegistrationResp:
     properties:
       data:
@@ -77,7 +112,134 @@ info:
   title: Fiber Example API
   version: "1.0"
 paths:
+  /attendances:
+    get:
+      consumes:
+      - application/json
+      description: Get list attendance
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Class id
+        in: query
+        name: classId
+        required: true
+        type: string
+      - description: Time range
+        in: query
+        name: period
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/attendances.Attendance'
+              type: array
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list attendance details api
+      tags:
+      - Attendance
+    patch:
+      consumes:
+      - application/json
+      description: Patch attendance
+      parameters:
+      - description: Patch attendance body
+        in: body
+        name: post
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/attendances.UpdateAttendanceRequest'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attendances.Attendance'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Patch attendance api
+      tags:
+      - Attendance
+    post:
+      consumes:
+      - application/json
+      description: Insert attendance
+      parameters:
+      - description: Create attendance body
+        in: body
+        name: post
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/attendances.CreateAttendanceRequest'
+          type: array
+      responses:
+        "200":
+          description: OK
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create attendance api
+      tags:
+      - Attendance
   /registrations:
+    delete:
+      consumes:
+      - application/json
+      description: Delete registration
+      parameters:
+      - description: Registration IDs
+        in: query
+        items:
+          type: integer
+        name: ids
+        required: true
+        type: array
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete registration api
+      tags:
+      - Registration
     get:
       consumes:
       - application/json
@@ -133,6 +295,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/registrations.Registration'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
         "500":
           description: Internal Server Error
           schema:
@@ -143,30 +309,6 @@ paths:
       tags:
       - Registration
   /registrations/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete registration
-      parameters:
-      - description: Registration ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/registrations.Registration'
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: Delete registration api
-      tags:
-      - Registration
     get:
       consumes:
       - application/json

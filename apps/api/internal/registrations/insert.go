@@ -2,6 +2,7 @@ package registrations
 
 import (
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -13,6 +14,7 @@ import (
 // @Accept json
 // @Param post body WriteRegistrationRequest true "Create registration body"
 // @Success 200 {object} Registration
+// @Failure 422 {string} string
 // @Failure 500 {string} string
 // @Security ApiKeyAuth
 // @Router /registrations [post]
@@ -27,6 +29,11 @@ func (h *RegistrationHandler) Insert(c *fiber.Ctx) error {
 	req := &Registration{WriteRegistrationRequest: *body}
 	if err := h.repo.Insert(req); err != nil {
 		log.Println("InsertRegistration.Insert err: ", err)
+
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			return fiber.ErrUnprocessableEntity
+		}
+
 		return fiber.ErrInternalServerError
 	}
 

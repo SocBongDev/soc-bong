@@ -2,7 +2,6 @@ package registrations
 
 import (
 	"github.com/SocBongDev/soc-bong/internal/common"
-	"github.com/pocketbase/dbx"
 )
 
 type WriteRegistrationRequest struct {
@@ -24,13 +23,15 @@ type RegistrationQuery struct {
 	Search string `json:"search"`
 }
 
+type DeleteRegistrationQuery struct {
+	Ids []int `query:"ids"`
+}
+
 type Registration struct {
 	common.BaseEntity
 	WriteRegistrationRequest
 	IsProcessed bool `json:"isProcessed"`
 }
-
-var _ = (*dbx.TableModel)(nil)
 
 func (e *Registration) TableName() string {
 	return "registrations"
