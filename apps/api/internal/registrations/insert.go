@@ -14,6 +14,7 @@ import (
 // @Accept json
 // @Param post body WriteRegistrationRequest true "Create registration body"
 // @Success 200 {object} Registration
+// @Failure 422 {string} string
 // @Failure 500 {string} string
 // @Security ApiKeyAuth
 // @Router /registrations [post]

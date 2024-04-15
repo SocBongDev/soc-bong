@@ -1,7 +1,9 @@
 package attendances
 
 import (
-	"github.com/SocBongDev/soc-bong/internal/common"
+	"fmt"
+	"strings"
+
 	"github.com/pocketbase/dbx"
 )
 
@@ -32,8 +34,30 @@ func (r *AttendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
 	return resp, nil
 }
 
-func (r *AttendanceRepo) Insert(req *Attendance) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
+func (r *AttendanceRepo) Insert(req []Attendance) error {
+	vals := make([]string, len(req))
+	for i, v := range req {
+		vals[i] = fmt.Sprintf(
+			"('%s', %d, %t, %d)",
+			v.AttendedAt,
+			v.ClassId,
+			v.IsAttended,
+			v.StudentId,
+		)
+	}
+
+	_, err := r.db.NewQuery(
+		fmt.Sprintf(
+			`
+             INSERT INTO attendances ("attended_at", "class_id", "is_attended", "student_id") 
+             VALUES %v
+             `,
+			strings.Join(vals, ", "),
+		),
+	).
+		Execute()
+
+	return err
 }
 
 func (r *AttendanceRepo) Update(req *Attendance) error {
