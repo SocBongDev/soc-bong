@@ -142,15 +142,8 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/attendances/{id}": {
+            },
             "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Patch attendance",
                 "consumes": [
                     "application/json"
@@ -166,15 +159,11 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/attendances.UpdateAttendanceRequest"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/attendances.UpdateAttendanceRequest"
+                            }
                         }
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Attendance ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {

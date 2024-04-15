@@ -161,6 +161,31 @@ paths:
       summary: Get list attendance details api
       tags:
       - Attendance
+    patch:
+      consumes:
+      - application/json
+      description: Patch attendance
+      parameters:
+      - description: Patch attendance body
+        in: body
+        name: post
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/attendances.UpdateAttendanceRequest'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attendances.Attendance'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Patch attendance api
+      tags:
+      - Attendance
     post:
       consumes:
       - application/json
@@ -188,37 +213,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create attendance api
-      tags:
-      - Attendance
-  /attendances/{id}:
-    patch:
-      consumes:
-      - application/json
-      description: Patch attendance
-      parameters:
-      - description: Patch attendance body
-        in: body
-        name: post
-        required: true
-        schema:
-          $ref: '#/definitions/attendances.UpdateAttendanceRequest'
-      - description: Attendance ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/attendances.Attendance'
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: Patch attendance api
       tags:
       - Attendance
   /registrations:
