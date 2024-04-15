@@ -64,8 +64,15 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Search term",
-                        "name": "search",
+                        "description": "Class id",
+                        "name": "classId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Time range",
+                        "name": "period",
                         "in": "query"
                     }
                 ],
@@ -73,7 +80,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/attendances.FindAttendanceResp"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/attendances.Attendance"
+                                }
+                            }
                         }
                     },
                     "500": {
@@ -105,15 +118,21 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/attendances.CreateAttendanceRequest"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/attendances.CreateAttendanceRequest"
+                            }
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "OK"
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
                         "schema": {
-                            "$ref": "#/definitions/attendances.Attendance"
+                            "type": "string"
                         }
                     },
                     "500": {
@@ -267,6 +286,50 @@ const docTemplate = `{
                             "$ref": "#/definitions/registrations.Registration"
                         }
                     },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registration"
+                ],
+                "summary": "Delete registration api",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "description": "Registration IDs",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -339,44 +402,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/registrations.WriteRegistrationRequest"
                         }
                     },
-                    {
-                        "type": "integer",
-                        "description": "Registration ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/registrations.Registration"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Delete registration",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Registration"
-                ],
-                "summary": "Delete registration api",
-                "parameters": [
                     {
                         "type": "integer",
                         "description": "Registration ID",
@@ -477,20 +502,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "studentId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "attendances.FindAttendanceResp": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/attendances.Attendance"
-                    }
-                },
-                "page": {
                     "type": "integer"
                 }
             }

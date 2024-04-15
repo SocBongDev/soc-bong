@@ -28,15 +28,6 @@ definitions:
       studentId:
         type: integer
     type: object
-  attendances.FindAttendanceResp:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/attendances.Attendance'
-        type: array
-      page:
-        type: integer
-    type: object
   attendances.UpdateAttendanceRequest:
     properties:
       id:
@@ -143,15 +134,24 @@ paths:
         in: query
         name: sort
         type: string
-      - description: Search term
+      - description: Class id
         in: query
-        name: search
+        name: classId
+        required: true
+        type: string
+      - description: Time range
+        in: query
+        name: period
         type: string
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/attendances.FindAttendanceResp'
+            additionalProperties:
+              items:
+                $ref: '#/definitions/attendances.Attendance'
+              type: array
+            type: object
         "500":
           description: Internal Server Error
           schema:
@@ -171,12 +171,16 @@ paths:
         name: post
         required: true
         schema:
-          $ref: '#/definitions/attendances.CreateAttendanceRequest'
+          items:
+            $ref: '#/definitions/attendances.CreateAttendanceRequest'
+          type: array
       responses:
         "200":
           description: OK
+        "422":
+          description: Unprocessable Entity
           schema:
-            $ref: '#/definitions/attendances.Attendance'
+            type: string
         "500":
           description: Internal Server Error
           schema:
@@ -218,6 +222,30 @@ paths:
       tags:
       - Attendance
   /registrations:
+    delete:
+      consumes:
+      - application/json
+      description: Delete registration
+      parameters:
+      - description: Registration IDs
+        in: query
+        items:
+          type: integer
+        name: ids
+        required: true
+        type: array
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete registration api
+      tags:
+      - Registration
     get:
       consumes:
       - application/json
@@ -273,6 +301,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/registrations.Registration'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
         "500":
           description: Internal Server Error
           schema:
@@ -283,30 +315,6 @@ paths:
       tags:
       - Registration
   /registrations/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete registration
-      parameters:
-      - description: Registration ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/registrations.Registration'
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: Delete registration api
-      tags:
-      - Registration
     get:
       consumes:
       - application/json
