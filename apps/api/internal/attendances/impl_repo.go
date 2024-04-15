@@ -16,11 +16,11 @@ func (r *AttendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
 		Where(dbx.And(
 			dbx.HashExp{"class_id": query.ClassId},
 			dbx.NewExp(
-				"strftime('%Y', checked_at) = {:year}",
+				"strftime('%Y', attended_at) = {:year}",
 				dbx.Params{"year": query.PeriodYear()},
 			),
 			dbx.NewExp(
-				"strftime('%Y', checked_at) = {:month}",
+				"strftime('%m', attended_at) = {:month}",
 				dbx.Params{"month": query.PeriodMonth()},
 			),
 		))

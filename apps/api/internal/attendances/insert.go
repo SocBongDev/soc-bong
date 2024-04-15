@@ -2,6 +2,7 @@ package attendances
 
 import (
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -27,6 +28,11 @@ func (h *AttendanceHandler) Insert(c *fiber.Ctx) error {
 	req := &Attendance{CreateAttendanceRequest: *body}
 	if err := h.repo.Insert(req); err != nil {
 		log.Println("InsertAttendance.Insert err: ", err)
+
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+			return fiber.ErrUnprocessableEntity
+		}
+
 		return fiber.ErrInternalServerError
 	}
 
