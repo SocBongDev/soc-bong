@@ -3,11 +3,8 @@ package registrations
 import (
 	"log"
 
-	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/gofiber/fiber/v2"
 )
-
-type FindRegistrationResp common.FindResponse[Registration]
 
 // @FindRegistration godoc
 // @Summary Get list registration details api

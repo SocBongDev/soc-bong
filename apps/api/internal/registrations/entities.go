@@ -23,6 +23,8 @@ type RegistrationQuery struct {
 	Search string `json:"search"`
 }
 
+type FindRegistrationResp common.FindResponse[Registration]
+
 type DeleteRegistrationQuery struct {
 	Ids []int `query:"ids"`
 }
