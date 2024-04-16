@@ -1,7 +1,7 @@
 package registrations
 
 type RegistrationRepository interface {
-	Delete(*Registration) error
+	Delete([]int) error
 	Find(*RegistrationQuery) ([]Registration, error)
 	FindOne(*Registration) error
 	Insert(*Registration) error

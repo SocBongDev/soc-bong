@@ -9,10 +9,10 @@ import (
 )
 
 type CreateAttendanceRequest struct {
-	AttendedAt time.Time `json:"attendedAt"`
-	ClassId    int       `json:"classId"`
-	IsAttended bool      `json:"isAttended"`
-	StudentId  int       `json:"studentId"`
+	AttendedAt common.DateTime `json:"attendedAt" swaggertype:"string"`
+	ClassId    int             `json:"classId"`
+	IsAttended bool            `json:"isAttended"`
+	StudentId  int             `json:"studentId"`
 }
 
 type UpdateAttendanceRequest struct {
@@ -28,18 +28,15 @@ type AttendanceQuery struct {
 	common.Sorter
 }
 
-func NewAttendanceQuery(classId int, period *string) *AttendanceQuery {
-	if period == nil {
+func (q *AttendanceQuery) Format() {
+	if q.Period == nil {
 		now := time.Now()
-		return &AttendanceQuery{
-			ClassId: classId,
-			month:   now.Month().String(),
-			year:    fmt.Sprint(now.Year()),
-		}
+		q.month, q.year = now.Format("01"), fmt.Sprint(now.Year())
+		return
 	}
 
-	periodSplit := strings.Split(*period, "-")
-	return &AttendanceQuery{ClassId: classId, month: periodSplit[0], year: periodSplit[1]}
+	periodSplit := strings.Split(*q.Period, "-")
+	q.month, q.year = periodSplit[0], periodSplit[1]
 }
 
 func (q AttendanceQuery) PeriodMonth() string {

@@ -9,8 +9,14 @@ type RegistrationRepo struct {
 	db *dbx.DB
 }
 
-func (r *RegistrationRepo) Delete(req *Registration) error {
-	return r.db.Model(req).Delete()
+func (r *RegistrationRepo) Delete(req []int) error {
+	anySlices := make([]any, len(req))
+	for i, v := range req {
+		anySlices[i] = v
+	}
+
+	_, err := r.db.Delete("registrations", dbx.HashExp{"id": anySlices}).Execute()
+	return err
 }
 
 func (r *RegistrationRepo) Find(query *RegistrationQuery) ([]Registration, error) {

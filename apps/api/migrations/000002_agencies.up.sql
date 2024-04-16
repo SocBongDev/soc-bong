@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS agencies (
     address TEXT NOT NULL,
     phone TEXT NOT NULL,
     email TEXT NOT NULL
+
+    UNIQUE(name, address, phone, email)
 );
 
 CREATE TRIGGER update_timestamp_agencies AFTER UPDATE ON agencies

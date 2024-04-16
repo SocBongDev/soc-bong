@@ -1,7 +1,9 @@
 package attendances
 
 import (
-	"github.com/SocBongDev/soc-bong/internal/common"
+	"fmt"
+	"strings"
+
 	"github.com/pocketbase/dbx"
 )
 
@@ -16,11 +18,11 @@ func (r *AttendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
 		Where(dbx.And(
 			dbx.HashExp{"class_id": query.ClassId},
 			dbx.NewExp(
-				"strftime('%Y', checked_at) = {:year}",
+				"strftime('%Y', attended_at) = {:year}",
 				dbx.Params{"year": query.PeriodYear()},
 			),
 			dbx.NewExp(
-				"strftime('%Y', checked_at) = {:month}",
+				"strftime('%m', attended_at) = {:month}",
 				dbx.Params{"month": query.PeriodMonth()},
 			),
 		))
@@ -32,17 +34,53 @@ func (r *AttendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
 	return resp, nil
 }
 
-func (r *AttendanceRepo) Insert(req *Attendance) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
-}
+func (r *AttendanceRepo) Insert(req []Attendance) error {
+	vals := make([]string, len(req))
+	for i, v := range req {
+		vals[i] = fmt.Sprintf(
+			"('%s', %d, %t, %d)",
+			v.AttendedAt,
+			v.ClassId,
+			v.IsAttended,
+			v.StudentId,
+		)
+	}
 
-func (r *AttendanceRepo) Update(req *Attendance) error {
-	_, err := r.db.Update(
-		"attendances",
-		dbx.Params{"is_attended": req.IsAttended},
-		dbx.HashExp{"id": req.Id},
+	_, err := r.db.NewQuery(
+		fmt.Sprintf(
+			`
+             INSERT INTO attendances ("attended_at", "class_id", "is_attended", "student_id") 
+             VALUES %v
+             `,
+			strings.Join(vals, ", "),
+		),
 	).
 		Execute()
+
+	return err
+}
+
+func (r *AttendanceRepo) Update(req []Attendance) error {
+	cases, ids := make([]string, len(req)+1), make([]string, len(req))
+	for i, v := range req {
+		cases[i] = fmt.Sprintf("WHEN %d THEN %t", v.Id, v.IsAttended)
+		ids[i] = fmt.Sprint(v.Id)
+	}
+
+	_, err := r.db.NewQuery(
+		fmt.Sprintf(
+			`
+            UPDATE attendances
+            SET 'is_attended' = CASE
+            %v
+            ELSE is_attended
+            END
+            WHERE id IN (%v)
+            `,
+			strings.Join(cases, " "),
+			strings.Join(ids, ", "),
+		),
+	).Execute()
 	return err
 }
 

@@ -23,6 +23,10 @@ type RegistrationQuery struct {
 	Search string `json:"search"`
 }
 
+type DeleteRegistrationQuery struct {
+	Ids []int `query:"ids"`
+}
+
 type Registration struct {
 	common.BaseEntity
 	WriteRegistrationRequest
