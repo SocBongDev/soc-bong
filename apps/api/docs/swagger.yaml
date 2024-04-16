@@ -109,6 +109,79 @@ definitions:
       studentName:
         type: string
     type: object
+  students.FindStudentResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/students.Student'
+        type: array
+      page:
+        type: integer
+    type: object
+  students.Student:
+    properties:
+      agency_id:
+        type: integer
+      birth_place:
+        type: string
+      class_id:
+        type: integer
+      createdAt:
+        type: string
+      dob:
+        type: string
+      enrolled_at:
+        type: string
+      ethnic:
+        type: string
+      first_name:
+        type: string
+      gender:
+        type: boolean
+      id:
+        type: integer
+      last_name:
+        type: string
+      permanent_address_commune:
+        type: string
+      permanent_address_district:
+        type: string
+      permanent_address_province:
+        type: string
+      temp_address:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  students.WriteStudentRequest:
+    properties:
+      agency_id:
+        type: integer
+      birth_place:
+        type: string
+      class_id:
+        type: integer
+      dob:
+        type: string
+      enrolled_at:
+        type: string
+      ethnic:
+        type: string
+      first_name:
+        type: string
+      gender:
+        type: boolean
+      last_name:
+        type: string
+      permanent_address_commune:
+        type: string
+      permanent_address_district:
+        type: string
+      permanent_address_province:
+        type: string
+      temp_address:
+        type: string
+    type: object
 info:
   contact:
     email: fiber@swagger.io
@@ -383,6 +456,147 @@ paths:
       summary: Update registration api
       tags:
       - Registration
+  /students:
+    get:
+      consumes:
+      - application/json
+      description: Get list student
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.FindStudentResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list student details api
+      tags:
+      - Student
+  /students/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete student
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete student api
+      tags:
+      - Student
+    get:
+      consumes:
+      - application/json
+      description: Get one student
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get student details api
+      tags:
+      - Student
+    patch:
+      consumes:
+      - application/json
+      description: Mark a student as processed
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Mark as done student api
+      tags:
+      - Student
+    put:
+      consumes:
+      - application/json
+      description: Update student
+      parameters:
+      - description: Update Student body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/students.WriteStudentRequest'
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update student api
+      tags:
+      - Student
 securityDefinitions:
   ApiKeyAuth:
     description: Apply "bearer " before token in authorization
