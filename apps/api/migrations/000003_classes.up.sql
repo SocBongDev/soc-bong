@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS classes (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     name TEXT NOT NULL,
-    grade TEXT NOT NULL,
+    grade TEXT CHECK(grade IN ('buds', 'seed', 'leaf')) NOT NULL,
 
     agency_id INTEGER NOT NULL,
     teacher_id TEXT NOT NULL,

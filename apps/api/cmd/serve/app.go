@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/SocBongDev/soc-bong/internal/attendances"
+	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
@@ -36,6 +37,10 @@ func index(c *fiber.Ctx) error {
 
 func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	v1 := api.Group("/v1")
+
+	classRepo := classes.NewRepo(db)
+	classHandler := classes.New(classRepo)
+	classHandler.RegisterRoute(v1)
 
 	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
 
