@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS attendances (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     attended_at DATE UNIQUE NOT NULL,
-    is_attended BOOLEAN DEFAULT FALSE NOT NULL,
+    is_attended INTEGER CHECK(is_attended IN (0, 1, 2)) DEFAULT 0 NOT NULL,
     class_id INTEGER NOT NULL,
     student_id INTEGER NOT NULL,
 
