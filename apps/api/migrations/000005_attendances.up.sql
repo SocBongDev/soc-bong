@@ -3,13 +3,14 @@ CREATE TABLE IF NOT EXISTS attendances (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    attended_at DATE UNIQUE NOT NULL,
-    is_attended INTEGER CHECK(is_attended IN (0, 1, 2)) DEFAULT 0 NOT NULL,
+    attended_at DATE NOT NULL,
+    attended_status INTEGER CHECK(attended_status IN (0, 1, 2, 3, 4)) DEFAULT 0 NOT NULL,
     class_id INTEGER NOT NULL,
     student_id INTEGER NOT NULL,
 
     FOREIGN KEY (class_id) REFERENCES classes (id),
     FOREIGN KEY (student_id) REFERENCES students (id)
+    UNIQUE(attended_at, attended_status, student_id)
 );
 
 CREATE INDEX class_id_checked_at_idx 

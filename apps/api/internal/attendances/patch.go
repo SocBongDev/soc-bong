@@ -27,7 +27,7 @@ func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
 	req := make([]Attendance, len(body))
 	for i, v := range body {
 		req[i] = Attendance{
-			CreateAttendanceRequest: CreateAttendanceRequest{IsAttended: v.IsAttended},
+			CreateAttendanceRequest: CreateAttendanceRequest{AttendedStatus: v.AttendedStatus},
 			BaseEntity:              common.BaseEntity{Id: v.Id},
 		}
 	}
