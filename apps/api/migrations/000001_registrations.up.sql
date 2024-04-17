@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     phone_number TEXT NOT NULL,
     student_class TEXT NOT NULL,
     student_dob DATE NOT NULL,
-    student_name TEXT NOT NULL
+    student_name TEXT NOT NULL,
 
     UNIQUE(parent_name, phone_number, student_class, student_dob, student_name)
 );

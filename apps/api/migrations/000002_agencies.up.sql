@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS agencies (
     name TEXT NOT NULL,
     address TEXT NOT NULL,
     phone TEXT NOT NULL,
-    email TEXT NOT NULL
+    email TEXT NOT NULL,
 
     UNIQUE(name, address, phone, email)
 );

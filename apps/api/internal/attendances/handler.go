@@ -1,6 +1,7 @@
 package attendances
 
 import (
+	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
@@ -28,6 +29,6 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 	)
 }
 
-func New(repo AttendanceRepository) *AttendanceHandler {
+func New(repo AttendanceRepository) common.APIHandler {
 	return &AttendanceHandler{repo}
 }
