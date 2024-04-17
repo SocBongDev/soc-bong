@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS parents (
     phone_number TEXT,
     zalo TEXT,
     occupation TEXT,    
-    lanlord TEXT,
+    landlord TEXT,
     roi TEXT,
     parent_birth_place TEXT,
     res_registration TEXT,

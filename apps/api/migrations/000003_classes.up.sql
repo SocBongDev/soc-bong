@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS classes (
     agency_id INTEGER NOT NULL,
     teacher_id TEXT NOT NULL,
 
-    FOREIGN KEY (agency_id) REFERENCES agencies (id)
+    FOREIGN KEY (agency_id) REFERENCES agencies (id),
     UNIQUE(name, grade, agency_id, teacher_id)
 );
 

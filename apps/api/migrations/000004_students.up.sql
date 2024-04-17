@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS students (
     agency_id INTEGER NOT NULL,
     class_id INTEGER NOT NULL,
 
-    FOREIGN KEY (agency_id) REFERENCES agencies (id)
+    FOREIGN KEY (agency_id) REFERENCES agencies (id),
     FOREIGN KEY (class_id) REFERENCES classes (id)
 );
 

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS attendances (
     student_id INTEGER NOT NULL,
 
     FOREIGN KEY (class_id) REFERENCES classes (id),
-    FOREIGN KEY (student_id) REFERENCES students (id)
+    FOREIGN KEY (student_id) REFERENCES students (id),
     UNIQUE(attended_at, attended_status, student_id)
 );
 
