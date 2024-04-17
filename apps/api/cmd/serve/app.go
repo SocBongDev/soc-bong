@@ -6,13 +6,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/SocBongDev/soc-bong/internal/agencies"
 	"github.com/SocBongDev/soc-bong/internal/attendances"
 	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
+	"github.com/SocBongDev/soc-bong/internal/parents"
 	"github.com/SocBongDev/soc-bong/internal/registrations"
+	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pocketbase/dbx"
 
@@ -44,7 +47,10 @@ func (a *App) RegisterAPIHandlers(router fiber.Router, handlers []common.APIHand
 
 func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	v1 := api.Group("/v1")
-	publicHandlers := []common.APIHandler{}
+	publicHandlers := []common.APIHandler{
+		students.New(students.NewRepo(db)),
+		parents.New(parents.NewRepo(db)),
+	}
 	a.RegisterAPIHandlers(v1, publicHandlers)
 
 	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
@@ -53,6 +59,7 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 		attendances.New(attendances.NewRepo(db)),
 		classes.New(classes.NewRepo(db)),
 		registrations.New(registrations.NewRepo(db)),
+		agencies.New(agencies.NewRepo(db)),
 	}
 	a.RegisterAPIHandlers(v1, privateHandlers)
 }

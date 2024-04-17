@@ -16,6 +16,247 @@
     },
     "basePath": "/api/v1",
     "paths": {
+        "/acengies/{id}": {
+            "put": {
+                "description": "Update acengy",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Update acengy api",
+                "parameters": [
+                    {
+                        "description": "Update acengy body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agencies.WriteAgencyRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agencies.Agency"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/agencies": {
+            "get": {
+                "description": "Get list agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Get list agency details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agencies.FindAgencyResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Insert agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Create agency api",
+                "parameters": [
+                    {
+                        "description": "Create agency body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agencies.WriteAgencyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agencies.Agency"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Delete agency api",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Agency IDs",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/agencies/{id}": {
+            "get": {
+                "description": "Get one agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Get agency details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agencies.Agency"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Mark a agency as processed",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Mark as done agency api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/attendances": {
             "get": {
                 "security": [
@@ -175,6 +416,452 @@
                 }
             }
         },
+        "/classes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get list class",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Get list class details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classes.FindClassResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert class",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Create class api",
+                "parameters": [
+                    {
+                        "description": "Create class body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/classes.WriteClassRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classes.Class"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/classes/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get one class",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Get class details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classes.Class"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update class",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Update class api",
+                "parameters": [
+                    {
+                        "description": "Update class body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/classes.WriteClassRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classes.Class"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/parents": {
+            "get": {
+                "description": "Get list parent",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parent"
+                ],
+                "summary": "Get list parent details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/parents.FindParentResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Insert parent",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parent"
+                ],
+                "summary": "Create parent api",
+                "parameters": [
+                    {
+                        "description": "Create parent body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/parents.WriteParentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/parents.Parent"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete parent",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parent"
+                ],
+                "summary": "Delete parent api",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Parent IDs",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/parents/{id}": {
+            "get": {
+                "description": "Get one parent",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parent"
+                ],
+                "summary": "Get parent details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Parent ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/parents.Parent"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update parent",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parent"
+                ],
+                "summary": "Update parent api",
+                "parameters": [
+                    {
+                        "description": "Update parent body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/parents.WriteParentRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Parent ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/parents.Parent"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Mark a parent as processed",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Parent"
+                ],
+                "summary": "Mark as done parent api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Parent ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/registrations": {
             "get": {
                 "security": [
@@ -302,6 +989,7 @@
                         "items": {
                             "type": "integer"
                         },
+                        "collectionFormat": "csv",
                         "description": "Registration IDs",
                         "name": "ids",
                         "in": "query",
@@ -503,6 +1191,47 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "Insert student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Create student api",
+                "parameters": [
+                    {
+                        "description": "Create student body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/students.WriteStudentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.Student"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/students/{id}": {
@@ -667,11 +1396,95 @@
         }
     },
     "definitions": {
+        "agencies.Agency": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "agencies.FindAgencyResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/agencies.Agency"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "agencies.WriteAgencyRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "attendances.AttendEnum": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-varnames": [
+                "Absented",
+                "Attended",
+                "Excused",
+                "Dayoff",
+                "Holiday"
+            ]
+        },
         "attendances.Attendance": {
             "type": "object",
             "properties": {
                 "attendedAt": {
                     "type": "string"
+                },
+                "attendedStatus": {
+                    "type": "string",
+                    "enum": [
+                        "absented",
+                        "attended",
+                        "excused",
+                        "dayoff",
+                        "holiday"
+                    ]
                 },
                 "classId": {
                     "type": "integer"
@@ -681,9 +1494,6 @@
                 },
                 "id": {
                     "type": "integer"
-                },
-                "isAttended": {
-                    "type": "boolean"
                 },
                 "studentId": {
                     "type": "integer"
@@ -699,11 +1509,18 @@
                 "attendedAt": {
                     "type": "string"
                 },
+                "attendedStatus": {
+                    "type": "string",
+                    "enum": [
+                        "absented",
+                        "attended",
+                        "excused",
+                        "dayoff",
+                        "holiday"
+                    ]
+                },
                 "classId": {
                     "type": "integer"
-                },
-                "isAttended": {
-                    "type": "boolean"
                 },
                 "studentId": {
                     "type": "integer"
@@ -713,11 +1530,179 @@
         "attendances.UpdateAttendanceRequest": {
             "type": "object",
             "properties": {
+                "attendedStatus": {
+                    "$ref": "#/definitions/attendances.AttendEnum"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "classes.Class": {
+            "type": "object",
+            "properties": {
+                "agency_id": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "grade": {
+                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "type": "string",
+                    "enum": [
+                        "buds",
+                        "seed",
+                        "leaf"
+                    ]
+                },
                 "id": {
                     "type": "integer"
                 },
-                "isAttended": {
+                "name": {
+                    "type": "string"
+                },
+                "teacher_id": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "classes.FindClassResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/classes.Class"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "classes.WriteClassRequest": {
+            "type": "object",
+            "properties": {
+                "agency_id": {
+                    "type": "integer"
+                },
+                "grade": {
+                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "type": "string",
+                    "enum": [
+                        "buds",
+                        "seed",
+                        "leaf"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "teacher_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "parents.FindParentResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/parents.Parent"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "parents.Parent": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "landlord": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "parent_birth_place": {
+                    "type": "string"
+                },
+                "parent_dob": {
+                    "type": "string"
+                },
+                "parent_gender": {
                     "type": "boolean"
+                },
+                "parent_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "res_registration": {
+                    "type": "string"
+                },
+                "roi": {
+                    "type": "string"
+                },
+                "student_id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "zalo": {
+                    "type": "string"
+                }
+            }
+        },
+        "parents.WriteParentRequest": {
+            "type": "object",
+            "properties": {
+                "landlord": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "parent_birth_place": {
+                    "type": "string"
+                },
+                "parent_dob": {
+                    "type": "string"
+                },
+                "parent_gender": {
+                    "type": "boolean"
+                },
+                "parent_name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "res_registration": {
+                    "type": "string"
+                },
+                "roi": {
+                    "type": "string"
+                },
+                "student_id": {
+                    "type": "integer"
+                },
+                "zalo": {
+                    "type": "string"
                 }
             }
         },
