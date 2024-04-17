@@ -837,36 +837,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "patch": {
-                "description": "Mark a parent as processed",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Parent"
-                ],
-                "summary": "Mark as done parent api",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Parent ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
             }
         },
         "/registrations": {
@@ -1356,41 +1326,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/students.Student"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Mark a student as processed",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Student"
-                ],
-                "summary": "Mark as done student api",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Student ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     },
                     "500": {
                         "description": "Internal Server Error",

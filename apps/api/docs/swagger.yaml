@@ -874,26 +874,6 @@ paths:
       summary: Get parent details api
       tags:
       - Parent
-    patch:
-      consumes:
-      - application/json
-      description: Mark a parent as processed
-      parameters:
-      - description: Parent ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Mark as done parent api
-      tags:
-      - Parent
     put:
       consumes:
       - application/json
@@ -1207,28 +1187,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get student details api
-      tags:
-      - Student
-    patch:
-      consumes:
-      - application/json
-      description: Mark a student as processed
-      parameters:
-      - description: Student ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: Mark as done student api
       tags:
       - Student
     put:
