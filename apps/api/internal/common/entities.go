@@ -1,6 +1,10 @@
 package common
 
-import "time"
+import (
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type BaseEntity struct {
 	Id        int       `json:"id"`
@@ -62,3 +66,7 @@ func (s *Sorter) GetSortBy() string {
 }
 
 var BaseExcludeFields []string = []string{"Id", "CreatedAt", "UpdatedAt"}
+
+type APIHandler interface {
+	RegisterRoute(fiber.Router)
+}

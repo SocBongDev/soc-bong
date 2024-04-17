@@ -1,6 +1,9 @@
 package classes
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/gofiber/fiber/v2"
+)
 
 type ClassHandler struct {
 	repo ClassRepository
@@ -14,6 +17,6 @@ func (h *ClassHandler) RegisterRoute(group fiber.Router) {
 	r.Put("/:id<int,min(1)>", h.Update)
 }
 
-func New(repo ClassRepository) *ClassHandler {
+func New(repo ClassRepository) common.APIHandler {
 	return &ClassHandler{repo}
 }
