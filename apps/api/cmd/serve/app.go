@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/SocBongDev/soc-bong/internal/agencies"
 	"github.com/SocBongDev/soc-bong/internal/attendances"
 	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
@@ -50,6 +51,7 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
 
 	privateHandlers := []common.APIHandler{
+		agencies.New(agencies.NewRepo(db)),
 		attendances.New(attendances.NewRepo(db)),
 		classes.New(classes.NewRepo(db)),
 		registrations.New(registrations.NewRepo(db)),
