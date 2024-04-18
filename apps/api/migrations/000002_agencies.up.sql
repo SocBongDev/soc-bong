@@ -3,12 +3,10 @@ CREATE TABLE IF NOT EXISTS agencies (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    name TEXT NOT NULL,
-    address TEXT NOT NULL,
-    phone TEXT NOT NULL,
-    email TEXT NOT NULL,
-
-    UNIQUE(name, address, phone, email)
+    name TEXT UNIQUE NOT NULL,
+    address TEXT UNIQUE NOT NULL,
+    phone TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL
 );
 
 CREATE TRIGGER update_timestamp_agencies AFTER UPDATE ON agencies
