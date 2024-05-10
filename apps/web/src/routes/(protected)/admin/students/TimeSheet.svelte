@@ -2,10 +2,42 @@
 	import LegendIcon from '~icons/ic/outline-watch-later'
 	import ExportIcon from '~icons/mdi/export'
 	import ClickDropdown from '$lib/components/ClickDropdown.svelte'
+	import dayjs from 'dayjs'
+	import { getContext, onDestroy, onMount } from 'svelte'
+	import { fade } from 'svelte/transition'
+	import { Notify, dialogProps, openDialog } from '$lib/store'
+	import { statusChange } from '$lib/store'
+	import type { AttendedStatus } from '$lib/store'
 
-	let inputValue: string = '2023-05'
+	let API = 'http://127.0.0.1:5000/api/v1'
+	let inputValue: string = dayjs().format('YYYY-MM') || '2023-05'
 	let yearPicked: number = parseInt(inputValue.split('-')[0], 10)
 	let monthPicked: number = parseInt(inputValue.split('-')[1], 10)
+	let statusArray: AttendedStatus[] = []
+
+	const unsubscribe = statusChange.subscribe((value) => {
+		console.log('check value', value)
+		statusArray = value
+	})
+
+	onDestroy(() => {
+		unsubscribe()
+	})
+
+	let classId = 1
+	let attendances: any = {}
+	let studentList: any = []
+	let loading = true
+	$: isReset = false
+
+	const status = [
+		{ name: 'unknown', color: 'bg-white', letter: '⚪' },
+		{ name: 'absented', color: 'bg-red-500', letter: '🔴' },
+		{ name: 'attended', color: 'bg-green-500', letter: '🟢' },
+		{ name: 'excused', color: 'bg-gray-500', letter: '🟡' },
+		{ name: 'dayoff', color: 'bg-black', letter: '⚫' },
+		{ name: 'holiday', color: 'bg-blue-500', letter: '🔵' }
+	]
 
 	function generateWeekDays(day: number) {
 		switch (day) {
@@ -28,11 +60,14 @@
 		}
 	}
 
-	function handleInput(event: any) {
+	async function handleInput(event: any) {
 		const value = (event.target as HTMLInputElement).value
 		inputValue = value
 		yearPicked = parseInt(value.split('-')[0], 10)
 		monthPicked = parseInt(value.split('-')[1], 10)
+		let datePicked = dayjs(value).format('MM-YYYY')
+		const res = await fetch(`${API}/attendances?classId=${classId}&period=${datePicked}`)
+		attendances = await res.json()
 	}
 
 	function generateCalendar(year: number, month: number) {
@@ -47,16 +82,114 @@
 		}
 		return thRow
 	}
+
+	onMount(async () => {
+		const getStudent = await fetch(`${API}/students?classId=${classId}`)
+		const studentData = await getStudent.json()
+		studentList = studentData.data
+		const res = await fetch(
+			`${API}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`
+		)
+		attendances = await res.json()
+		loading = false
+	})
+
+	async function handleSelectClassId(event: any) {
+		classId = parseInt((event.target as HTMLSelectElement).value)
+		const datePicked = dayjs(inputValue).format('MM-YYYY')
+
+		const studentsList = await fetch(`${API}/students?classId=${classId}`)
+		const attendancesList = await fetch(
+			`${API}/attendances?classId=${classId}&period=${datePicked}`
+		)
+		const studentData = await studentsList.json()
+
+		studentList = studentData.data
+		attendances = await attendancesList.json()
+	}
+
+	function clearStatusChanges() {
+		statusChange.set([])
+		statusArray = []
+		isReset = true
+		setTimeout(() => {
+			isReset = false
+		}, 500)
+	}
+
+	async function batchUpdate() {
+		console.log('get this statusArray', statusArray)
+		if (statusArray.length > 0) {
+			statusArray.forEach(async (status) => {
+				if (status?.id) {
+					console.log('check status has id', status)
+					const res = await fetch(`${API}/attendances`, {
+						method: 'PATCH',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify([{
+							id: status.id,
+							attendedStatus: status.attendedStatus
+						}])
+					})
+					
+				} else {
+					console.log('check status none id', status)
+					const res = await fetch(`${API}/attendances`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify([{
+							attendedAt: status.date,
+							attendedStatus: status.attendedStatus,
+							classId: status.classId && parseInt(status.classId),
+							studentId: status.studentId
+						}])
+					})
+					
+				}
+			})
+			Notify({
+				type: 'success',
+				id: crypto.randomUUID(),
+				description: `Đã cập nhật điểm danh thành công cho ${statusArray.length} ngày`
+			
+			})
+		} else {
+			Notify({
+				type: 'error',
+				id: crypto.randomUUID(),
+				description: 'Lỗi không thể thực hiện chức năng này'
+			})
+		}
+		statusChange.set([])
+		statusArray = []
+	}
 </script>
 
 <div class="h-full w-full">
+	<div class="row-span-full mt-1 grid grid-cols-6 px-2">
+		{#each status as { name, color, letter } (name)}
+			<div class="flex items-center gap-1">
+				<div class={`h-5 w-5 ${color} rounded-full border border-black/50`} />
+
+				<p>- {name}</p>
+			</div>
+		{/each}
+	</div>
 	<div class="mt-2 flex justify-between">
 		<div class="flex items-center justify-start">
-			<select class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold">
-				<option value="1" disabled>Monthly Timesheets</option>
-				<option value="2">Third-quarter Timessheets</option>
-				<option value="3">Half-year Timesheets</option>
-				<option value="4">Yearly Timesheets</option>
+			<select
+				on:change={handleSelectClassId}
+				id="classId"
+				class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold"
+			>
+				<option value="1">Lớp nhà trẻ</option>
+				<option value="2">Lớp Mầm</option>
+				<option value="3">Lớp Chồi</option>
+				<option value="4">Lớp Lá</option>
 			</select>
 			<div class="dropdown-calendar text-sm">
 				<input
@@ -108,52 +241,143 @@
 			</div>
 		</div>
 	</div>
-	<table class="table">
-		<thead class="text-center">
-			<tr>
-				<th class="px-0">
-					<label>
-						<input
-							type="text"
-							placeholder="🔎 Tìm kiếm"
-							class="input input-ghost w-fit max-w-xs font-bold"
-						/>
-					</label>
-				</th>
-				{#each generateCalendar(yearPicked, monthPicked) as { day, weekDay } (day)}
-					<th class="group p-1">
-						{weekDay}
-						<br />
-						{day}
+	{#if loading}
+		<p>Loading...</p>
+	{:else}
+		<table class="table">
+			<thead class="text-center">
+				<tr>
+					<th class="px-0">
+						<label>
+							<input
+								type="text"
+								placeholder="🔎 Tìm kiếm"
+								class="input input-ghost w-fit max-w-xs font-bold"
+							/>
+						</label>
 					</th>
-				{/each}
-				<th class="min-w-[4rem] px-1">Tổng Kết</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each Array(5) as _, index (index)}
-				<tr class="hover cursor-pointer text-center">
-					<th class="max-w-xs px-0">
-						<div class="flex items-center justify-start gap-2">
-							<div class="avatar">
-								<div class="w-12 rounded-full">
-									<img
-										alt="avatar"
-										src="https://www.shutterstock.com/image-vector/young-smiling-man-avatar-brown-600w-2261401207.jpg"
-									/>
-								</div>
-							</div>
-							<p>Cho Chang</p>
-						</div>
-					</th>
-					{#each generateCalendar(yearPicked, monthPicked) as _, index (index)}
-						<td class="w-fit p-0.5">
-							<ClickDropdown />
-						</td>
+					{#each generateCalendar(yearPicked, monthPicked) as { day, weekDay } (day)}
+						<th class="group p-1">
+							{weekDay}
+							<br />
+							{day}
+						</th>
 					{/each}
-					<td class="min-w-[4rem] px-1">30 buổi</td>
+					<th class="min-w-[4rem] px-1">Tổng Kết</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				<!-- thêm studentList -->
+				<!-- {#each Object.entries(data) as student, index (index)} -->
+				{#if studentList.length === 0}
+					<tr class="hover cursor-pointer text-center">
+						<td class="max-w-xs px-0">Không có dữ liệu</td>
+					</tr>
+				{:else}
+					{#each studentList as student, id (id)}
+						<tr class="hover cursor-pointer text-center">
+							<th class="max-w-xs px-0">
+								<div class="flex items-center justify-start gap-2">
+									<div class="avatar">
+										<div class="w-12 rounded-full">
+											<img
+												alt="avatar"
+												src="https://www.shutterstock.com/image-vector/young-smiling-man-avatar-brown-600w-2261401207.jpg"
+											/>
+										</div>
+									</div>
+									{#if student}
+										<p>
+											{student.firstName}
+											{student.lastName}
+										</p>
+									{/if}
+								</div>
+							</th>
+
+							{#each generateCalendar(yearPicked, monthPicked) as date, index (index)}
+								{#if attendances[`${id + 1}`]?.some((attendance) => {
+									const attendedDate = dayjs(String(Object(attendance).attendedAt))
+									return attendedDate.date() === date.day && attendedDate.month() + 1 === monthPicked
+								})}
+									<td class="w-fit p-0.5">
+										{#each attendances[`${id + 1}`] as attendance}
+											{#if dayjs(String(Object(attendance).attendedAt)).date() === date.day && dayjs(String(Object(attendance).attendedAt)).month() + 1 === monthPicked}
+												{#key isReset}
+													<ClickDropdown
+														data={attendance}
+														date={date.day.toString()}
+														studentId={student?.id}
+														classId={classId.toString()}
+														{monthPicked}
+														{yearPicked}
+													/>
+												{/key}
+											{/if}
+										{/each}
+									</td>
+								{:else}
+									<td class="w-fit p-0.5">
+										{#key isReset}
+											<ClickDropdown
+												data={null}
+												date={date.day.toString()}
+												studentId={student?.id}
+												classId={classId.toString()}
+												{monthPicked}
+												{yearPicked}
+											/>
+										{/key}
+									</td>
+								{/if}
+							{/each}
+							<td class="min-w-[4rem] px-1">30 buổi</td>
+						</tr>
+					{/each}
+				{/if}
+			</tbody>
+		</table>
+
+		{#if statusArray.length > 0}
+			<div class="absolute bottom-10 left-1/2 w-1/2 -translate-x-1/2" transition:fade>
+				<div class="alert flex justify-between rounded-full bg-white py-2.5 text-sm shadow">
+					<div class="flex w-1/2 items-center gap-3">
+						<span>Đã sửa <strong>{statusArray.length}</strong> ngày</span>
+						<button
+							class="btn btn-outline btn-sm rounded border-2 bg-white normal-case"
+							on:click={clearStatusChanges}>Huỷ thay đổi</button
+						>
+					</div>
+					<button
+						class="btn btn-ghost btn-sm rounded normal-case text-red-500 hover:bg-red-100"
+						on:click={() => {
+							dialogProps.set({
+								description: 'Hành vi này không thể hoàn tác. Bạn có muốn tiếp tục?',
+								title: 'Yêu cầu xác nhận!',
+								onContinue: batchUpdate
+							})
+							openDialog.set(true)
+						}}>Tiến hành điểm danh</button
+					>
+				</div>
+			</div>
+		{/if}
+		<!-- <div class="join mt-auto self-center">
+			<a
+			class={data.students.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
+			href={`/admin?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
+			>
+			<button class="btn join-item">«</button>
+		</a>
+		<button class="btn join-item">Trang {data.students.page}</button>
+		<a
+		class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
+			? 'pointer-events-none cursor-default opacity-40'
+			: ''}
+			href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
+			>
+			<button class="btn join-item">»</button>
+		</a>
+	</div> -->
+	{/if}
 </div>

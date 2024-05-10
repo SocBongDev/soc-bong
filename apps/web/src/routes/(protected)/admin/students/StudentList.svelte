@@ -5,7 +5,6 @@
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import dayjs from 'dayjs'
 	import type { PageData } from './$types'
-	import type { Student } from '$lib'
 	import { invalidate } from '$app/navigation'
 
 	export let data: PageData
