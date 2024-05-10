@@ -7,6 +7,14 @@ export interface NotificationMessage {
 	type: 'error' | 'warning' | 'success' | 'loading'
 }
 
+export interface AttendedStatus {
+	id?: string
+	date?: string
+	attendedStatus: 'attended' | 'absented' | 'excused' | 'dayoff' | 'holiday' | 'unknown';
+	classId?: string,
+	studentId?: string,
+}
+
 export const notifications = writable<Array<NotificationMessage>>([])
 
 export function Notify(notification: NotificationMessage) {
@@ -33,3 +41,5 @@ export interface DialogProps {
 export const dialogProps = writable<DialogProps | undefined>(undefined)
 
 export const openDialog = writable(false)
+
+export const statusChange = writable<Array<AttendedStatus>>([])
