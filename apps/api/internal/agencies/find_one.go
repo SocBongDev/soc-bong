@@ -37,7 +37,7 @@ func (h *AgencyHandler) FindOne(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("GetAgencyDetails success. Response: %#v\n", resp)
+	log.Printf("GetAgencyDetails success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }

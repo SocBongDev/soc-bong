@@ -37,7 +37,7 @@ func (h *RegistrationHandler) FindOne(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("GetRegistrationDetails success. Response: %#v\n", resp)
+	log.Printf("GetRegistrationDetails success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }

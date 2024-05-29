@@ -28,7 +28,7 @@ func (h *AttendanceHandler) Find(c *fiber.Ctx) error {
 	}
 	query.Format()
 
-	log.Printf("FindAttendances request: %#v\n", query)
+	log.Printf("FindAttendances request: %+v\n", query)
 
 	data, err := h.repo.Find(query)
 	if err != nil {
@@ -41,7 +41,7 @@ func (h *AttendanceHandler) Find(c *fiber.Ctx) error {
 		resp[a.StudentId] = append(resp[a.StudentId], a)
 	}
 
-	log.Printf("FindAttendances success. Response: %#v\n", resp)
+	log.Printf("FindAttendances success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }

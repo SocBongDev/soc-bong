@@ -26,7 +26,7 @@ func (h *AgencyHandler) Find(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindAgencies request: %#v\n", query)
+	log.Printf("FindAgencies request: %+v\n", query)
 
 	data, err := h.repo.Find(query)
 	if err != nil {
@@ -35,7 +35,7 @@ func (h *AgencyHandler) Find(c *fiber.Ctx) error {
 	}
 
 	resp := FindAgencyResp{Data: data, Page: query.GetPage()}
-	log.Printf("FindAgencies success. Response: %#v\n", resp)
+	log.Printf("FindAgencies success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }
