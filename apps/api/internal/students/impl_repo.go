@@ -5,11 +5,13 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-type StudentRepo struct {
+type studentRepo struct {
 	db *dbx.DB
 }
 
-func (r *StudentRepo) Delete(ids []int) error {
+var _ StudentRepository = (*studentRepo)(nil)
+
+func (r *studentRepo) Delete(ids []int) error {
 	anySlices := make([]any, len(ids))
 	for i, v := range ids {
 		anySlices[i] = v
@@ -19,7 +21,7 @@ func (r *StudentRepo) Delete(ids []int) error {
 	return err
 }
 
-func (r *StudentRepo) Find(query *StudentQuery) ([]Student, error) {
+func (r *studentRepo) Find(query *StudentQuery) ([]Student, error) {
 	resp := make([]Student, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("students").
@@ -45,18 +47,18 @@ func (r *StudentRepo) Find(query *StudentQuery) ([]Student, error) {
 	return resp, nil
 }
 
-func (r *StudentRepo) FindOne(req *Student) error {
+func (r *studentRepo) FindOne(req *Student) error {
 	return r.db.Select().Model(req.Id, req)
 }
 
-func (r *StudentRepo) Insert(req *Student) error {
+func (r *studentRepo) Insert(req *Student) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
-func (r *StudentRepo) Update(req *Student) error {
+func (r *studentRepo) Update(req *Student) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
-func NewRepo(db *dbx.DB) StudentRepository {
-	return &StudentRepo{db}
+func NewRepo(db *dbx.DB) *studentRepo {
+	return &studentRepo{db}
 }
