@@ -1,8 +1,67 @@
 basePath: /api/v1
 definitions:
+  agencies.Agency:
+    properties:
+      address:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  agencies.FindAgencyResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/agencies.Agency'
+        type: array
+      page:
+        type: integer
+    type: object
+  agencies.WriteAgencyRequest:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  attendances.AttendEnum:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-varnames:
+    - Absented
+    - Attended
+    - Excused
+    - Dayoff
+    - Holiday
   attendances.Attendance:
     properties:
       attendedAt:
+        type: string
+      attendedStatus:
+        enum:
+        - absented
+        - attended
+        - excused
+        - dayoff
+        - holiday
         type: string
       classId:
         type: integer
@@ -10,8 +69,6 @@ definitions:
         type: string
       id:
         type: integer
-      isAttended:
-        type: boolean
       studentId:
         type: integer
       updatedAt:
@@ -21,19 +78,80 @@ definitions:
     properties:
       attendedAt:
         type: string
+      attendedStatus:
+        enum:
+        - absented
+        - attended
+        - excused
+        - dayoff
+        - holiday
+        type: string
       classId:
         type: integer
-      isAttended:
-        type: boolean
       studentId:
         type: integer
     type: object
   attendances.UpdateAttendanceRequest:
     properties:
+      attendedStatus:
+        $ref: '#/definitions/attendances.AttendEnum'
       id:
         type: integer
-      isAttended:
-        type: boolean
+    type: object
+  classes.Class:
+    properties:
+      agency_id:
+        type: integer
+      createdAt:
+        type: string
+      grade:
+        description: |-
+          Grade type:
+          * buds - Children who is 3 yo.
+          * seed - Children who is 4 yo.
+          * leaf - Children who is 5 yo.
+        enum:
+        - buds
+        - seed
+        - leaf
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      teacher_id:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  classes.FindClassResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/classes.Class'
+        type: array
+      page:
+        type: integer
+    type: object
+  classes.WriteClassRequest:
+    properties:
+      agency_id:
+        type: integer
+      grade:
+        description: |-
+          Grade type:
+          * buds - Children who is 3 yo.
+          * seed - Children who is 4 yo.
+          * leaf - Children who is 5 yo.
+        enum:
+        - buds
+        - seed
+        - leaf
+        type: string
+      name:
+        type: string
+      teacher_id:
+        type: string
     type: object
   registrations.FindRegistrationResp:
     properties:
@@ -112,6 +230,138 @@ info:
   title: Fiber Example API
   version: "1.0"
 paths:
+  /agencies:
+    get:
+      consumes:
+      - application/json
+      description: Get list agency
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agencies.FindAgencyResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list agency details api
+      tags:
+      - Agency
+    post:
+      consumes:
+      - application/json
+      description: Insert agency
+      parameters:
+      - description: Create agency body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/agencies.WriteAgencyRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agencies.Agency'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create agency api
+      tags:
+      - Agency
+  /agencies/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one agency
+      parameters:
+      - description: Agency ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agencies.Agency'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get agency details api
+      tags:
+      - Agency
+    put:
+      consumes:
+      - application/json
+      description: Update agency
+      parameters:
+      - description: Update agency body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/agencies.WriteAgencyRequest'
+      - description: Agency ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agencies.Agency'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update agency api
+      tags:
+      - Agency
   /attendances:
     get:
       consumes:
@@ -215,13 +465,173 @@ paths:
       summary: Create attendance api
       tags:
       - Attendance
+  /classes:
+    get:
+      consumes:
+      - application/json
+      description: Get list class
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/classes.FindClassResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list class details api
+      tags:
+      - Class
+    post:
+      consumes:
+      - application/json
+      description: Insert class
+      parameters:
+      - description: Create class body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/classes.WriteClassRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/classes.Class'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create class api
+      tags:
+      - Class
+  /classes/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one class
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/classes.Class'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get class details api
+      tags:
+      - Class
+    put:
+      consumes:
+      - application/json
+      description: Update class
+      parameters:
+      - description: Update class body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/classes.WriteClassRequest'
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/classes.Class'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update class api
+      tags:
+      - Class
+  /classes/{id}/export-excel:
+    get:
+      consumes:
+      - application/json
+      description: Get one class excel file
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get class excel api
+      tags:
+      - Class
   /registrations:
     delete:
       consumes:
       - application/json
       description: Delete registration
       parameters:
-      - description: Registration IDs
+      - collectionFormat: csv
+        description: Registration IDs
         in: query
         items:
           type: integer
@@ -385,6 +795,32 @@ paths:
       summary: Update registration api
       tags:
       - Registration
+  /students:
+    delete:
+      consumes:
+      - application/json
+      description: Delete student
+      parameters:
+      - collectionFormat: csv
+        description: Student IDs
+        in: query
+        items:
+          type: integer
+        name: ids
+        required: true
+        type: array
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete student api
+      tags:
+      - Student
 securityDefinitions:
   ApiKeyAuth:
     description: Apply "bearer " before token in authorization
