@@ -16,6 +16,213 @@
     },
     "basePath": "/api/v1",
     "paths": {
+        "/agencies": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get list agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Get list agency details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agencies.FindAgencyResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Create agency api",
+                "parameters": [
+                    {
+                        "description": "Create agency body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agencies.WriteAgencyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agencies.Agency"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/agencies/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get one agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Get agency details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agencies.Agency"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update agency",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agency"
+                ],
+                "summary": "Update agency api",
+                "parameters": [
+                    {
+                        "description": "Update agency body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agencies.WriteAgencyRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Agency ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agencies.Agency"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/attendances": {
             "get": {
                 "security": [
@@ -175,6 +382,256 @@
                 }
             }
         },
+        "/classes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get list class",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Get list class details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classes.FindClassResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert class",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Create class api",
+                "parameters": [
+                    {
+                        "description": "Create class body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/classes.WriteClassRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classes.Class"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/classes/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get one class",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Get class details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classes.Class"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update class",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Update class api",
+                "parameters": [
+                    {
+                        "description": "Update class body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/classes.WriteClassRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classes.Class"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/classes/{id}/export-excel": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get one class excel file",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Class"
+                ],
+                "summary": "Get class excel api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/registrations": {
             "get": {
                 "security": [
@@ -302,6 +759,7 @@
                         "items": {
                             "type": "integer"
                         },
+                        "collectionFormat": "csv",
                         "description": "Registration IDs",
                         "name": "ids",
                         "in": "query",
@@ -442,14 +900,338 @@
                     }
                 }
             }
+        },
+        "/students": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get list student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Get list student details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.FindStudentResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Create student api",
+                "parameters": [
+                    {
+                        "description": "Create student body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/students.InsertStudentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.Student"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Delete student api",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Student IDs",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get one student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Get student details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.Student"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Update student api",
+                "parameters": [
+                    {
+                        "description": "Update student body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/students.InsertStudentRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.Student"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "agencies.Agency": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "agencies.FindAgencyResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/agencies.Agency"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "agencies.WriteAgencyRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "attendances.AttendEnum": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+            ],
+            "x-enum-varnames": [
+                "Absented",
+                "Attended",
+                "Excused",
+                "Dayoff",
+                "Holiday"
+            ]
+        },
         "attendances.Attendance": {
             "type": "object",
             "properties": {
                 "attendedAt": {
                     "type": "string"
+                },
+                "attendedStatus": {
+                    "type": "string",
+                    "enum": [
+                        "absented",
+                        "attended",
+                        "excused",
+                        "dayoff",
+                        "holiday"
+                    ]
                 },
                 "classId": {
                     "type": "integer"
@@ -459,9 +1241,6 @@
                 },
                 "id": {
                     "type": "integer"
-                },
-                "isAttended": {
-                    "type": "boolean"
                 },
                 "studentId": {
                     "type": "integer"
@@ -477,11 +1256,18 @@
                 "attendedAt": {
                     "type": "string"
                 },
+                "attendedStatus": {
+                    "type": "string",
+                    "enum": [
+                        "absented",
+                        "attended",
+                        "excused",
+                        "dayoff",
+                        "holiday"
+                    ]
+                },
                 "classId": {
                     "type": "integer"
-                },
-                "isAttended": {
-                    "type": "boolean"
                 },
                 "studentId": {
                     "type": "integer"
@@ -491,11 +1277,159 @@
         "attendances.UpdateAttendanceRequest": {
             "type": "object",
             "properties": {
+                "attendedStatus": {
+                    "$ref": "#/definitions/attendances.AttendEnum"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "classes.Class": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "grade": {
+                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "type": "string",
+                    "enum": [
+                        "buds",
+                        "seed",
+                        "leaf"
+                    ]
+                },
                 "id": {
                     "type": "integer"
                 },
-                "isAttended": {
+                "name": {
+                    "type": "string"
+                },
+                "teacherId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "classes.FindClassResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/classes.Class"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "classes.WriteClassRequest": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "grade": {
+                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "type": "string",
+                    "enum": [
+                        "buds",
+                        "seed",
+                        "leaf"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "teacherId": {
+                    "type": "string"
+                }
+            }
+        },
+        "parents.Parent": {
+            "type": "object",
+            "properties": {
+                "birthPlace": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "gender": {
                     "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "landlord": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "resRegistration": {
+                    "type": "string"
+                },
+                "roi": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "zalo": {
+                    "type": "string"
+                }
+            }
+        },
+        "parents.WriteParentRequest": {
+            "type": "object",
+            "properties": {
+                "birthPlace": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "landlord": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "resRegistration": {
+                    "type": "string"
+                },
+                "roi": {
+                    "type": "string"
+                },
+                "zalo": {
+                    "type": "string"
                 }
             }
         },
@@ -579,6 +1513,132 @@
                     "type": "string"
                 },
                 "studentName": {
+                    "type": "string"
+                }
+            }
+        },
+        "students.FindStudentResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/students.Student"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "students.InsertStudentRequest": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "birthPlace": {
+                    "type": "string"
+                },
+                "classId": {
+                    "type": "integer"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "enrolledAt": {
+                    "type": "string"
+                },
+                "ethnic": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/parents.WriteParentRequest"
+                    }
+                },
+                "permanentAddressCommune": {
+                    "type": "string"
+                },
+                "permanentAddressDistrict": {
+                    "type": "string"
+                },
+                "permanentAddressProvince": {
+                    "type": "string"
+                },
+                "tempAddress": {
+                    "type": "string"
+                }
+            }
+        },
+        "students.Student": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "birthPlace": {
+                    "type": "string"
+                },
+                "class": {
+                    "$ref": "#/definitions/classes.Class"
+                },
+                "classId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "enrolledAt": {
+                    "type": "string"
+                },
+                "ethnic": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/parents.Parent"
+                    }
+                },
+                "permanentAddressCommune": {
+                    "type": "string"
+                },
+                "permanentAddressDistrict": {
+                    "type": "string"
+                },
+                "permanentAddressProvince": {
+                    "type": "string"
+                },
+                "tempAddress": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }

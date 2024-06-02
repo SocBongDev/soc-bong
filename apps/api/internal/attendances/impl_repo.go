@@ -7,11 +7,13 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-type AttendanceRepo struct {
+type attendanceRepo struct {
 	db *dbx.DB
 }
 
-func (r *AttendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
+var _ AttendanceRepository = (*attendanceRepo)(nil)
+
+func (r *attendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
 	resp := []Attendance{}
 	q := r.db.Select("*").
 		From("attendances").
@@ -34,14 +36,14 @@ func (r *AttendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
 	return resp, nil
 }
 
-func (r *AttendanceRepo) Insert(req []Attendance) error {
+func (r *attendanceRepo) Insert(req []Attendance) error {
 	vals := make([]string, len(req))
 	for i, v := range req {
 		vals[i] = fmt.Sprintf(
-			"('%s', %d, %t, %d)",
+			"('%s', %d, %d, %d)",
 			v.AttendedAt,
 			v.ClassId,
-			v.IsAttended,
+			v.AttendedStatus,
 			v.StudentId,
 		)
 	}
@@ -49,7 +51,7 @@ func (r *AttendanceRepo) Insert(req []Attendance) error {
 	_, err := r.db.NewQuery(
 		fmt.Sprintf(
 			`
-             INSERT INTO attendances ("attended_at", "class_id", "is_attended", "student_id") 
+             INSERT INTO attendances ("attended_at", "class_id", "attended_status", "student_id") 
              VALUES %v
              `,
 			strings.Join(vals, ", "),
@@ -60,10 +62,10 @@ func (r *AttendanceRepo) Insert(req []Attendance) error {
 	return err
 }
 
-func (r *AttendanceRepo) Update(req []Attendance) error {
+func (r *attendanceRepo) Update(req []Attendance) error {
 	cases, ids := make([]string, len(req)+1), make([]string, len(req))
 	for i, v := range req {
-		cases[i] = fmt.Sprintf("WHEN %d THEN %t", v.Id, v.IsAttended)
+		cases[i] = fmt.Sprintf("WHEN %d THEN %d", v.Id, v.AttendedStatus)
 		ids[i] = fmt.Sprint(v.Id)
 	}
 
@@ -71,9 +73,9 @@ func (r *AttendanceRepo) Update(req []Attendance) error {
 		fmt.Sprintf(
 			`
             UPDATE attendances
-            SET 'is_attended' = CASE
+            SET 'attended_status' = CASE
             %v
-            ELSE is_attended
+            ELSE attended_status
             END
             WHERE id IN (%v)
             `,
@@ -84,6 +86,6 @@ func (r *AttendanceRepo) Update(req []Attendance) error {
 	return err
 }
 
-func NewRepo(db *dbx.DB) AttendanceRepository {
-	return &AttendanceRepo{db}
+func NewRepo(db *dbx.DB) *attendanceRepo {
+	return &attendanceRepo{db}
 }

@@ -25,7 +25,7 @@ func (h *RegistrationHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("InsertRegistration request: %#v\n", body)
+	log.Printf("InsertRegistration request: %+v\n", body)
 	req := &Registration{WriteRegistrationRequest: *body}
 	if err := h.repo.Insert(req); err != nil {
 		log.Println("InsertRegistration.Insert err: ", err)
@@ -37,7 +37,7 @@ func (h *RegistrationHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("InsertRegistration success. Response: %#v\n", body)
+	log.Printf("InsertRegistration success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

@@ -6,11 +6,15 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/SocBongDev/soc-bong/internal/agencies"
 	"github.com/SocBongDev/soc-bong/internal/attendances"
+	"github.com/SocBongDev/soc-bong/internal/classes"
+	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/SocBongDev/soc-bong/internal/registrations"
+	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pocketbase/dbx"
 
@@ -34,18 +38,38 @@ func index(c *fiber.Ctx) error {
 	return c.Redirect("/docs")
 }
 
+func (a *App) RegisterAPIHandlers(router fiber.Router, handlers []common.APIHandler) {
+	for _, handler := range handlers {
+		handler.RegisterRoute(router)
+	}
+}
+
 func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	v1 := api.Group("/v1")
+	agencyRepo, attendanceRepo, classRepo, registrationRepo := agencies.NewRepo(
+		db,
+	), attendances.NewRepo(
+		db,
+	), classes.NewRepo(
+		db,
+	), registrations.NewRepo(
+		db,
+	)
+	spreadsheet := spreadsheet.New()
+
+	publicHandlers := []common.APIHandler{
+		classes.New(attendanceRepo, classRepo, spreadsheet),
+	}
+	a.RegisterAPIHandlers(v1, publicHandlers)
 
 	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
 
-	attendanceRepo := attendances.NewRepo(db)
-	attendanceHandler := attendances.New(attendanceRepo)
-	attendanceHandler.RegisterRoute(v1)
-
-	registrationRepo := registrations.NewRepo(db)
-	registrationHandler := registrations.New(registrationRepo)
-	registrationHandler.RegisterRoute(v1)
+	privateHandlers := []common.APIHandler{
+		agencies.New(agencyRepo),
+		attendances.New(attendanceRepo),
+		registrations.New(registrationRepo),
+	}
+	a.RegisterAPIHandlers(v1, privateHandlers)
 }
 
 func (a *App) RunHttpServer() {

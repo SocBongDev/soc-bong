@@ -5,11 +5,13 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-type RegistrationRepo struct {
+type registrationRepo struct {
 	db *dbx.DB
 }
 
-func (r *RegistrationRepo) Delete(req []int) error {
+var _ RegistrationRepository = (*registrationRepo)(nil)
+
+func (r *registrationRepo) Delete(req []int) error {
 	anySlices := make([]any, len(req))
 	for i, v := range req {
 		anySlices[i] = v
@@ -19,7 +21,7 @@ func (r *RegistrationRepo) Delete(req []int) error {
 	return err
 }
 
-func (r *RegistrationRepo) Find(query *RegistrationQuery) ([]Registration, error) {
+func (r *registrationRepo) Find(query *RegistrationQuery) ([]Registration, error) {
 	resp := make([]Registration, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("registrations").
@@ -43,19 +45,19 @@ func (r *RegistrationRepo) Find(query *RegistrationQuery) ([]Registration, error
 	return resp, nil
 }
 
-func (r *RegistrationRepo) FindOne(req *Registration) error {
+func (r *registrationRepo) FindOne(req *Registration) error {
 	return r.db.Select().Model(req.Id, req)
 }
 
-func (r *RegistrationRepo) Insert(req *Registration) error {
+func (r *registrationRepo) Insert(req *Registration) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
-func (r *RegistrationRepo) Update(req *Registration) error {
+func (r *registrationRepo) Update(req *Registration) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
-func (r *RegistrationRepo) MarkAsDone(req *Registration) error {
+func (r *registrationRepo) MarkAsDone(req *Registration) error {
 	_, err := r.db.Update(
 		"registrations",
 		dbx.Params{"is_processed": true},
@@ -65,6 +67,6 @@ func (r *RegistrationRepo) MarkAsDone(req *Registration) error {
 	return err
 }
 
-func NewRepo(db *dbx.DB) RegistrationRepository {
-	return &RegistrationRepo{db}
+func NewRepo(db *dbx.DB) *registrationRepo {
+	return &registrationRepo{db}
 }

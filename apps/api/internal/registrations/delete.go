@@ -23,14 +23,14 @@ func (h *RegistrationHandler) Delete(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("DeleteRegistrations request: %#v\n", query)
+	log.Printf("DeleteRegistrations request: %+v\n", query)
 
 	if err := h.repo.Delete(query.Ids); err != nil {
 		log.Println("DeleteRegistration.Delete err: ", err)
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("DeleteRegistration success. Response: %#v\n", query.Ids)
+	log.Printf("DeleteRegistration success. Response: %+v\n", query.Ids)
 
 	return c.JSON(nil)
 }

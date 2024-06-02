@@ -3,11 +3,8 @@ package registrations
 import (
 	"log"
 
-	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/gofiber/fiber/v2"
 )
-
-type FindRegistrationResp common.FindResponse[Registration]
 
 // @FindRegistration godoc
 // @Summary Get list registration details api
@@ -29,7 +26,7 @@ func (h *RegistrationHandler) Find(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindRegistrations request: %#v\n", query)
+	log.Printf("FindRegistrations request: %+v\n", query)
 
 	data, err := h.repo.Find(query)
 	if err != nil {
@@ -38,7 +35,7 @@ func (h *RegistrationHandler) Find(c *fiber.Ctx) error {
 	}
 
 	resp := FindRegistrationResp{Data: data, Page: query.GetPage()}
-	log.Printf("FindRegistrations success. Response: %#v\n", resp)
+	log.Printf("FindRegistrations success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }

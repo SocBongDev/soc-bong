@@ -24,14 +24,14 @@ func (h *RegistrationHandler) Patch(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("UpdateRegistration request: %#v\n", id)
+	log.Printf("UpdateRegistration request: %+v\n", id)
 	req := &Registration{BaseEntity: common.BaseEntity{Id: id}}
 	if err := h.repo.MarkAsDone(req); err != nil {
 		log.Println("UpdateRegistration.Update err: ", err)
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("UpdateRegistration success. Response: %#v\n", id)
+	log.Printf("UpdateRegistration success. Response: %+v\n", id)
 
 	return c.JSON(nil)
 }

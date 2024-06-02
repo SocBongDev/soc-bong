@@ -31,14 +31,14 @@ func (h *RegistrationHandler) Update(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("UpdateRegistration request: %#v\n", body)
+	log.Printf("UpdateRegistration request: %+v\n", body)
 	req := &Registration{WriteRegistrationRequest: *body, BaseEntity: common.BaseEntity{Id: id}}
 	if err := h.repo.Update(req); err != nil {
 		log.Println("UpdateRegistration.Update err: ", err)
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("UpdateRegistration success. Response: %#v\n", body)
+	log.Printf("UpdateRegistration success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

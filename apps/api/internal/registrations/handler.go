@@ -1,6 +1,7 @@
 package registrations
 
 import (
+	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
@@ -43,6 +44,6 @@ func (h *RegistrationHandler) RegisterRoute(group fiber.Router) {
 	)
 }
 
-func New(repo RegistrationRepository) *RegistrationHandler {
+func New(repo RegistrationRepository) common.APIHandler {
 	return &RegistrationHandler{repo}
 }

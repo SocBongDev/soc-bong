@@ -23,11 +23,11 @@ func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("PatchAttendance request: %#v\n", body)
+	log.Printf("PatchAttendance request: %+v\n", body)
 	req := make([]Attendance, len(body))
 	for i, v := range body {
 		req[i] = Attendance{
-			CreateAttendanceRequest: CreateAttendanceRequest{IsAttended: v.IsAttended},
+			CreateAttendanceRequest: CreateAttendanceRequest{AttendedStatus: v.AttendedStatus},
 			BaseEntity:              common.BaseEntity{Id: v.Id},
 		}
 	}
@@ -37,7 +37,7 @@ func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("PatchAttendance success. Response: %#v\n", body)
+	log.Printf("PatchAttendance success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }
