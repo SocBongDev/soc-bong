@@ -909,6 +909,112 @@ const docTemplate = `{
             }
         },
         "/students": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get list student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Get list student details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.FindStudentResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Create student api",
+                "parameters": [
+                    {
+                        "description": "Create student body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/students.InsertStudentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.Student"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -939,6 +1045,99 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get one student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Get student details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.Student"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update student",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Student"
+                ],
+                "summary": "Update student api",
+                "parameters": [
+                    {
+                        "description": "Update student body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/students.InsertStudentRequest"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Student ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/students.Student"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -1096,7 +1295,7 @@ const docTemplate = `{
         "classes.Class": {
             "type": "object",
             "properties": {
-                "agency_id": {
+                "agencyId": {
                     "type": "integer"
                 },
                 "createdAt": {
@@ -1117,7 +1316,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "teacher_id": {
+                "teacherId": {
                     "type": "string"
                 },
                 "updatedAt": {
@@ -1142,7 +1341,7 @@ const docTemplate = `{
         "classes.WriteClassRequest": {
             "type": "object",
             "properties": {
-                "agency_id": {
+                "agencyId": {
                     "type": "integer"
                 },
                 "grade": {
@@ -1157,7 +1356,86 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "teacher_id": {
+                "teacherId": {
+                    "type": "string"
+                }
+            }
+        },
+        "parents.Parent": {
+            "type": "object",
+            "properties": {
+                "birthPlace": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "landlord": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "resRegistration": {
+                    "type": "string"
+                },
+                "roi": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "zalo": {
+                    "type": "string"
+                }
+            }
+        },
+        "parents.WriteParentRequest": {
+            "type": "object",
+            "properties": {
+                "birthPlace": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "landlord": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "resRegistration": {
+                    "type": "string"
+                },
+                "roi": {
+                    "type": "string"
+                },
+                "zalo": {
                     "type": "string"
                 }
             }
@@ -1242,6 +1520,132 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "studentName": {
+                    "type": "string"
+                }
+            }
+        },
+        "students.FindStudentResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/students.Student"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                }
+            }
+        },
+        "students.InsertStudentRequest": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "birthPlace": {
+                    "type": "string"
+                },
+                "classId": {
+                    "type": "integer"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "enrolledAt": {
+                    "type": "string"
+                },
+                "ethnic": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/parents.WriteParentRequest"
+                    }
+                },
+                "permanentAddressCommune": {
+                    "type": "string"
+                },
+                "permanentAddressDistrict": {
+                    "type": "string"
+                },
+                "permanentAddressProvince": {
+                    "type": "string"
+                },
+                "tempAddress": {
+                    "type": "string"
+                }
+            }
+        },
+        "students.Student": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "birthPlace": {
+                    "type": "string"
+                },
+                "class": {
+                    "$ref": "#/definitions/classes.Class"
+                },
+                "classId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "enrolledAt": {
+                    "type": "string"
+                },
+                "ethnic": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "parents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/parents.Parent"
+                    }
+                },
+                "permanentAddressCommune": {
+                    "type": "string"
+                },
+                "permanentAddressDistrict": {
+                    "type": "string"
+                },
+                "permanentAddressProvince": {
+                    "type": "string"
+                },
+                "tempAddress": {
+                    "type": "string"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }

@@ -100,7 +100,7 @@ definitions:
     type: object
   classes.Class:
     properties:
-      agency_id:
+      agencyId:
         type: integer
       createdAt:
         type: string
@@ -119,7 +119,7 @@ definitions:
         type: integer
       name:
         type: string
-      teacher_id:
+      teacherId:
         type: string
       updatedAt:
         type: string
@@ -135,7 +135,7 @@ definitions:
     type: object
   classes.WriteClassRequest:
     properties:
-      agency_id:
+      agencyId:
         type: integer
       grade:
         description: |-
@@ -150,7 +150,59 @@ definitions:
         type: string
       name:
         type: string
-      teacher_id:
+      teacherId:
+        type: string
+    type: object
+  parents.Parent:
+    properties:
+      birthPlace:
+        type: string
+      createdAt:
+        type: string
+      dob:
+        type: string
+      gender:
+        type: boolean
+      id:
+        type: integer
+      landlord:
+        type: string
+      name:
+        type: string
+      occupation:
+        type: string
+      phoneNumber:
+        type: string
+      resRegistration:
+        type: string
+      roi:
+        type: string
+      updatedAt:
+        type: string
+      zalo:
+        type: string
+    type: object
+  parents.WriteParentRequest:
+    properties:
+      birthPlace:
+        type: string
+      dob:
+        type: string
+      gender:
+        type: boolean
+      landlord:
+        type: string
+      name:
+        type: string
+      occupation:
+        type: string
+      phoneNumber:
+        type: string
+      resRegistration:
+        type: string
+      roi:
+        type: string
+      zalo:
         type: string
     type: object
   registrations.FindRegistrationResp:
@@ -216,6 +268,89 @@ definitions:
       studentDob:
         type: string
       studentName:
+        type: string
+    type: object
+  students.FindStudentResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/students.Student'
+        type: array
+      page:
+        type: integer
+    type: object
+  students.InsertStudentRequest:
+    properties:
+      agencyId:
+        type: integer
+      birthPlace:
+        type: string
+      classId:
+        type: integer
+      dob:
+        type: string
+      enrolledAt:
+        type: string
+      ethnic:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: boolean
+      lastName:
+        type: string
+      parents:
+        items:
+          $ref: '#/definitions/parents.WriteParentRequest'
+        type: array
+      permanentAddressCommune:
+        type: string
+      permanentAddressDistrict:
+        type: string
+      permanentAddressProvince:
+        type: string
+      tempAddress:
+        type: string
+    type: object
+  students.Student:
+    properties:
+      agencyId:
+        type: integer
+      birthPlace:
+        type: string
+      class:
+        $ref: '#/definitions/classes.Class'
+      classId:
+        type: integer
+      createdAt:
+        type: string
+      dob:
+        type: string
+      enrolledAt:
+        type: string
+      ethnic:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: boolean
+      id:
+        type: integer
+      lastName:
+        type: string
+      parents:
+        items:
+          $ref: '#/definitions/parents.Parent'
+        type: array
+      permanentAddressCommune:
+        type: string
+      permanentAddressDistrict:
+        type: string
+      permanentAddressProvince:
+        type: string
+      tempAddress:
+        type: string
+      updatedAt:
         type: string
     type: object
 info:
@@ -819,6 +954,133 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Delete student api
+      tags:
+      - Student
+    get:
+      consumes:
+      - application/json
+      description: Get list student
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.FindStudentResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list student details api
+      tags:
+      - Student
+    post:
+      consumes:
+      - application/json
+      description: Insert student
+      parameters:
+      - description: Create student body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/students.InsertStudentRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create student api
+      tags:
+      - Student
+  /students/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one student
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get student details api
+      tags:
+      - Student
+    put:
+      consumes:
+      - application/json
+      description: Update student
+      parameters:
+      - description: Update student body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/students.InsertStudentRequest'
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update student api
       tags:
       - Student
 securityDefinitions:
