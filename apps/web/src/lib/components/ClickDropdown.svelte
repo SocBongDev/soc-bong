@@ -20,12 +20,12 @@
 	}[]
 
 	const status: statusType = [
-		{ name: 'unknown', color: 'bg-white', letter: '⚪' },
-		{ name: 'absented', color: 'bg-red-500', letter: '🔴' },
-		{ name: 'attended', color: 'bg-green-500', letter: '🟢' },
-		{ name: 'excused', color: 'bg-gray-500', letter: '🟡' },
-		{ name: 'dayoff', color: 'bg-black', letter: '⚫' },
-		{ name: 'holiday', color: 'bg-blue-500', letter: '🔵' }
+		{ name: 'unknown', color: 'text-white', letter: '⚪' },
+		{ name: 'absented', color: 'text-red-500', letter: '🔴' },
+		{ name: 'attended', color: 'text-green-500', letter: '🟢' },
+		{ name: 'excused', color: 'text-gray-500', letter: '🟡' },
+		{ name: 'dayoff', color: 'text-black', letter: '⚫' },
+		{ name: 'holiday', color: 'text-blue-500', letter: '🔵' }
 	]
 
 	$: activeStatus = status[0]
@@ -73,7 +73,7 @@
 					...status,
 					{
 						id: id,
-						date: dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD'),
+						date: dayjs(`${yearPicked}-${monthPicked}-${date} ${dayjs().format('HH:mm:ss')}`).format('YYYY-MM-DD HH:mm:ss.SSS[Z]'),
 						studentId: studentId,
 						attendedStatus: activeStatus.name,
 						classId: classId
