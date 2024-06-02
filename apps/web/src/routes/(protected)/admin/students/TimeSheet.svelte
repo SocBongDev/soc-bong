@@ -32,11 +32,11 @@
 
 	const status = [
 		{ name: 'unknown', color: 'bg-white', letter: '⚪' },
-		{ name: 'absented', color: 'bg-red-500', letter: '🔴' },
+		{ name: 'absented', color: 'bg-red-600', letter: '🔴' },
 		{ name: 'attended', color: 'bg-green-500', letter: '🟢' },
-		{ name: 'excused', color: 'bg-gray-500', letter: '🟡' },
-		{ name: 'dayoff', color: 'bg-black', letter: '⚫' },
-		{ name: 'holiday', color: 'bg-blue-500', letter: '🔵' }
+		{ name: 'excused', color: 'bg-yellow-400', letter: '🟡' },
+		{ name: 'dayoff', color: 'bg-gray-700', letter: '⚫' },
+		{ name: 'holiday', color: 'bg-blue-600', letter: '🔵' }
 	]
 
 	function generateWeekDays(day: number) {
@@ -83,7 +83,7 @@
 		return thRow
 	}
 
-	onMount(async () => {
+	async function fetchData() {
 		const getStudent = await fetch(`${API}/students?classId=${classId}`)
 		const studentData = await getStudent.json()
 		studentList = studentData.data
@@ -92,6 +92,10 @@
 		)
 		attendances = await res.json()
 		loading = false
+	}
+
+	onMount(() => {
+		fetchData();
 	})
 
 	async function handleSelectClassId(event: any) {
@@ -122,40 +126,39 @@
 		if (statusArray.length > 0) {
 			statusArray.forEach(async (status) => {
 				if (status?.id) {
-					console.log('check status has id', status)
 					const res = await fetch(`${API}/attendances`, {
 						method: 'PATCH',
 						headers: {
 							'Content-Type': 'application/json'
 						},
-						body: JSON.stringify([{
-							id: status.id,
-							attendedStatus: status.attendedStatus
-						}])
+						body: JSON.stringify([
+							{
+								id: status.id,
+								attendedStatus: status.attendedStatus
+							}
+						])
 					})
-					
 				} else {
-					console.log('check status none id', status)
 					const res = await fetch(`${API}/attendances`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'
 						},
-						body: JSON.stringify([{
-							attendedAt: status.date,
-							attendedStatus: status.attendedStatus,
-							classId: status.classId && parseInt(status.classId),
-							studentId: status.studentId
-						}])
+						body: JSON.stringify([
+							{
+								attendedAt: status.date,
+								attendedStatus: status.attendedStatus,
+								classId: status.classId && parseInt(status.classId),
+								studentId: status.studentId
+							}
+						])
 					})
-					
 				}
 			})
 			Notify({
 				type: 'success',
 				id: crypto.randomUUID(),
 				description: `Đã cập nhật điểm danh thành công cho ${statusArray.length} ngày`
-			
 			})
 		} else {
 			Notify({
@@ -164,8 +167,9 @@
 				description: 'Lỗi không thể thực hiện chức năng này'
 			})
 		}
-		statusChange.set([])
-		statusArray = []
+		statusChange.set([]);
+		statusArray = [];
+		fetchData();
 	}
 </script>
 
@@ -352,12 +356,12 @@
 						class="btn btn-ghost btn-sm rounded normal-case text-red-500 hover:bg-red-100"
 						on:click={() => {
 							dialogProps.set({
-								description: 'Hành vi này không thể hoàn tác. Bạn có muốn tiếp tục?',
+								description: 'Tiến hành điểm danh các ngày này?',
 								title: 'Yêu cầu xác nhận!',
 								onContinue: batchUpdate
 							})
 							openDialog.set(true)
-						}}>Tiến hành điểm danh</button
+						}}>Xác nhận điểm danh</button
 					>
 				</div>
 			</div>

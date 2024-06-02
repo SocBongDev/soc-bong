@@ -16,13 +16,18 @@
 	import TrashIcon from '~icons/fa-solid/trash-alt'
 	import TimesIcon from '~icons/uil/times'
 	import { invalidate } from '$app/navigation'
+	import type { StudentProps, ParentProps } from '../type'
+	import dayjs from 'dayjs'
 
 	export let data: PageData
+
+	const API_URL = 'http://127.0.0.1:5000/api/v1'
+
 	let drawerToggleRef: HTMLInputElement
 	let scrollClass = ''
 	let isNew = true
 
-	let recordData: (Student & Parent) | null = null
+	let recordData: (StudentProps & ParentProps) | null = null
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
@@ -46,28 +51,46 @@
 		activeTabValue = tabValue
 	}
 
-	var agencyOptions = data?.agencies?.data?.map((el) => ({ label: el.agencyName, value: el.id.toString() }))
+	var agencyOptions = data?.agencies?.data?.map((el) => ({
+		label: el.name,
+		value: el.id ? el.id.toString() : '1'
+	}))
+
+	var classOptions = data?.classes?.data?.map((cl) => ({
+		label: cl.name,
+		value: cl.id ? cl.id.toString() : '1'
+	}))
+
+	var genderMap = (value: string) => {
+		if (value === '1') {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	function genderBooleantoString(gender: boolean) {
+		return gender ? '1' : '2'
+	}
 
 	const defaultFormValues = {
 		firstName: '',
 		lastName: '',
-		grade: 'seed',
-		enrollDate: '',
+		enrolledAt: '', //enrolledAt
 		dob: '',
-		birthYear: '',
-		gender: 'male',
+		gender: '1', //boolean
 		ethnic: '',
 		birthPlace: '',
-		tempRes: '',
-		permResProvince: '',
-		permResDistrict: '',
-		permResCommune: '',
-		agencyId: parseInt(agencyOptions[0]?.value),
-		classRoomId: 1,
+		tempAdress: '',
+		permanentAddressProvince: '',
+		permanentAddressDistrict: '',
+		permanentAddressCommune: '',
+		agencyId: parseInt(agencyOptions[0]?.value || '1'),
+		classId: parseInt(classOptions[0]?.value || '1'),
 		studentId: 1,
 		parentName: '',
 		parentDob: '',
-		parentGender: 'male',
+		parentGender: genderMap('1'),
 		parentPhoneNumber: '',
 		parentZalo: '',
 		parentOccupation: '',
@@ -81,7 +104,7 @@
 		name: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
-		options?: { label: string; value: string }[]
+		options?: { label: string; value: string | boolean }[]
 	}[] = [
 		{
 			name: 'firstName',
@@ -94,18 +117,7 @@
 			required: true
 		},
 		{
-			name: 'grade',
-			type: 'select',
-			required: true,
-			options: [
-				{ label: 'Lớp mầm', value: 'seed' },
-				{ label: 'Lớp chồi', value: 'buds' },
-				{ label: 'Lớp lá', value: 'leaf' },
-				{ label: 'Trẻ ( 18 - 24 tháng tuổi )', value: 'toddlers' }
-			]
-		},
-		{
-			name: 'enrollDate',
+			name: 'enrolledAt', //enrolledAt
 			type: 'date',
 			required: false
 		},
@@ -115,18 +127,13 @@
 			required: false
 		},
 		{
-			name: 'gender',
+			name: 'gender', //boolean
 			type: 'select',
 			required: true,
 			options: [
-				{ label: 'Nam', value: 'male' },
-				{ label: 'Nữ', value: 'female' }
+				{ label: 'Nam', value: '1' },
+				{ label: 'Nữ', value: '2' }
 			]
-		},
-		{
-			name: 'birthYear',
-			type: 'text',
-			required: false
 		},
 		{
 			name: 'ethnic',
@@ -139,22 +146,22 @@
 			required: false
 		},
 		{
-			name: 'tempRes',
+			name: 'tempAdress',
 			type: 'text',
 			required: false
 		},
 		{
-			name: 'permResProvince',
+			name: 'permanentAddressProvince',
 			type: 'text',
 			required: false
 		},
 		{
-			name: 'permResDistrict',
+			name: 'permanentAddressDistrict',
 			type: 'text',
 			required: false
 		},
 		{
-			name: 'permResCommune',
+			name: 'permanentAddressCommune',
 			type: 'text',
 			required: false
 		},
@@ -162,17 +169,13 @@
 			name: 'agencyId',
 			type: 'select',
 			required: true,
-			options: agencyOptions,
+			options: agencyOptions
 		},
 		{
-			name: 'classRoomId',
+			name: 'classId',
 			type: 'select',
 			required: true,
-			options: [
-				{ label: 'Lớp 01', value: '1' },
-				{ label: 'Lớp 02', value: '2' },
-				{ label: 'Lớp 03', value: '3' }
-			]
+			options: classOptions
 		}
 	]
 
@@ -180,7 +183,7 @@
 		name: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
-		options?: { label: string; value: string }[]
+		options?: { label: string; value: string | boolean }[]
 	}[] = [
 		{
 			name: 'parentName',
@@ -197,8 +200,8 @@
 			type: 'select',
 			required: true,
 			options: [
-				{ label: 'Nam', value: 'male' },
-				{ label: 'Nữ', value: 'female' }
+				{ label: 'Nam', value: '1' },
+				{ label: 'Nữ', value: '2' }
 			]
 		},
 		{
@@ -243,8 +246,10 @@
 		extend: validator({ schema }),
 		transform: (values: any) => ({
 			...values,
+			gender: genderMap(values.gender),
+			parentGender: genderMap(values.parentGender),
 			agencyId: parseInt(values.agencyId, 10),
-			classRoomId: parseInt(values.classRoomId, 10)
+			classId: parseInt(values.classRoomId, 10)
 		}),
 		onSubmit: save
 	})
@@ -264,11 +269,12 @@
 		}
 	}
 
-	async function save(req: CreateStudentBody & CreateParentBody) {
+	async function save(req: ParentProps & StudentProps) {
 		loading = true
 		const body = JSON.stringify(req)
+		console.log('body student: ', body)
 		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew ? '/api/students' : `/api/students/${recordData?.id}`
+		const url = isNew ? `${API_URL}/students` : `${API_URL}/students/${recordData?.id}`
 		const request = fetch(url, {
 			method,
 			body
@@ -294,7 +300,6 @@
 
 	function refreshData() {
 		invalidate('app:students')
-		invalidate('app:agencies')
 	}
 
 	let prevPromise: Promise<void>
@@ -318,11 +323,33 @@
 	async function loadData(id: number, signal: AbortSignal) {
 		loading = true
 		try {
-			const res = await fetch(`/api/students/${id}`, {
+			const res = await fetch(`${API_URL}/students/${id}`, {
 				signal
-			}).then((res) => res.json())
-			recordData = res
-		} catch (e) {
+			})
+			const studentData = await res.json()
+			
+			if (studentData.id) {
+				recordData = {
+					...studentData,
+					gender: genderBooleantoString(studentData.gender),
+					enrolledAt: dayjs(studentData.enrolledAt).format('YYYY-MM-DD'),
+					dob: dayjs(studentData.dob).format('YYYY-MM-DD'),
+					parentBirthPlace: studentData.parent_birth_place,
+					parentDob: dayjs(studentData.parent_dob).format('YYYY-MM-DD'),
+					parentGender: genderBooleantoString(studentData.parent_gender),
+					parentLandlord: studentData.landlord,
+					parentName: studentData.parent_name,
+					parentOccupation: studentData.occupation,
+					parentPhoneNumber: studentData.phone_number,
+					parentResRegistration: studentData.res_registration,
+					parentRoi: studentData.roi,
+					parentZalo: studentData.zalo,
+					studentId: studentData.student_id,
+				}
+			} else {
+				throw new Error('Student ID not found can not find Parent of Student')
+			}
+		} catch (e: any) {
 			console.error('LoadData: ', e)
 			if (e.name !== undefined && e.name === 'AbortError') {
 				return
