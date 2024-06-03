@@ -33,7 +33,7 @@ func (h *AgencyHandler) Update(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("UpdateAgency request: %#v\n", body)
+	log.Printf("UpdateAgency request: %+v\n", body)
 	req := &Agency{WriteAgencyRequest: *body, BaseEntity: common.BaseEntity{Id: id}}
 	if err := h.repo.Update(req); err != nil {
 		log.Println("UpdateAgency.Update err: ", err)
@@ -45,7 +45,7 @@ func (h *AgencyHandler) Update(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("UpdateAgency success. Response: %#v\n", body)
+	log.Printf("UpdateAgency success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

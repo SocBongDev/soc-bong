@@ -37,7 +37,7 @@ func (h *ClassHandler) FindOne(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("GetClassDetails success. Response: %#v\n", resp)
+	log.Printf("GetClassDetails success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }

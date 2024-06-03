@@ -25,7 +25,7 @@ func (h *AgencyHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("InsertAgency request: %#v\n", body)
+	log.Printf("InsertAgency request: %+v\n", body)
 	req := &Agency{WriteAgencyRequest: *body}
 	if err := h.repo.Insert(req); err != nil {
 		log.Println("InsertAgency.Insert err: ", err)
@@ -37,7 +37,7 @@ func (h *AgencyHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("InsertAgency success. Response: %#v\n", body)
+	log.Printf("InsertAgency success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

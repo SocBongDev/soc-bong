@@ -25,7 +25,7 @@ func (h *AttendanceHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("InsertAttendance request: %#v\n", body)
+	log.Printf("InsertAttendance request: %+v\n", body)
 	req := make([]Attendance, len(body))
 	for i, v := range body {
 		req[i] = Attendance{CreateAttendanceRequest: v}
@@ -41,7 +41,7 @@ func (h *AttendanceHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("InsertAttendance success. Response: %#v\n", body)
+	log.Printf("InsertAttendance success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

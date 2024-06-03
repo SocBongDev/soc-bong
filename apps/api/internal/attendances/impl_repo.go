@@ -7,11 +7,13 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-type AttendanceRepo struct {
+type attendanceRepo struct {
 	db *dbx.DB
 }
 
-func (r *AttendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
+var _ AttendanceRepository = (*attendanceRepo)(nil)
+
+func (r *attendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
 	resp := []Attendance{}
 	q := r.db.Select("*").
 		From("attendances").
@@ -34,7 +36,7 @@ func (r *AttendanceRepo) Find(query *AttendanceQuery) ([]Attendance, error) {
 	return resp, nil
 }
 
-func (r *AttendanceRepo) Insert(req []Attendance) error {
+func (r *attendanceRepo) Insert(req []Attendance) error {
 	vals := make([]string, len(req))
 	for i, v := range req {
 		vals[i] = fmt.Sprintf(
@@ -60,7 +62,7 @@ func (r *AttendanceRepo) Insert(req []Attendance) error {
 	return err
 }
 
-func (r *AttendanceRepo) Update(req []Attendance) error {
+func (r *attendanceRepo) Update(req []Attendance) error {
 	cases, ids := make([]string, len(req)+1), make([]string, len(req))
 	for i, v := range req {
 		cases[i] = fmt.Sprintf("WHEN %d THEN %d", v.Id, v.AttendedStatus)
@@ -84,6 +86,6 @@ func (r *AttendanceRepo) Update(req []Attendance) error {
 	return err
 }
 
-func NewRepo(db *dbx.DB) AttendanceRepository {
-	return &AttendanceRepo{db}
+func NewRepo(db *dbx.DB) *attendanceRepo {
+	return &attendanceRepo{db}
 }

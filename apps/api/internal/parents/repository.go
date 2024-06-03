@@ -1,6 +1,6 @@
 package parents
 
 type ParentRepository interface {
-	Insert(*Parent) error
-	Update(*Parent) error
+	Insert([]*Parent) error
+	Update([]*Parent) error
 }

@@ -5,18 +5,38 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-type ParentRepo struct {
+type parentRepo struct {
 	db *dbx.DB
 }
 
-func (r *ParentRepo) Insert(req *Parent) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
+var _ ParentRepository = (*parentRepo)(nil)
+
+func (r *parentRepo) Insert(reqs []*Parent) error {
+	return r.db.Transactional(
+		func(tx *dbx.Tx) error {
+			for _, req := range reqs {
+				if err := tx.Model(req).Exclude(common.BaseExcludeFields...).Insert(); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
 }
 
-func (r *ParentRepo) Update(req *Parent) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
+func (r *parentRepo) Update(reqs []*Parent) error {
+	return r.db.Transactional(
+		func(tx *dbx.Tx) error {
+			for _, req := range reqs {
+				if err := tx.Model(req).Exclude(common.BaseExcludeFields...).Update(); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
 }
 
-func NewRepo(db *dbx.DB) ParentRepository {
-	return &ParentRepo{db}
+func NewRepo(db *dbx.DB) *parentRepo {
+	return &parentRepo{db}
 }

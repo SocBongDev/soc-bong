@@ -26,7 +26,7 @@ func (h *ClassHandler) Find(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindClasses request: %#v\n", query)
+	log.Printf("FindClasses request: %+v\n", query)
 
 	data, err := h.repo.Find(query)
 	if err != nil {
@@ -35,7 +35,7 @@ func (h *ClassHandler) Find(c *fiber.Ctx) error {
 	}
 
 	resp := FindClassResp{Data: data, Page: query.GetPage()}
-	log.Printf("FindClasses success. Response: %#v\n", resp)
+	log.Printf("FindClasses success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }

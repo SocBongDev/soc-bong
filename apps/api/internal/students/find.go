@@ -3,11 +3,8 @@ package students
 import (
 	"log"
 
-	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/gofiber/fiber/v2"
 )
-
-type FinsStudentResp common.FindResponse[Student]
 
 // @FindStudent godoc
 // @Summary Get list student details api
@@ -18,7 +15,6 @@ type FinsStudentResp common.FindResponse[Student]
 // @Param  pageSize query int false "Page Size"
 // @Param  sort query string false "Sort direction" Enums(asc, desc) default(desc)
 // @Param  search query string false "Search term"
-// @Param  classId query string false "ClassId"
 // @Success 200 {object} FindStudentResp
 // @Failure 500 {string} string
 // @Security ApiKeyAuth
@@ -30,17 +26,16 @@ func (h *StudentHandler) Find(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindStudents request: %#v\n", query)
+	log.Printf("FindStudents request: %+v\n", query)
 
 	data, err := h.repo.Find(query)
-
 	if err != nil {
 		log.Println("FindStudents.All err: ", err)
 		return fiber.ErrInternalServerError
 	}
 
 	resp := FindStudentResp{Data: data, Page: query.GetPage()}
-	log.Printf("FindStudents success. Response: %#v\n", resp)
+	log.Printf("FindStudents success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }

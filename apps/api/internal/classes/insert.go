@@ -25,7 +25,7 @@ func (h *ClassHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("InsertClass request: %#v\n", body)
+	log.Printf("InsertClass request: %+v\n", body)
 	req := &Class{WriteClassRequest: *body}
 	if err := h.repo.Insert(req); err != nil {
 		log.Println("InsertClass.Insert err: ", err)
@@ -37,7 +37,7 @@ func (h *ClassHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("InsertClass success. Response: %#v\n", body)
+	log.Printf("InsertClass success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

@@ -5,11 +5,13 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-type AgencyRepo struct {
+type agencyRepo struct {
 	db *dbx.DB
 }
 
-func (r *AgencyRepo) Find(query *AgencyQuery) ([]Agency, error) {
+var _ AgencyRepository = (*agencyRepo)(nil)
+
+func (r *agencyRepo) Find(query *AgencyQuery) ([]Agency, error) {
 	resp := make([]Agency, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("agencies").
@@ -34,18 +36,18 @@ func (r *AgencyRepo) Find(query *AgencyQuery) ([]Agency, error) {
 	return resp, nil
 }
 
-func (r *AgencyRepo) FindOne(req *Agency) error {
+func (r *agencyRepo) FindOne(req *Agency) error {
 	return r.db.Select().Model(req.Id, req)
 }
 
-func (r *AgencyRepo) Insert(req *Agency) error {
+func (r *agencyRepo) Insert(req *Agency) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
-func (r *AgencyRepo) Update(req *Agency) error {
+func (r *agencyRepo) Update(req *Agency) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
-func NewRepo(db *dbx.DB) AgencyRepository {
-	return &AgencyRepo{db}
+func NewRepo(db *dbx.DB) *agencyRepo {
+	return &agencyRepo{db}
 }

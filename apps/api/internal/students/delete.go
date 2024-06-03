@@ -23,14 +23,14 @@ func (h *StudentHandler) Delete(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("DeleteStudents request: %#v\n", query)
+	log.Printf("DeleteStudents request: %+v\n", query)
 
 	if err := h.repo.Delete(query.Ids); err != nil {
 		log.Println("DeleteStudent.Delete err: ", err)
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("DeleteStudent success. Response: %#v\n", query.Ids)
+	log.Printf("DeleteStudent success. Response: %+v\n", query.Ids)
 
 	return c.JSON(nil)
 }

@@ -33,7 +33,7 @@ func (h *ClassHandler) Update(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("UpdateClass request: %#v\n", body)
+	log.Printf("UpdateClass request: %+v\n", body)
 	req := &Class{WriteClassRequest: *body, BaseEntity: common.BaseEntity{Id: id}}
 	if err := h.repo.Update(req); err != nil {
 		log.Println("UpdateClass.Update err: ", err)
@@ -45,7 +45,7 @@ func (h *ClassHandler) Update(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("UpdateClass success. Response: %#v\n", body)
+	log.Printf("UpdateClass success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

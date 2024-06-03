@@ -5,11 +5,13 @@ import (
 	"github.com/pocketbase/dbx"
 )
 
-type ClassRepo struct {
+type classRepo struct {
 	db *dbx.DB
 }
 
-func (r *ClassRepo) Find(query *ClassQuery) ([]Class, error) {
+var _ ClassRepository = (*classRepo)(nil)
+
+func (r *classRepo) Find(query *ClassQuery) ([]Class, error) {
 	resp := make([]Class, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("classes").
@@ -27,18 +29,18 @@ func (r *ClassRepo) Find(query *ClassQuery) ([]Class, error) {
 	return resp, nil
 }
 
-func (r *ClassRepo) FindOne(req *Class) error {
+func (r *classRepo) FindOne(req *Class) error {
 	return r.db.Select().Model(req.Id, req)
 }
 
-func (r *ClassRepo) Insert(req *Class) error {
+func (r *classRepo) Insert(req *Class) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
-func (r *ClassRepo) Update(req *Class) error {
+func (r *classRepo) Update(req *Class) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
-func NewRepo(db *dbx.DB) ClassRepository {
-	return &ClassRepo{db}
+func NewRepo(db *dbx.DB) *classRepo {
+	return &classRepo{db}
 }
