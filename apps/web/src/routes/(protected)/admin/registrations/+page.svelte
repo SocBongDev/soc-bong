@@ -10,21 +10,22 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import DateField from '$lib/components/DateField.svelte'
 	import { createForm } from 'felte'
-	import type { CreateRegistrationBody, Registration } from '$lib'
 	import { CreateRegistrationSchema as schema } from './validate'
 	import { validator } from '@felte/validator-zod'
 	import SelectField from '$lib/components/SelectField.svelte'
 	import { invalidate } from '$app/navigation'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import { blur, fade } from 'svelte/transition'
+	import type { RegistrationProps } from '../type'
 
 	export let data: PageData
+	const API_URL = 'http://127.0.0.1:5000/api/v1'
 	let drawerToggleRef: HTMLInputElement
 	let isChecked: string[] = []
 	let scrollClass = ''
 	let isCheckedAll = false
 	let isNew = true
-	let recordData: Registration | null = null
+	let recordData: RegistrationProps | null = null
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
@@ -34,18 +35,18 @@
 		setInitialValues(initialValues)
 		reset()
 	}
-	var agencyOptions = data?.agencies?.data?.map((el) => ({
-		label: el.agencyName,
-		value: el.id.toString()
-	}))
+	// var agencyOptions = data?.agencies?.data?.map((el) => ({
+	// 	label: el.agencyName,
+	// 	value: el.id.toString()
+	// }))
 	const defaultFormValues = {
 		studentClass: 'seed',
 		studentName: '',
 		phoneNumber: '',
 		studentDob: '',
 		parentName: '',
-		note: undefined,
-		agencyId: parseInt(agencyOptions[0]?.value)
+		note: undefined
+		// agencyId: parseInt(agencyOptions[0]?.value)
 	}
 	const registrationSchema: {
 		name: string
@@ -88,13 +89,13 @@
 			name: 'note',
 			type: 'text',
 			required: false
-		},
-		{
-			name: 'agencyId',
-			type: 'select',
-			required: true,
-			options: agencyOptions
 		}
+		// {
+		// 	name: 'agencyId',
+		// 	type: 'select',
+		// 	required: true,
+		// 	options: agencyOptions
+		// }
 	]
 	const studentClassMap = {
 		seed: 'Lớp mầm',
@@ -122,10 +123,10 @@
 		}
 	}
 
-	function formatAgencyName(agencyId: number) {
-		const agency = data.agencies.data.find((el) => parseInt(el.id.toString()) === agencyId)
-		return agency?.agencyName || 'N/A'
-	}
+	// function formatAgencyName(agencyId: number) {
+	// 	const agency = data.agencies.data.find((el) => parseInt(el.id.toString()) === agencyId)
+	// 	return agency?.agencyName || 'N/A'
+	// }
 
 	let prevPromise: Promise<void>
 	async function show(id?: number) {
@@ -170,7 +171,7 @@
 		}
 
 		isChecked = [...isChecked, id]
-		const isValidCheckAll = isChecked.length === data.registrations.data.length
+		const isValidCheckAll = isChecked.length === data?.registrations?.data.length
 		if (isValidCheckAll) {
 			isCheckedAll = true
 		}
@@ -183,7 +184,7 @@
 			return
 		}
 
-		isChecked = data.registrations?.data?.map((el: any) => el?.id)
+		isChecked = data.registrations?.data?.map((el: any) => el?.id.toString())
 	}
 
 	function handleContentScroll(panel: HTMLElement) {
@@ -201,15 +202,27 @@
 		}
 	}
 
-	async function save(req: CreateRegistrationBody) {
+	async function save(req: RegistrationProps) {
 		loading = true
 		const body = JSON.stringify(req)
 		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew ? '/api/registrations' : `/api/registrations/${recordData?.id}`
+		const url = isNew ? `${API_URL}/registrations` : `${API_URL}/registrations/${recordData?.id}`
 		const request = fetch(url, {
 			method,
+			headers: {
+				'Content-Type': 'application/json',
+				accept: 'application/json'
+			},
 			body
-		}).then((res) => res.json())
+		}).then((res) => {
+			if (res.status == 422) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			}
+		})
 
 		try {
 			const res = await request
@@ -226,14 +239,13 @@
 
 	function refreshData() {
 		invalidate('app:registrations')
-		invalidate('app:agencies')
 	}
 
 	async function loadData(id: number, signal: AbortSignal) {
 		loading = true
 
 		try {
-			const res = await fetch(`/api/registrations/${id}`, {
+			const res = await fetch(`${API_URL}/registrations/${id}`, {
 				signal
 			}).then((res) => res.json())
 			res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
@@ -258,9 +270,13 @@
 		loading = true
 
 		try {
-			const res = await fetch(`/api/registrations`, {
+			const res = await fetch(`${API_URL}/registrations`, {
 				body: JSON.stringify({ ids: [Number(recordData.id)] }),
-				method: 'DELETE'
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				}
 			}).then((res) => res.json())
 			refreshData()
 			resetDefaultForm()
@@ -281,7 +297,7 @@
 	async function batchDelete() {
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch('/api/registrations', { body: JSON.stringify({ ids }), method: 'DELETE' })
+			await fetch(`${API_URL}/registrations`, { body: JSON.stringify({ ids }), method: 'DELETE' })
 			refreshData()
 			clearSelected()
 		} catch (e) {
@@ -322,7 +338,10 @@
 			</div>
 			<button
 				class="btn btn-primary btn-sm rounded normal-case active:!translate-y-1"
-				on:click={() => show()}
+				on:click={() => {
+					recordData = null
+					show()
+				}}
 			>
 				<PlusIcon />
 				Thêm mới
@@ -347,7 +366,7 @@
 						<th>Ngày sinh</th>
 						<th>Tên phụ huynh</th>
 						<th>Số điện thoại</th>
-						<th>Cơ Sở Nhà Trẻ</th>
+						<!-- <th>Cơ Sở Nhà Trẻ</th> -->
 						<th>Ghi chú</th>
 						<th>
 							<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
@@ -358,44 +377,46 @@
 				</thead>
 				<tbody>
 					{#each data.registrations.data as registration (registration.id)}
-						<tr class="hover cursor-pointer">
-							<th>
-								<label>
-									<input
-										id={registration.id?.toString()}
-										type="checkbox"
-										class="checkbox checkbox-sm rounded"
-										on:click={handleCheck}
-										checked={isChecked.includes(registration.id?.toString())}
-									/>
-								</label>
-							</th>
-							<th on:click={() => show(registration.id)}>{registration.studentName}</th>
-							<td on:click={() => show(registration.id)}
-								>{formatStudentClass(registration.studentClass || '')}</td
-							>
-							<td on:click={() => show(registration.id)}
-								>{dayjs(registration.studentDob).format('DD/MM/YYYY')}</td
-							>
-							<td on:click={() => show(registration.id)}>{registration.parentName}</td>
-							<td on:click={() => show(registration.id)}>{registration.phoneNumber}</td>
-							<td on:click={() => show(registration.id)}
+						{#if registration.id}
+							<tr class="hover cursor-pointer">
+								<th>
+									<label>
+										<input
+											id={registration.id?.toString()}
+											type="checkbox"
+											class="checkbox checkbox-sm rounded"
+											on:click={handleCheck}
+											checked={isChecked.includes(registration.id?.toString())}
+										/>
+									</label>
+								</th>
+								<th on:click={() => show(registration.id)}>{registration.studentName}</th>
+								<td on:click={() => show(registration.id)}
+									>{formatStudentClass(registration.studentClass || '')}</td
+								>
+								<td on:click={() => show(registration.id)}
+									>{dayjs(registration.studentDob).format('DD/MM/YYYY')}</td
+								>
+								<td on:click={() => show(registration.id)}>{registration.parentName}</td>
+								<td on:click={() => show(registration.id)}>{registration.phoneNumber}</td>
+								<!-- <td on:click={() => show(registration.id)}
 								>{formatAgencyName(registration.agencyId)}</td
-							>
-							{#if registration.note === null}
-								<td on:click={() => show(registration.id)} />
-							{:else}
-								<td on:click={() => show(registration.id)}>{registration.note}</td>
-							{/if}
-							<!-- <td on:click={() => show(registration.id)}
+							> -->
+								{#if registration.note === null}
+									<td on:click={() => show(registration.id)} />
+								{:else}
+									<td on:click={() => show(registration.id)}>{registration.note}</td>
+								{/if}
+								<!-- <td on:click={() => show(registration.id)}
 								>{registration.note === null ? '' : registration.note}</td
 							> -->
-							<td on:click={() => show(registration.id)}>
-								<div class="px-2">
-									<ArrowRightIcon />
-								</div>
-							</td>
-						</tr>
+								<td on:click={() => show(registration.id)}>
+									<div class="px-2">
+										<ArrowRightIcon />
+									</div>
+								</td>
+							</tr>
+						{/if}
 					{/each}
 				</tbody>
 			</table>

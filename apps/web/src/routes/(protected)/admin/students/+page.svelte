@@ -3,7 +3,6 @@
 	import StudentList from './StudentList.svelte'
 	import RefreshIcon from '~icons/ri/refresh-line'
 	import type { PageData } from './$types'
-	import type { CreateParentBody, CreateStudentBody, Parent, Student } from '$lib'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import PlusIcon from '~icons/ic/round-add'
 	import { createForm } from 'felte'
@@ -16,7 +15,7 @@
 	import TrashIcon from '~icons/fa-solid/trash-alt'
 	import TimesIcon from '~icons/uil/times'
 	import { invalidate } from '$app/navigation'
-	import type { StudentProps, ParentProps } from '../type'
+	import type { StudentProps} from '../type'
 	import dayjs from 'dayjs'
 
 	export let data: PageData
@@ -26,8 +25,8 @@
 	let drawerToggleRef: HTMLInputElement
 	let scrollClass = ''
 	let isNew = true
-
-	let recordData: (StudentProps & ParentProps) | null = null
+	let isCheckedAll = false
+	let recordData: StudentProps | null = null
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
@@ -81,22 +80,25 @@
 		gender: '1', //boolean
 		ethnic: '',
 		birthPlace: '',
-		tempAdress: '',
+		tempAddress: '',
 		permanentAddressProvince: '',
 		permanentAddressDistrict: '',
 		permanentAddressCommune: '',
 		agencyId: parseInt(agencyOptions[0]?.value || '1'),
 		classId: parseInt(classOptions[0]?.value || '1'),
 		studentId: 1,
-		parentName: '',
-		parentDob: '',
-		parentGender: genderMap('1'),
+		fatherName: '',
+		motherName: '',
+		fatherDob: '',
+		motherDob: '',
+		fatherBirthPlace: '',
+		motherBirthPlace: '',
+		fatherOccupation: '',
+		motherOccupation: '',
 		parentPhoneNumber: '',
 		parentZalo: '',
-		parentOccupation: '',
-		parentLandlord: '',
+		parentLandLord: '',
 		parentRoi: '',
-		parentBirthPlace: '',
 		parentResRegistration: ''
 	}
 
@@ -146,7 +148,7 @@
 			required: false
 		},
 		{
-			name: 'tempAdress',
+			name: 'tempAddress',
 			type: 'text',
 			required: false
 		},
@@ -186,23 +188,49 @@
 		options?: { label: string; value: string | boolean }[]
 	}[] = [
 		{
-			name: 'parentName',
+			name: 'fatherName',
 			type: 'text',
 			required: true
 		},
 		{
-			name: 'parentDob',
+			name: 'fatherDob',
 			type: 'date',
 			required: false
 		},
 		{
-			name: 'parentGender',
-			type: 'select',
-			required: true,
-			options: [
-				{ label: 'Nam', value: '1' },
-				{ label: 'Nữ', value: '2' }
-			]
+			name: 'fatherBirthPlace',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'fatherOccupation',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'motherName',
+			type: 'text',
+			required: true
+		},
+		{
+			name: 'motherDob',
+			type: 'date',
+			required: false
+		},
+		{
+			name: 'motherOccupation',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'motherBirthPlace',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'parentLandLord',
+			type: 'text',
+			required: false
 		},
 		{
 			name: 'parentPhoneNumber',
@@ -215,22 +243,7 @@
 			required: false
 		},
 		{
-			name: 'parentOccupation',
-			type: 'text',
-			required: false
-		},
-		{
-			name: 'parentLandlord',
-			type: 'text',
-			required: false
-		},
-		{
 			name: 'parentRoi',
-			type: 'text',
-			required: false
-		},
-		{
-			name: 'parentBirthPlace',
 			type: 'text',
 			required: false
 		},
@@ -246,10 +259,10 @@
 		extend: validator({ schema }),
 		transform: (values: any) => ({
 			...values,
-			gender: genderMap(values.gender),
+			gender: values.gender,
 			parentGender: genderMap(values.parentGender),
 			agencyId: parseInt(values.agencyId, 10),
-			classId: parseInt(values.classRoomId, 10)
+			classId: parseInt(values.classId, 10)
 		}),
 		onSubmit: save
 	})
@@ -269,16 +282,55 @@
 		}
 	}
 
-	async function save(req: ParentProps & StudentProps) {
+	async function save(req: StudentProps) {
 		loading = true
-		const body = JSON.stringify(req)
-		console.log('body student: ', body)
+		const body = {
+			agencyId: req.agencyId,
+			birthPlace: req.birthPlace,
+			classId: req.classId,
+			dob: req.dob,
+			enrolledAt: req.enrolledAt,
+			ethnic: req.ethnic,
+			father_birth_place: req.fatherBirthPlace,
+			father_dob: req.fatherDob,
+			father_name: req.fatherName,
+			father_occupation: req.fatherOccupation,
+			firstName: req.firstName,
+			gender: genderMap(req.gender),
+			land_lord: req.parentLandLord,
+			lastName: req.lastName,
+			mother_birth_place: req.motherBirthPlace,
+			mother_dob: req.motherDob,
+			mother_name: req.motherName,
+			mother_occupation: req.motherOccupation,
+			parent_phone_number: req.parentPhoneNumber,
+			parent_res_registration: req.parentResRegistration,
+			parent_roi: req.parentRoi,
+			parent_zalo: req.parentZalo,
+			permanentAddressCommune: req.permanentAddressCommune,
+			permanentAddressDistrict: req.permanentAddressDistrict,
+			permanentAddressProvince: req.permanentAddressProvince,
+			tempAddress: req.tempAddress,
+		}
+		const bodyFormated = JSON.stringify(body)
 		const method = isNew ? 'POST' : 'PUT'
 		const url = isNew ? `${API_URL}/students` : `${API_URL}/students/${recordData?.id}`
 		const request = fetch(url, {
 			method,
-			body
-		}).then((res) => res.json())
+			headers: {
+				'Content-Type': 'application/json',
+				accept: 'application/json'
+			},
+			body: bodyFormated,
+		}).then((res) => {
+			if (res.status == 422) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			}
+		})
 
 		try {
 			const res = await request
@@ -326,25 +378,30 @@
 			const res = await fetch(`${API_URL}/students/${id}`, {
 				signal
 			})
+
 			const studentData = await res.json()
-			
 			if (studentData.id) {
 				recordData = {
 					...studentData,
+					tempAdress: studentData.temp_address,
+
 					gender: genderBooleantoString(studentData.gender),
 					enrolledAt: dayjs(studentData.enrolledAt).format('YYYY-MM-DD'),
 					dob: dayjs(studentData.dob).format('YYYY-MM-DD'),
-					parentBirthPlace: studentData.parent_birth_place,
-					parentDob: dayjs(studentData.parent_dob).format('YYYY-MM-DD'),
-					parentGender: genderBooleantoString(studentData.parent_gender),
-					parentLandlord: studentData.landlord,
-					parentName: studentData.parent_name,
-					parentOccupation: studentData.occupation,
-					parentPhoneNumber: studentData.phone_number,
-					parentResRegistration: studentData.res_registration,
-					parentRoi: studentData.roi,
-					parentZalo: studentData.zalo,
-					studentId: studentData.student_id,
+					fatherBirthPlace: studentData.father_birth_place,
+					motherBirthPlace: studentData.mother_birth_place,
+					fatherDob: dayjs(studentData.father_dob).format('YYYY-MM-DD'),
+					motherDob: dayjs(studentData.mother_dob).format('YYYY-MM-DD'),
+					fatherOccupation: studentData.father_occupation,
+					motherOccupation: studentData.mother_occupation,
+					fatherName: studentData.father_name,
+					motherName: studentData.mother_name,
+
+					parentLandLord: studentData.land_lord,
+					parentPhoneNumber: studentData.parent_phone_number,
+					parentResRegistration: studentData.parent_res_registration,
+					parentRoi: studentData.parent_roi,
+					parentZalo: studentData.parent_zalo
 				}
 			} else {
 				throw new Error('Student ID not found can not find Parent of Student')
