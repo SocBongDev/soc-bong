@@ -2,7 +2,7 @@
 	import Error from './FloatingLabel/Error.svelte'
 
 	export let name: string
-	export let options: { label: string; value: string }[] = []
+	export let options: { label: string; value: string | boolean }[] = []
 	export let required = false
 	export let error: string[] | null = null
 </script>

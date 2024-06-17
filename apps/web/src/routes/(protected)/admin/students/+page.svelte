@@ -3,7 +3,6 @@
 	import StudentList from './StudentList.svelte'
 	import RefreshIcon from '~icons/ri/refresh-line'
 	import type { PageData } from './$types'
-	import type { CreateParentBody, CreateStudentBody, Parent, Student } from '$lib'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import PlusIcon from '~icons/ic/round-add'
 	import { createForm } from 'felte'
@@ -16,13 +15,18 @@
 	import TrashIcon from '~icons/fa-solid/trash-alt'
 	import TimesIcon from '~icons/uil/times'
 	import { invalidate } from '$app/navigation'
+	import type { StudentProps} from '../type'
+	import dayjs from 'dayjs'
 
 	export let data: PageData
+
+	const API_URL = 'http://127.0.0.1:5000/api/v1'
+
 	let drawerToggleRef: HTMLInputElement
 	let scrollClass = ''
 	let isNew = true
-
-	let recordData: (Student & Parent) | null = null
+	let isCheckedAll = false
+	let recordData: StudentProps | null = null
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
@@ -46,34 +50,55 @@
 		activeTabValue = tabValue
 	}
 
-	var agencyOptions = data?.agencies?.data?.map((el) => ({ label: el.agencyName, value: el.id.toString() }))
+	var agencyOptions = data?.agencies?.data?.map((el) => ({
+		label: el.name,
+		value: el.id ? el.id.toString() : '1'
+	}))
+
+	var classOptions = data?.classes?.data?.map((cl) => ({
+		label: cl.name,
+		value: cl.id ? cl.id.toString() : '1'
+	}))
+
+	var genderMap = (value: string) => {
+		if (value === '1') {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	function genderBooleantoString(gender: boolean) {
+		return gender ? '1' : '2'
+	}
 
 	const defaultFormValues = {
 		firstName: '',
 		lastName: '',
-		grade: 'seed',
-		enrollDate: '',
+		enrolledAt: '', //enrolledAt
 		dob: '',
-		birthYear: '',
-		gender: 'male',
+		gender: '1', //boolean
 		ethnic: '',
 		birthPlace: '',
-		tempRes: '',
-		permResProvince: '',
-		permResDistrict: '',
-		permResCommune: '',
-		agencyId: parseInt(agencyOptions[0]?.value),
-		classRoomId: 1,
+		tempAddress: '',
+		permanentAddressProvince: '',
+		permanentAddressDistrict: '',
+		permanentAddressCommune: '',
+		agencyId: parseInt(agencyOptions[0]?.value || '1'),
+		classId: parseInt(classOptions[0]?.value || '1'),
 		studentId: 1,
-		parentName: '',
-		parentDob: '',
-		parentGender: 'male',
+		fatherName: '',
+		motherName: '',
+		fatherDob: '',
+		motherDob: '',
+		fatherBirthPlace: '',
+		motherBirthPlace: '',
+		fatherOccupation: '',
+		motherOccupation: '',
 		parentPhoneNumber: '',
 		parentZalo: '',
-		parentOccupation: '',
-		parentLandlord: '',
+		parentLandLord: '',
 		parentRoi: '',
-		parentBirthPlace: '',
 		parentResRegistration: ''
 	}
 
@@ -81,7 +106,7 @@
 		name: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
-		options?: { label: string; value: string }[]
+		options?: { label: string; value: string | boolean }[]
 	}[] = [
 		{
 			name: 'firstName',
@@ -94,18 +119,7 @@
 			required: true
 		},
 		{
-			name: 'grade',
-			type: 'select',
-			required: true,
-			options: [
-				{ label: 'Lớp mầm', value: 'seed' },
-				{ label: 'Lớp chồi', value: 'buds' },
-				{ label: 'Lớp lá', value: 'leaf' },
-				{ label: 'Trẻ ( 18 - 24 tháng tuổi )', value: 'toddlers' }
-			]
-		},
-		{
-			name: 'enrollDate',
+			name: 'enrolledAt', //enrolledAt
 			type: 'date',
 			required: false
 		},
@@ -115,18 +129,13 @@
 			required: false
 		},
 		{
-			name: 'gender',
+			name: 'gender', //boolean
 			type: 'select',
 			required: true,
 			options: [
-				{ label: 'Nam', value: 'male' },
-				{ label: 'Nữ', value: 'female' }
+				{ label: 'Nam', value: '1' },
+				{ label: 'Nữ', value: '2' }
 			]
-		},
-		{
-			name: 'birthYear',
-			type: 'text',
-			required: false
 		},
 		{
 			name: 'ethnic',
@@ -139,22 +148,22 @@
 			required: false
 		},
 		{
-			name: 'tempRes',
+			name: 'tempAddress',
 			type: 'text',
 			required: false
 		},
 		{
-			name: 'permResProvince',
+			name: 'permanentAddressProvince',
 			type: 'text',
 			required: false
 		},
 		{
-			name: 'permResDistrict',
+			name: 'permanentAddressDistrict',
 			type: 'text',
 			required: false
 		},
 		{
-			name: 'permResCommune',
+			name: 'permanentAddressCommune',
 			type: 'text',
 			required: false
 		},
@@ -162,17 +171,13 @@
 			name: 'agencyId',
 			type: 'select',
 			required: true,
-			options: agencyOptions,
+			options: agencyOptions
 		},
 		{
-			name: 'classRoomId',
+			name: 'classId',
 			type: 'select',
 			required: true,
-			options: [
-				{ label: 'Lớp 01', value: '1' },
-				{ label: 'Lớp 02', value: '2' },
-				{ label: 'Lớp 03', value: '3' }
-			]
+			options: classOptions
 		}
 	]
 
@@ -180,26 +185,52 @@
 		name: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
-		options?: { label: string; value: string }[]
+		options?: { label: string; value: string | boolean }[]
 	}[] = [
 		{
-			name: 'parentName',
+			name: 'fatherName',
 			type: 'text',
 			required: true
 		},
 		{
-			name: 'parentDob',
+			name: 'fatherDob',
 			type: 'date',
 			required: false
 		},
 		{
-			name: 'parentGender',
-			type: 'select',
-			required: true,
-			options: [
-				{ label: 'Nam', value: 'male' },
-				{ label: 'Nữ', value: 'female' }
-			]
+			name: 'fatherBirthPlace',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'fatherOccupation',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'motherName',
+			type: 'text',
+			required: true
+		},
+		{
+			name: 'motherDob',
+			type: 'date',
+			required: false
+		},
+		{
+			name: 'motherOccupation',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'motherBirthPlace',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'parentLandLord',
+			type: 'text',
+			required: false
 		},
 		{
 			name: 'parentPhoneNumber',
@@ -212,22 +243,7 @@
 			required: false
 		},
 		{
-			name: 'parentOccupation',
-			type: 'text',
-			required: false
-		},
-		{
-			name: 'parentLandlord',
-			type: 'text',
-			required: false
-		},
-		{
 			name: 'parentRoi',
-			type: 'text',
-			required: false
-		},
-		{
-			name: 'parentBirthPlace',
 			type: 'text',
 			required: false
 		},
@@ -243,8 +259,10 @@
 		extend: validator({ schema }),
 		transform: (values: any) => ({
 			...values,
+			gender: values.gender,
+			parentGender: genderMap(values.parentGender),
 			agencyId: parseInt(values.agencyId, 10),
-			classRoomId: parseInt(values.classRoomId, 10)
+			classId: parseInt(values.classId, 10)
 		}),
 		onSubmit: save
 	})
@@ -264,15 +282,55 @@
 		}
 	}
 
-	async function save(req: CreateStudentBody & CreateParentBody) {
+	async function save(req: StudentProps) {
 		loading = true
-		const body = JSON.stringify(req)
+		const body = {
+			agencyId: req.agencyId,
+			birthPlace: req.birthPlace,
+			classId: req.classId,
+			dob: req.dob,
+			enrolledAt: req.enrolledAt,
+			ethnic: req.ethnic,
+			father_birth_place: req.fatherBirthPlace,
+			father_dob: req.fatherDob,
+			father_name: req.fatherName,
+			father_occupation: req.fatherOccupation,
+			firstName: req.firstName,
+			gender: genderMap(req.gender),
+			land_lord: req.parentLandLord,
+			lastName: req.lastName,
+			mother_birth_place: req.motherBirthPlace,
+			mother_dob: req.motherDob,
+			mother_name: req.motherName,
+			mother_occupation: req.motherOccupation,
+			parent_phone_number: req.parentPhoneNumber,
+			parent_res_registration: req.parentResRegistration,
+			parent_roi: req.parentRoi,
+			parent_zalo: req.parentZalo,
+			permanentAddressCommune: req.permanentAddressCommune,
+			permanentAddressDistrict: req.permanentAddressDistrict,
+			permanentAddressProvince: req.permanentAddressProvince,
+			tempAddress: req.tempAddress,
+		}
+		const bodyFormated = JSON.stringify(body)
 		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew ? '/api/students' : `/api/students/${recordData?.id}`
+		const url = isNew ? `${API_URL}/students` : `${API_URL}/students/${recordData?.id}`
 		const request = fetch(url, {
 			method,
-			body
-		}).then((res) => res.json())
+			headers: {
+				'Content-Type': 'application/json',
+				accept: 'application/json'
+			},
+			body: bodyFormated,
+		}).then((res) => {
+			if (res.status == 422) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			}
+		})
 
 		try {
 			const res = await request
@@ -294,7 +352,6 @@
 
 	function refreshData() {
 		invalidate('app:students')
-		invalidate('app:agencies')
 	}
 
 	let prevPromise: Promise<void>
@@ -318,11 +375,38 @@
 	async function loadData(id: number, signal: AbortSignal) {
 		loading = true
 		try {
-			const res = await fetch(`/api/students/${id}`, {
+			const res = await fetch(`${API_URL}/students/${id}`, {
 				signal
-			}).then((res) => res.json())
-			recordData = res
-		} catch (e) {
+			})
+
+			const studentData = await res.json()
+			if (studentData.id) {
+				recordData = {
+					...studentData,
+					tempAdress: studentData.temp_address,
+
+					gender: genderBooleantoString(studentData.gender),
+					enrolledAt: dayjs(studentData.enrolledAt).format('YYYY-MM-DD'),
+					dob: dayjs(studentData.dob).format('YYYY-MM-DD'),
+					fatherBirthPlace: studentData.father_birth_place,
+					motherBirthPlace: studentData.mother_birth_place,
+					fatherDob: dayjs(studentData.father_dob).format('YYYY-MM-DD'),
+					motherDob: dayjs(studentData.mother_dob).format('YYYY-MM-DD'),
+					fatherOccupation: studentData.father_occupation,
+					motherOccupation: studentData.mother_occupation,
+					fatherName: studentData.father_name,
+					motherName: studentData.mother_name,
+
+					parentLandLord: studentData.land_lord,
+					parentPhoneNumber: studentData.parent_phone_number,
+					parentResRegistration: studentData.parent_res_registration,
+					parentRoi: studentData.parent_roi,
+					parentZalo: studentData.parent_zalo
+				}
+			} else {
+				throw new Error('Student ID not found can not find Parent of Student')
+			}
+		} catch (e: any) {
 			console.error('LoadData: ', e)
 			if (e.name !== undefined && e.name === 'AbortError') {
 				return

@@ -5,7 +5,6 @@
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import dayjs from 'dayjs'
 	import type { PageData } from './$types'
-	import type { Student } from '$lib'
 	import { invalidate } from '$app/navigation'
 
 	export let data: PageData
@@ -20,27 +19,22 @@
 		toddlers: 'Trẻ ( 18 - 24 tháng tuổi )'
 	}
 
-	const studentClassIdMap = {
-		1: 'Lớp 1',
-		2: 'Lớp 2',
-		3: 'Lớp 3'
-	}
-
-	const studentGenderMap = {
-		male: 'Nam',
-		female: 'Nữ'
-	}
-
 	function formatStudentDate(studentDate: string | null) {
 		if (!studentDate) return 'Chưa điền'
 		return dayjs(studentDate).format('DD/MM/YYYY')
 	}
 
-	function formatStudentGender(studentGender: string | null) {
+	function formatBirthYear(studentDate: string | null) {
+		if (!studentDate) return 'Chưa điền'
+		return dayjs(studentDate).format('YYYY')
+	}
+
+	function formatStudentGender(studentGender: string | boolean | null) {
 		switch (studentGender) {
-			case 'male':
-			case 'female':
-				return studentGenderMap[studentGender as keyof typeof studentGenderMap]
+			case true: 
+				return 'Nam'
+			case false: 
+				return 'Nữ'
 			case null:
 				return 'Chưa điền giới tính'
 			default:
@@ -48,32 +42,24 @@
 		}
 	}
 
-	function formatStudentClassId(studentClass: number) {
-		switch (studentClass) {
-			case 1:
-			case 2:
-			case 3:
-				return studentClassIdMap[studentClass as keyof typeof studentClassIdMap]
-			default:
-				return 'Lớp chưa đúng'
-		}
-	}
-
-	function formatStudentClass(studentClass: string) {
-		switch (studentClass) {
-			case 'seed':
+	function formatStudentClassId(classId: number) {
+		const classRoomId = data?.classes?.data.find((cl) => cl.id == classId);
+		switch (classRoomId?.grade){
 			case 'buds':
+			case 'seed':
 			case 'leaf':
 			case 'toddlers':
-				return studentClassMap[studentClass as keyof typeof studentClassMap]
+				return studentClassMap[classRoomId?.grade as keyof typeof  studentClassMap];
 			default:
-				return 'N/A'
+				return "Lớp chưa đúng!"
 		}
 	}
 
 	function formatAgencyName(agencyId: number) {
-		const agency = data.agencies.data.find((el) => parseInt(el.id.toString()) === agencyId)
-		return agency?.agencyName || 'N/A'
+		const agency = data.agencies.data.find(
+			(el) => (el.id && parseInt(el.id?.toString())) === agencyId
+		)
+		return agency?.name || 'N/A'
 	}
 
 	function handleCheckAll() {
@@ -81,9 +67,8 @@
 		if (!isCheckedAll) {
 			isChecked = []
 			return
-		} else {
-			isChecked = data.students?.data?.map((student: any) => student?.id)
-		}
+		} 
+			isChecked = data.students?.data?.map((student: any) => student?.id.toString())
 	}
 
 	function handleCheck(e: any) {
@@ -100,7 +85,7 @@
 		}
 
 		isChecked = [...isChecked, id]
-		const isValidCheckAll = isChecked.length === data.students.data.length
+		const isValidCheckAll = isChecked.length === data?.students?.data.length
 		if (isValidCheckAll) {
 			isCheckedAll = true
 		}
@@ -150,7 +135,7 @@
 				<th>Năm sinh</th>
 				<th>Giới tính</th>
 				<th>Cơ Sở Trường Học</th>
-				<th>Mã phòng học</th>
+				<!-- <th>Mã phòng học</th> -->
 				<th>
 					<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
 						<EllipsisIcon />
@@ -161,38 +146,48 @@
 		<tbody>
 			{#if data}
 				{#each data?.students.data as student (student.id)}
-					<tr class="hover cursor-pointer text-center">
-						<th>
-							<label>
-								<input
-									id={student.id.toString()}
-									type="checkbox"
-									class="checkbox checkbox-sm rounded"
-									checked={isChecked.includes(student.id?.toString())}
-									on:click={handleCheck}
-								/>
-							</label>
-						</th>
-						<td on:click={() => onClick(student.id)}>{formatStudentClass(student.grade)}</td>
-						<th on:click={() => onClick(student.id)}>{student.firstName}</th>
-						<th on:click={() => onClick(student.id)}>{student.lastName}</th>
-						<td on:click={() => onClick(student.id)}
-							>{formatStudentDate(student.enrollDate) || ''}</td
-						>
-						<td on:click={() => onClick(student.id)}>{formatStudentDate(student.dob) || ''}</td>
-						<td on:click={() => onClick(student.id)}>{student.birthYear}</td>
-						<td on:click={() => onClick(student.id)}>{formatStudentGender(student.gender)}</td>
-						<td on:click={() => onClick(student.id)}
-							>{formatAgencyName(student.agencyId)}</td
-						>
-						<td on:click={() => onClick(student.id)}>{formatStudentClassId(student.classRoomId)}</td
-						>
-						<td on:click={() => onClick(student.id)}>
-							<div class="px-2 text-center align-middle">
-								<ArrowRightIcon />
-							</div>
-						</td>
-					</tr>
+					{#if student.id !== undefined}
+						<tr class="hover cursor-pointer text-center">
+							<th>
+								<label>
+									<input
+										id={student.id.toString()}
+										type="checkbox"
+										class="checkbox checkbox-sm rounded"
+										checked={isChecked.includes(student.id?.toString())}
+										on:click={handleCheck}
+									/>
+								</label>
+							</th>
+							<!-- classId get name of class -->
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatStudentClassId(student.classId)}</td
+							>
+							<th on:click={() => onClick(Number(student.id))}>{student.firstName}</th>
+							<th on:click={() => onClick(Number(student.id))}>{student.lastName}</th>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatStudentDate(student.enrolledAt) || ''}</td
+							>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatStudentDate(student.dob) || ''}</td
+							>
+							<td on:click={() => onClick(Number(student.id))}>{formatBirthYear(student.dob)}</td>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatStudentGender(student.gender)}</td
+							>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatAgencyName(student.agencyId)}</td
+							>
+							<!-- <td on:click={() => onClick(student.id)}
+								>{formatStudentClassId(student.classRoomId)}</td
+							> -->
+							<td on:click={() => onClick(Number(student.id))}>
+								<div class="px-2 text-center align-middle">
+									<ArrowRightIcon />
+								</div>
+							</td>
+						</tr>
+					{/if}
 				{/each}
 			{/if}
 		</tbody>

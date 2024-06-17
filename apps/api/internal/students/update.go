@@ -12,14 +12,14 @@ import (
 // @Description Update student
 // @Tags Student
 // @Accept json
-// @Param post body InsertStudentRequest true "Update student body"
+// @Param post body WriteStudentRequest true "Update student body"
 // @Param id path int true "Student ID"
 // @Success 200 {object} Student
 // @Failure 500 {string} string
 // @Security ApiKeyAuth
 // @Router /students/{id} [put]
 func (h *StudentHandler) Update(c *fiber.Ctx) error {
-	body := new(InsertStudentRequest)
+	body := new(WriteStudentRequest)
 	if err := c.BodyParser(body); err != nil {
 		log.Println("UpdateStudent.BodyParser err: ", err)
 		return fiber.ErrBadRequest
@@ -33,7 +33,7 @@ func (h *StudentHandler) Update(c *fiber.Ctx) error {
 
 	log.Printf("UpdateStudent request: %+v\n", body)
 	req := &Student{
-		WriteStudentRequest: body.WriteStudentRequest,
+		WriteStudentRequest: *body,
 		BaseEntity:          common.BaseEntity{Id: id},
 	}
 	if err := h.repo.Update(req); err != nil {

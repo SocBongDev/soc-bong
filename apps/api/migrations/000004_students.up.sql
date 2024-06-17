@@ -18,8 +18,24 @@ CREATE TABLE IF NOT EXISTS students (
     agency_id INTEGER NOT NULL,
     class_id INTEGER NOT NULL,
 
+    father_birth_place TEXT,
+    mother_birth_place TEXT,
+    father_dob TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    mother_dob TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    father_name TEXT,
+    mother_name TEXT,
+    land_lord TEXT,
+    father_occupation TEXT,
+    mother_occupation TEXT,
+    phone_number TEXT,
+    res_registration TEXT,
+    roi TEXT,
+    zalo TEXT,
+
     FOREIGN KEY (agency_id) REFERENCES agencies (id)
     FOREIGN KEY (class_id) REFERENCES classes (id)
+
+    UNIQUE(first_name, last_name, dob)
 );
 
 CREATE TRIGGER update_timestamp_students AFTER UPDATE ON students

@@ -3,7 +3,6 @@ package students
 import (
 	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
-	"github.com/SocBongDev/soc-bong/internal/parents"
 	"github.com/pocketbase/dbx"
 )
 
@@ -11,23 +10,26 @@ func mapStudents(dbResult []DbStudentResult) []Student {
 	studentsMap := make(map[int]*Student)
 	for _, v := range dbResult {
 		if student, ok := studentsMap[v.Id]; ok {
-			student.Parents = append(student.Parents, parents.Parent{
+			student.Parents = append(student.Parents, Parent{
 				BaseEntity: common.BaseEntity{
 					Id:        v.ParentId,
 					CreatedAt: v.ParentCreatedAt,
 					UpdatedAt: v.ParentUpdatedAt,
 				},
-				WriteParentRequest: parents.WriteParentRequest{
-					BirthPlace:      v.ParentBirthPlace,
-					Dob:             v.ParentDob,
-					Gender:          v.ParentGender,
-					Landlord:        v.ParentLandlord,
-					Name:            v.ParentName,
-					Occupation:      v.ParentOccupation,
-					PhoneNumber:     v.ParentPhoneNumber,
-					ResRegistration: v.ParentResRegistration,
-					Roi:             v.ParentRoi,
-					Zalo:            v.ParentZalo,
+				WriteParentRequest: WriteParentRequest{
+					FatherBirthPlace: v.FatherBirthPlace,
+					MotherBirthPlace: v.MotherBirthPlace,
+					FatherDob:        v.FatherDob,
+					MotherDob:        v.MotherDob,
+					FatherName:       v.FatherName,
+					MotherName:       v.MotherName,
+					Landlord:         v.Landlord,
+					FatherOccupation: v.FatherOccupation,
+					MotherOccupation: v.MotherOccupation,
+					PhoneNumber:      v.PhoneNumber,
+					ResRegistration:  v.ResRegistration,
+					Roi:              v.Roi,
+					Zalo:             v.Zalo,
 				},
 			})
 		} else {
@@ -44,8 +46,10 @@ func mapStudents(dbResult []DbStudentResult) []Student {
 						UpdatedAt: v.ClassUpdatedAt,
 					},
 					WriteClassRequest: classes.WriteClassRequest{
-						Name:  v.ClassName,
-						Grade: v.ClassGrade,
+						Name:      v.ClassName,
+						Grade:     v.ClassGrade,
+						AgencyId:  v.AgencyId,
+						TeacherId: v.TeacherId,
 					},
 				},
 				WriteStudentRequest: WriteStudentRequest{
@@ -62,25 +66,41 @@ func mapStudents(dbResult []DbStudentResult) []Student {
 					TempAddress:              v.TempAddress,
 					AgencyId:                 v.AgencyId,
 					ClassId:                  v.ClassId,
+					FatherBirthPlace:         v.FatherBirthPlace,
+					MotherBirthPlace:         v.MotherBirthPlace,
+					FatherDob:                v.FatherDob,
+					MotherDob:                v.MotherDob,
+					FatherName:               v.FatherName,
+					MotherName:               v.MotherName,
+					Landlord:                 v.Landlord,
+					FatherOccupation:         v.FatherOccupation,
+					MotherOccupation:         v.MotherOccupation,
+					PhoneNumber:              v.PhoneNumber,
+					ResRegistration:          v.ResRegistration,
+					Roi:                      v.Roi,
+					Zalo:                     v.Zalo,
 				},
-				Parents: []parents.Parent{
+				Parents: []Parent{
 					{
 						BaseEntity: common.BaseEntity{
 							Id:        v.ParentId,
 							CreatedAt: v.ParentCreatedAt,
 							UpdatedAt: v.ParentUpdatedAt,
 						},
-						WriteParentRequest: parents.WriteParentRequest{
-							BirthPlace:      v.ParentBirthPlace,
-							Dob:             v.ParentDob,
-							Gender:          v.ParentGender,
-							Landlord:        v.ParentLandlord,
-							Name:            v.ParentName,
-							Occupation:      v.ParentOccupation,
-							PhoneNumber:     v.ParentPhoneNumber,
-							ResRegistration: v.ParentResRegistration,
-							Roi:             v.ParentRoi,
-							Zalo:            v.ParentZalo,
+						WriteParentRequest: WriteParentRequest{
+							FatherBirthPlace: v.FatherBirthPlace,
+							MotherBirthPlace: v.MotherBirthPlace,
+							FatherDob:        v.FatherDob,
+							MotherDob:        v.MotherDob,
+							FatherName:       v.FatherName,
+							MotherName:       v.MotherName,
+							Landlord:         v.Landlord,
+							FatherOccupation: v.FatherOccupation,
+							MotherOccupation: v.MotherOccupation,
+							PhoneNumber:      v.PhoneNumber,
+							ResRegistration:  v.ResRegistration,
+							Roi:              v.Roi,
+							Zalo:             v.Zalo,
 						},
 					},
 				},

@@ -24,7 +24,10 @@
 		"drizzle-zod": "^0.5.1",
 		"felte": "^1.2.12",
 		"postgres": "^3.3.5",
-		"zod": "^3.22.2"
+		"zod": "^3.22.2",
+		"@auth/core": "^0.4.0",
+		"@auth/sveltekit": "^0.2.1",
+		"@auth0/auth0-spa-js": "^1.22.0"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^17.7.1",
