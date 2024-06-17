@@ -11,17 +11,17 @@ type WriteClassRequest struct {
 	// * seed - Children who is 4 yo.
 	// * leaf - Children who is 5 yo.
 	Grade     string `json:"grade"     enums:"buds,seed,leaf"`
-	AgencyId  int    `json:"agencyId"`
-	TeacherId string `json:"teacherId"`
+	AgencyId  int    `json:"agencyId" db:"agency_id"`
+	TeacherId string `json:"teacherId" db:"teacher_id"`
 }
 
 type ClassQuery struct {
 	common.Pagination
 	common.Sorter
 
-	AgencyId  int    `json:"agencyId"`
+	AgencyId  int    `json:"agencyId" db:"agency_id"`
 	Search    string `json:"search"`
-	TeacherId int    `json:"teacherId"`
+	TeacherId int    `json:"teacherId" db:"teacher_id"`
 }
 
 type FindClassResp common.FindResponse[Class]
