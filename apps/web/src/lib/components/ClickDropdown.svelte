@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { statusChange } from '$lib/store'
-	import dayjs from 'dayjs';
+	import dayjs from 'dayjs'
 	export let data: any
-	
+
 	export let date: string
 	export let studentId: string
 	export let classId: string
 	export let monthPicked: number
 	export let yearPicked: number
-	
+
 	let isDropdownOpen: boolean = false
 
-	type attendedStatus = 'attended' | 'absented' | 'excused' | 'dayoff' | 'holiday' | 'unknown'
+	type attendedStatus = 'attended' | 'absented' | 'excused' | 'dayoff' | 'holiday'
 
 	type statusType = {
 		name: attendedStatus
@@ -20,7 +20,6 @@
 	}[]
 
 	const status: statusType = [
-		{ name: 'unknown', color: 'text-white', letter: '⚪' },
 		{ name: 'absented', color: 'text-red-500', letter: '🔴' },
 		{ name: 'attended', color: 'text-green-500', letter: '🟢' },
 		{ name: 'excused', color: 'text-gray-500', letter: '🟡' },
@@ -37,11 +36,15 @@
 	}
 
 	function handleChangeState(index: number) {
-		activeStatus = status[index]	
+		activeStatus = status[index]
 		statusChange.update((status) => {
-			let id = data?.id;
+			let id = data?.id
 			if (!id) {
-				const existingIndex = status.findIndex((s) => s.date === dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD') && s.studentId === studentId)
+				const existingIndex = status.findIndex(
+					(s) =>
+						s.date === dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD') &&
+						s.studentId === studentId
+				)
 				if (existingIndex !== -1) {
 					return status.map((s, i) => {
 						if (i === existingIndex) {
@@ -52,11 +55,11 @@
 				}
 				return [
 					...status,
-					{ 
-						date: dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD'), 
+					{
+						date: dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD'),
 						studentId: studentId,
 						attendedStatus: activeStatus.name,
-						classId: classId 
+						classId: classId
 					}
 				]
 			} else {
@@ -73,7 +76,9 @@
 					...status,
 					{
 						id: id,
-						date: dayjs(`${yearPicked}-${monthPicked}-${date} ${dayjs().format('HH:mm:ss')}`).format('YYYY-MM-DD HH:mm:ss.SSS[Z]'),
+						date: dayjs(
+							`${yearPicked}-${monthPicked}-${date} ${dayjs().format('HH:mm:ss')}`
+						).format('YYYY-MM-DD HH:mm:ss.SSS[Z]'),
 						studentId: studentId,
 						attendedStatus: activeStatus.name,
 						classId: classId
@@ -112,8 +117,8 @@
 			<span class="max-h-full w-fit">{status[4].letter}</span>
 		{:else if active == '' && data && data.attendedStatus == 'holiday'}
 			<span class="max-h-full w-fit">{status[5].letter}</span>
-		{:else if active == '' && data && data.attendedStatus == 'unknown'}
-			<span class="max-h-full w-fit">{status[0].letter}</span>
+			<!-- {:else if active == '' && data && data.attendedStatus == 'unknown'}
+			<span class="max-h-full w-fit">{status[0].letter}</span> -->
 		{:else if active == ''}
 			<svg class="w-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
 				><path
