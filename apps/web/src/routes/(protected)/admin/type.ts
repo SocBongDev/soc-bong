@@ -1,3 +1,16 @@
+export type RegistrationProps = {
+        createdAt?: string,
+        id?: number,
+        isProcessed?: boolean,
+        note?: string,
+        parentName: string,
+        phoneNumber: string,
+        studentClass: string,
+        studentDob: string,
+        studentName: string,
+        updatedAt?: string
+}
+
 
 export type AgencyProps = {
     address: string,
@@ -24,37 +37,41 @@ export type StudentProps = {
     permanentAddressCommune: string,
     permanentAddressDistrict: string,
     permanentAddressProvince: string,
-    tempAdress: string,
+    tempAddress: string,
     updatedAt?: string,
-    parentBirthPlace: string,
-    parentDob: string,
-    parentGender: boolean,
-    parentLandlord: string,
-    parentName: string,
-    parentOccupation: string,
+
+    fatherBirthPlace: string,
+    motherBirthPlace: string,
+    fatherDob: string,
+    motherDob: string,
+    fatherName: string,
+    motherName: string,
+    fatherOccupation: string,
+    motherOccupation: string,
+    parentLandLord: string,
     parentPhoneNumber: string,
     parentResRegistration: string,
     parentRoi: string,
-    studentId: number,
     parentZalo: string
 }
 
 export type ParentProps = {
-    parentBirthPlace: string,
-    createdAt?: string,
-    parentDob: string,
-    parentGender: boolean,
     id?: number,
-    parentLandlord: string,
-    parentName: string,
-    parentOccupation: string,
-    parentPhoneNumber: string,
-    parentResRegistration: string,
-    parentRoi: string,
-    studentId: number,
+    createdAt?: string,
     updatedAt?: string,
-    parentZalo: string
-    
+    father_birth_place: string,
+    mother_birth_place: string,
+    father_dob: string,
+    mother_dob: string,
+    father_name: string,
+    mother_name: string,
+    father_occupation: string,
+    mother_occupation: string,
+    land_lord: string,
+    parent_phone_number: string,
+    parent_res_registration: string,
+    parent_roi: string,
+    parent_zalo: string
 }
 
 export type ClassesProps = {
