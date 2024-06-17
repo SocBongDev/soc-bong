@@ -16,7 +16,7 @@
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import { blur, fade } from 'svelte/transition'
 	import { onMount } from 'svelte'
-	import type { AgencyProps } from './+page'
+	import type { AgencyProps } from '../type'
 	import dayjs from 'dayjs'
 
 	export let data: PageData
@@ -32,7 +32,6 @@
 	let abortController: AbortController | undefined = undefined
 	$: isNew = !recordData
 	$: if (recordData !== null) {
-		console.log('check recordData: ', recordData)
 		const { id, createdAt, updatedAt, ...initialValues } = recordData
 		setInitialValues(initialValues)
 		reset()
@@ -46,10 +45,6 @@
 		createdAt: dayjs().format('dd/MM/YYYY'),
 		updatedAt: dayjs().format('dd/MM/YYYY')
 	}
-
-	onMount(() => {
-		console.log('check Data agencies:', data)
-	})
 
 	function resetDefaultForm() {
 		setInitialValues(defaultFormValues)
@@ -128,7 +123,6 @@
 	async function save(req: AgencyProps) {
 		loading = true
 		const body = JSON.stringify(req)
-		console.log('check body', body)
 		const method = isNew ? 'POST' : 'PUT'
 		const url = isNew ? `${API_URL}/agencies` : `${API_URL}/agencies/${recordData?.id}`
 		const request = fetch(url, {
@@ -140,7 +134,11 @@
 			body
 		}).then((res) => {
 			if (res.status == 422) {
-				Notify({type: 'error', id: crypto.randomUUID(), description: 'phía server đã tồn tại dữ liệu này!'})
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'phía server đã tồn tại dữ liệu này!'
+				})
 			}
 		})
 		// note: all 4 fields need to be unique when insert
@@ -169,7 +167,6 @@
 				signal
 			}).then((res) => res.json())
 			// res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
-			console.log('check res', res)
 			recordData = res
 		} catch (e: any) {
 			console.error('LoadData: ', e)
@@ -225,7 +222,6 @@
 		loading = true
 
 		try {
-			console.log('recordData', recordData.id)
 			const res = await fetch(`${API_URL}/agencies`, {
 				body: JSON.stringify({ ids: [Number(recordData.id)] }),
 				method: 'DELETE',
@@ -253,7 +249,7 @@
 	async function batchDelete() {
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch('/api/agencies', { body: JSON.stringify({ ids }), method: 'DELETE' })
+			await fetch(`${API_URL}/agencies`, { body: JSON.stringify({ ids }), method: 'DELETE' })
 			refreshData()
 			clearSelected()
 		} catch (e) {
@@ -294,7 +290,10 @@
 			</div>
 			<button
 				class="btn btn-primary btn-sm rounded normal-case active:!translate-y-1"
-				on:click={() => show()}
+				on:click={() => {
+					recordData = null
+					show()
+				}}
 			>
 				<PlusIcon />
 				Thêm mới
