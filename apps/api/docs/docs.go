@@ -990,7 +990,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/students.InsertStudentRequest"
+                            "$ref": "#/definitions/students.WriteStudentRequest"
                         }
                     }
                 ],
@@ -1121,7 +1121,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/students.InsertStudentRequest"
+                            "$ref": "#/definitions/students.WriteStudentRequest"
                         }
                     },
                     {
@@ -1361,85 +1361,6 @@ const docTemplate = `{
                 }
             }
         },
-        "parents.Parent": {
-            "type": "object",
-            "properties": {
-                "birthPlace": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "dob": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "boolean"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "landlord": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "occupation": {
-                    "type": "string"
-                },
-                "phoneNumber": {
-                    "type": "string"
-                },
-                "resRegistration": {
-                    "type": "string"
-                },
-                "roi": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "zalo": {
-                    "type": "string"
-                }
-            }
-        },
-        "parents.WriteParentRequest": {
-            "type": "object",
-            "properties": {
-                "birthPlace": {
-                    "type": "string"
-                },
-                "dob": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "boolean"
-                },
-                "landlord": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "occupation": {
-                    "type": "string"
-                },
-                "phoneNumber": {
-                    "type": "string"
-                },
-                "resRegistration": {
-                    "type": "string"
-                },
-                "roi": {
-                    "type": "string"
-                },
-                "zalo": {
-                    "type": "string"
-                }
-            }
-        },
         "registrations.FindRegistrationResp": {
             "type": "object",
             "properties": {
@@ -1538,52 +1459,55 @@ const docTemplate = `{
                 }
             }
         },
-        "students.InsertStudentRequest": {
+        "students.Parent": {
             "type": "object",
             "properties": {
-                "agencyId": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "father_birth_place": {
+                    "type": "string"
+                },
+                "father_dob": {
+                    "type": "string"
+                },
+                "father_name": {
+                    "type": "string"
+                },
+                "father_occupation": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer"
                 },
-                "birthPlace": {
+                "mother_birth_place": {
                     "type": "string"
                 },
-                "classId": {
-                    "type": "integer"
-                },
-                "dob": {
+                "mother_dob": {
                     "type": "string"
                 },
-                "enrolledAt": {
+                "mother_name": {
                     "type": "string"
                 },
-                "ethnic": {
+                "mother_occupation": {
                     "type": "string"
                 },
-                "firstName": {
+                "parent_land_lord": {
                     "type": "string"
                 },
-                "gender": {
-                    "type": "boolean"
-                },
-                "lastName": {
+                "parent_phone_number": {
                     "type": "string"
                 },
-                "parents": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/parents.WriteParentRequest"
-                    }
-                },
-                "permanentAddressCommune": {
+                "parent_res_registration": {
                     "type": "string"
                 },
-                "permanentAddressDistrict": {
+                "parent_roi": {
                     "type": "string"
                 },
-                "permanentAddressProvince": {
+                "parent_zalo": {
                     "type": "string"
                 },
-                "tempAddress": {
+                "updatedAt": {
                     "type": "string"
                 }
             }
@@ -1615,6 +1539,18 @@ const docTemplate = `{
                 "ethnic": {
                     "type": "string"
                 },
+                "father_birth_place": {
+                    "type": "string"
+                },
+                "father_dob": {
+                    "type": "string"
+                },
+                "father_name": {
+                    "type": "string"
+                },
+                "father_occupation": {
+                    "type": "string"
+                },
                 "firstName": {
                     "type": "string"
                 },
@@ -1624,13 +1560,40 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "land_lord": {
+                    "type": "string"
+                },
                 "lastName": {
+                    "type": "string"
+                },
+                "mother_birth_place": {
+                    "type": "string"
+                },
+                "mother_dob": {
+                    "type": "string"
+                },
+                "mother_name": {
+                    "type": "string"
+                },
+                "mother_occupation": {
+                    "type": "string"
+                },
+                "parent_phone_number": {
+                    "type": "string"
+                },
+                "parent_res_registration": {
+                    "type": "string"
+                },
+                "parent_roi": {
+                    "type": "string"
+                },
+                "parent_zalo": {
                     "type": "string"
                 },
                 "parents": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/parents.Parent"
+                        "$ref": "#/definitions/students.Parent"
                     }
                 },
                 "permanentAddressCommune": {
@@ -1646,6 +1609,89 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "students.WriteStudentRequest": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "birthPlace": {
+                    "type": "string"
+                },
+                "classId": {
+                    "type": "integer"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "enrolledAt": {
+                    "type": "string"
+                },
+                "ethnic": {
+                    "type": "string"
+                },
+                "father_birth_place": {
+                    "type": "string"
+                },
+                "father_dob": {
+                    "type": "string"
+                },
+                "father_name": {
+                    "type": "string"
+                },
+                "father_occupation": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "land_lord": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "mother_birth_place": {
+                    "type": "string"
+                },
+                "mother_dob": {
+                    "type": "string"
+                },
+                "mother_name": {
+                    "type": "string"
+                },
+                "mother_occupation": {
+                    "type": "string"
+                },
+                "parent_phone_number": {
+                    "type": "string"
+                },
+                "parent_res_registration": {
+                    "type": "string"
+                },
+                "parent_roi": {
+                    "type": "string"
+                },
+                "parent_zalo": {
+                    "type": "string"
+                },
+                "permanentAddressCommune": {
+                    "type": "string"
+                },
+                "permanentAddressDistrict": {
+                    "type": "string"
+                },
+                "permanentAddressProvince": {
+                    "type": "string"
+                },
+                "tempAddress": {
                     "type": "string"
                 }
             }
