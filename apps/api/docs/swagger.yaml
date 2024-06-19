@@ -153,58 +153,6 @@ definitions:
       teacherId:
         type: string
     type: object
-  parents.Parent:
-    properties:
-      birthPlace:
-        type: string
-      createdAt:
-        type: string
-      dob:
-        type: string
-      gender:
-        type: boolean
-      id:
-        type: integer
-      landlord:
-        type: string
-      name:
-        type: string
-      occupation:
-        type: string
-      phoneNumber:
-        type: string
-      resRegistration:
-        type: string
-      roi:
-        type: string
-      updatedAt:
-        type: string
-      zalo:
-        type: string
-    type: object
-  parents.WriteParentRequest:
-    properties:
-      birthPlace:
-        type: string
-      dob:
-        type: string
-      gender:
-        type: boolean
-      landlord:
-        type: string
-      name:
-        type: string
-      occupation:
-        type: string
-      phoneNumber:
-        type: string
-      resRegistration:
-        type: string
-      roi:
-        type: string
-      zalo:
-        type: string
-    type: object
   registrations.FindRegistrationResp:
     properties:
       data:
@@ -279,37 +227,41 @@ definitions:
       page:
         type: integer
     type: object
-  students.InsertStudentRequest:
+  students.Parent:
     properties:
-      agencyId:
+      createdAt:
+        type: string
+      father_birth_place:
+        type: string
+      father_dob:
+        type: string
+      father_name:
+        type: string
+      father_occupation:
+        type: string
+      father_phone_number:
+        type: string
+      id:
         type: integer
-      birthPlace:
+      mother_birth_place:
         type: string
-      classId:
-        type: integer
-      dob:
+      mother_dob:
         type: string
-      enrolledAt:
+      mother_name:
         type: string
-      ethnic:
+      mother_occupation:
         type: string
-      firstName:
+      mother_phone_number:
         type: string
-      gender:
-        type: boolean
-      lastName:
+      parent_land_lord:
         type: string
-      parents:
-        items:
-          $ref: '#/definitions/parents.WriteParentRequest'
-        type: array
-      permanentAddressCommune:
+      parent_res_registration:
         type: string
-      permanentAddressDistrict:
+      parent_roi:
         type: string
-      permanentAddressProvince:
+      parent_zalo:
         type: string
-      tempAddress:
+      updatedAt:
         type: string
     type: object
   students.Student:
@@ -330,17 +282,45 @@ definitions:
         type: string
       ethnic:
         type: string
+      father_birth_place:
+        type: string
+      father_dob:
+        type: string
+      father_name:
+        type: string
+      father_occupation:
+        type: string
+      father_phone_number:
+        type: string
       firstName:
         type: string
       gender:
         type: boolean
       id:
         type: integer
+      land_lord:
+        type: string
       lastName:
+        type: string
+      mother_birth_place:
+        type: string
+      mother_dob:
+        type: string
+      mother_name:
+        type: string
+      mother_occupation:
+        type: string
+      mother_phone_number:
+        type: string
+      parent_res_registration:
+        type: string
+      parent_roi:
+        type: string
+      parent_zalo:
         type: string
       parents:
         items:
-          $ref: '#/definitions/parents.Parent'
+          $ref: '#/definitions/students.Parent'
         type: array
       permanentAddressCommune:
         type: string
@@ -351,6 +331,63 @@ definitions:
       tempAddress:
         type: string
       updatedAt:
+        type: string
+    type: object
+  students.WriteStudentRequest:
+    properties:
+      agencyId:
+        type: integer
+      birthPlace:
+        type: string
+      classId:
+        type: integer
+      dob:
+        type: string
+      enrolledAt:
+        type: string
+      ethnic:
+        type: string
+      father_birth_place:
+        type: string
+      father_dob:
+        type: string
+      father_name:
+        type: string
+      father_occupation:
+        type: string
+      father_phone_number:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: boolean
+      land_lord:
+        type: string
+      lastName:
+        type: string
+      mother_birth_place:
+        type: string
+      mother_dob:
+        type: string
+      mother_name:
+        type: string
+      mother_occupation:
+        type: string
+      mother_phone_number:
+        type: string
+      parent_res_registration:
+        type: string
+      parent_roi:
+        type: string
+      parent_zalo:
+        type: string
+      permanentAddressCommune:
+        type: string
+      permanentAddressDistrict:
+        type: string
+      permanentAddressProvince:
+        type: string
+      tempAddress:
         type: string
     type: object
 info:
@@ -1005,7 +1042,7 @@ paths:
         name: post
         required: true
         schema:
-          $ref: '#/definitions/students.InsertStudentRequest'
+          $ref: '#/definitions/students.WriteStudentRequest'
       responses:
         "200":
           description: OK
@@ -1063,7 +1100,7 @@ paths:
         name: post
         required: true
         schema:
-          $ref: '#/definitions/students.InsertStudentRequest'
+          $ref: '#/definitions/students.WriteStudentRequest'
       - description: Student ID
         in: path
         name: id
