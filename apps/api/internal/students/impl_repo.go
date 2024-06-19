@@ -3,10 +3,10 @@ package students
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
-	"github.com/SocBongDev/soc-bong/internal/parents"
 	"github.com/pocketbase/dbx"
 )
 
@@ -37,19 +37,25 @@ var (
 		fmt.Sprintf("%s.updated_at as class_updated_at", classes.TABLE),
 		fmt.Sprintf("%s.name as class_name", classes.TABLE),
 		fmt.Sprintf("%s.grade as class_grade", classes.TABLE),
-		fmt.Sprintf("%s.id as parent_id", parents.TABLE),
-		fmt.Sprintf("%s.created_at as parent_created_at", parents.TABLE),
-		fmt.Sprintf("%s.updated_at as parent_updated_at", parents.TABLE),
-		fmt.Sprintf("%s.parent_birth_place as parent_birth_place", parents.TABLE),
-		fmt.Sprintf("%s.parent_dob as parent_dob", parents.TABLE),
-		fmt.Sprintf("%s.parent_gender as parent_gender", parents.TABLE),
-		fmt.Sprintf("%s.landlord as parent_landlord", parents.TABLE),
-		fmt.Sprintf("%s.parent_name as parent_name", parents.TABLE),
-		fmt.Sprintf("%s.occupation as parent_occupation", parents.TABLE),
-		fmt.Sprintf("%s.phone_number as parent_phone_number", parents.TABLE),
-		fmt.Sprintf("%s.res_registration as parent_res_registration", parents.TABLE),
-		fmt.Sprintf("%s.roi as parent_roi", parents.TABLE),
-		fmt.Sprintf("%s.zalo as parent_zalo", parents.TABLE),
+		fmt.Sprintf("%s.agency_id as class_agency_id", classes.TABLE),
+		fmt.Sprintf("%s.teacher_id as class_teacher_id", classes.TABLE),
+		fmt.Sprintf("%s.id as parent_id", TABLE),
+		fmt.Sprintf("%s.created_at as parent_created_at", TABLE),
+		fmt.Sprintf("%s.updated_at as parent_updated_at", TABLE),
+		fmt.Sprintf("%s.father_birth_place as father_birth_place", TABLE),
+		fmt.Sprintf("%s.mother_birth_place as mother_birth_place", TABLE),
+		fmt.Sprintf("%s.father_dob as father_dob", TABLE),
+		fmt.Sprintf("%s.mother_dob as mother_dob", TABLE),
+		fmt.Sprintf("%s.mother_name as mother_name", TABLE),
+		fmt.Sprintf("%s.father_name as father_name", TABLE),
+		fmt.Sprintf("%s.land_lord as land_lord", TABLE),
+		fmt.Sprintf("%s.father_occupation as father_occupation", TABLE),
+		fmt.Sprintf("%s.mother_occupation as mother_occupation", TABLE),
+		fmt.Sprintf("%s.father_phone_number as father_phone_number", TABLE),
+		fmt.Sprintf("%s.mother_phone_number as mother_phone_number", TABLE),
+		fmt.Sprintf("%s.res_registration as res_registration", TABLE),
+		fmt.Sprintf("%s.roi as roi", TABLE),
+		fmt.Sprintf("%s.zalo as zalo", TABLE),
 	}
 )
 
@@ -93,16 +99,6 @@ func (r *studentRepo) Find(query *StudentQuery) ([]Student, error) {
 				),
 			),
 		).
-		InnerJoin(
-			parents.TABLE,
-			dbx.NewExp(
-				fmt.Sprintf(
-					"%s.student_id = %s.id",
-					parents.TABLE,
-					TABLE,
-				),
-			),
-		).
 		Build().
 		WithAllHook(allHook).
 		All(&resp); err != nil {
@@ -126,16 +122,6 @@ func (r *studentRepo) FindOne(req *Student) error {
 				),
 			),
 		).
-		InnerJoin(
-			parents.TABLE,
-			dbx.NewExp(
-				fmt.Sprintf(
-					"%s.student_id = %s.id",
-					parents.TABLE,
-					TABLE,
-				),
-			),
-		).
 		Build().
 		WithAllHook(allHook).
 		All(&students); err != nil {
@@ -153,6 +139,7 @@ func (r *studentRepo) FindOne(req *Student) error {
 }
 
 func (r *studentRepo) Insert(req *Student) error {
+	log.Printf("check final req: %v", req)
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 

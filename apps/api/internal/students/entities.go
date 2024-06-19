@@ -5,7 +5,6 @@ import (
 
 	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
-	"github.com/SocBongDev/soc-bong/internal/parents"
 )
 
 const TABLE = "students"
@@ -22,13 +21,50 @@ type WriteStudentRequest struct {
 	PermanentAddressDistrict string          `json:"permanentAddressDistrict"`
 	PermanentAddressProvince string          `json:"permanentAddressProvince"`
 	TempAddress              string          `json:"tempAddress"`
-	AgencyId                 int             `json:"agencyId"`
-	ClassId                  int             `json:"classId"`
+	AgencyId                 int             `json:"agencyId" db:"agency_id"`
+	ClassId                  int             `json:"classId" db:"class_id"`
+
+	FatherBirthPlace  string          `json:"father_birth_place" db:"father_birth_place"`
+	MotherBirthPlace  string          `json:"mother_birth_place" db:"mother_birth_place"`
+	FatherDob         common.DateTime `json:"father_dob" db:"father_dob" swaggertype:"string"`
+	MotherDob         common.DateTime `json:"mother_dob" db:"mother_dob" swaggertype:"string"`
+	FatherName        string          `json:"father_name" db:"father_name"`
+	MotherName        string          `json:"mother_name" db:"mother_name"`
+	Landlord          string          `json:"land_lord" db:"land_lord"`
+	FatherOccupation  string          `json:"father_occupation" db:"father_occupation"`
+	MotherOccupation  string          `json:"mother_occupation" db:"mother_occupation"`
+	FatherPhoneNumber string          `json:"father_phone_number" db:"father_phone_number"`
+	MotherPhoneNumber string          `json:"mother_phone_number" db:"mother_phone_number"`
+	ResRegistration   string          `json:"parent_res_registration" db:"res_registration"`
+	Roi               string          `json:"parent_roi" db:"roi"`
+	Zalo              string          `json:"parent_zalo" db:"zalo"`
+}
+
+type WriteParentRequest struct {
+	FatherBirthPlace  string          `json:"father_birth_place" db:"father_birth_place"`
+	MotherBirthPlace  string          `json:"mother_birth_place" db:"mother_birth_place"`
+	FatherDob         common.DateTime `json:"father_dob" db:"father_dob" swaggertype:"string"`
+	MotherDob         common.DateTime `json:"mother_dob" db:"mother_dob" swaggertype:"string"`
+	FatherName        string          `json:"father_name" db:"father_name"`
+	MotherName        string          `json:"mother_name" db:"mother_name"`
+	Landlord          string          `json:"parent_land_lord" db:"land_lord"`
+	FatherOccupation  string          `json:"father_occupation" db:"father_occupation"`
+	MotherOccupation  string          `json:"mother_occupation" db:"mother_occupation"`
+	FatherPhoneNumber string          `json:"father_phone_number" db:"father_phone_number"`
+	MotherPhoneNumber string          `json:"mother_phone_number" db:"mother_phone_number"`
+	ResRegistration   string          `json:"parent_res_registration" db:"res_registration"`
+	Roi               string          `json:"parent_roi" db:"roi"`
+	Zalo              string          `json:"parent_zalo" db:"zalo"`
 }
 
 type InsertStudentRequest struct {
 	WriteStudentRequest
-	Parents []parents.WriteParentRequest `json:"parents"`
+	Parents []WriteParentRequest `json:"parents"`
+}
+
+type Parent struct {
+	common.BaseEntity
+	WriteParentRequest
 }
 
 type StudentQuery struct {
@@ -54,29 +90,20 @@ type DbStudentResult struct {
 
 	ClassName  string `db:"class_name"`
 	ClassGrade string `db:"class_grade"`
+	AgencyId   int    `db:"class_agency_id"`
+	TeacherId  string `db:"class_teacher_id"`
 
 	ParentId        int       `db:"parent_id"`
 	ParentCreatedAt time.Time `db:"parent_created_at"`
 	ParentUpdatedAt time.Time `db:"parent_updated_at"`
-
-	ParentBirthPlace      string `db:"parent_birth_place"`
-	ParentDob             string `db:"parent_dob"`
-	ParentGender          bool   `db:"parent_gender"`
-	ParentLandlord        string `db:"parent_landlord"`
-	ParentName            string `db:"parent_name"`
-	ParentOccupation      string `db:"parent_occupation"`
-	ParentPhoneNumber     string `db:"parent_phone_number"`
-	ParentResRegistration string `db:"parent_res_registration"`
-	ParentRoi             string `db:"parent_roi"`
-	ParentZalo            string `db:"parent_zalo"`
 }
 
 type Student struct {
 	common.BaseEntity
 	WriteStudentRequest
 
-	Class   classes.Class    `json:"class"   db:"-"`
-	Parents []parents.Parent `json:"parents" db:"-"`
+	Class   classes.Class `json:"class"   db:"-"`
+	Parents []Parent      `json:"parents" db:"-"`
 }
 
 func (e *Student) TableName() string {
