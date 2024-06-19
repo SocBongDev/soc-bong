@@ -24,35 +24,37 @@ type WriteStudentRequest struct {
 	AgencyId                 int             `json:"agencyId" db:"agency_id"`
 	ClassId                  int             `json:"classId" db:"class_id"`
 
-	FatherBirthPlace string          `json:"father_birth_place" db:"father_birth_place"`
-	MotherBirthPlace string          `json:"mother_birth_place" db:"mother_birth_place"`
-	FatherDob        common.DateTime `json:"father_dob" db:"father_dob" swaggertype:"string"`
-	MotherDob        common.DateTime `json:"mother_dob" db:"mother_dob" swaggertype:"string"`
-	FatherName       string          `json:"father_name" db:"father_name"`
-	MotherName       string          `json:"mother_name" db:"mother_name"`
-	Landlord         string          `json:"land_lord" db:"land_lord"`
-	FatherOccupation string          `json:"father_occupation" db:"father_occupation"`
-	MotherOccupation string          `json:"mother_occupation" db:"mother_occupation"`
-	PhoneNumber      string          `json:"parent_phone_number" db:"phone_number"`
-	ResRegistration  string          `json:"parent_res_registration" db:"res_registration"`
-	Roi              string          `json:"parent_roi" db:"roi"`
-	Zalo             string          `json:"parent_zalo" db:"zalo"`
+	FatherBirthPlace  string          `json:"father_birth_place" db:"father_birth_place"`
+	MotherBirthPlace  string          `json:"mother_birth_place" db:"mother_birth_place"`
+	FatherDob         common.DateTime `json:"father_dob" db:"father_dob" swaggertype:"string"`
+	MotherDob         common.DateTime `json:"mother_dob" db:"mother_dob" swaggertype:"string"`
+	FatherName        string          `json:"father_name" db:"father_name"`
+	MotherName        string          `json:"mother_name" db:"mother_name"`
+	Landlord          string          `json:"land_lord" db:"land_lord"`
+	FatherOccupation  string          `json:"father_occupation" db:"father_occupation"`
+	MotherOccupation  string          `json:"mother_occupation" db:"mother_occupation"`
+	FatherPhoneNumber string          `json:"father_phone_number" db:"father_phone_number"`
+	MotherPhoneNumber string          `json:"mother_phone_number" db:"mother_phone_number"`
+	ResRegistration   string          `json:"parent_res_registration" db:"res_registration"`
+	Roi               string          `json:"parent_roi" db:"roi"`
+	Zalo              string          `json:"parent_zalo" db:"zalo"`
 }
 
 type WriteParentRequest struct {
-	FatherBirthPlace string          `json:"father_birth_place" db:"father_birth_place"`
-	MotherBirthPlace string          `json:"mother_birth_place" db:"mother_birth_place"`
-	FatherDob        common.DateTime `json:"father_dob" db:"father_dob" swaggertype:"string"`
-	MotherDob        common.DateTime `json:"mother_dob" db:"mother_dob" swaggertype:"string"`
-	FatherName       string          `json:"father_name" db:"father_name"`
-	MotherName       string          `json:"mother_name" db:"mother_name"`
-	Landlord         string          `json:"parent_land_lord" db:"land_lord"`
-	FatherOccupation string          `json:"father_occupation" db:"father_occupation"`
-	MotherOccupation string          `json:"mother_occupation" db:"mother_occupation"`
-	PhoneNumber      string          `json:"parent_phone_number" db:"phone_number"`
-	ResRegistration  string          `json:"parent_res_registration" db:"res_registration"`
-	Roi              string          `json:"parent_roi" db:"roi"`
-	Zalo             string          `json:"parent_zalo" db:"zalo"`
+	FatherBirthPlace  string          `json:"father_birth_place" db:"father_birth_place"`
+	MotherBirthPlace  string          `json:"mother_birth_place" db:"mother_birth_place"`
+	FatherDob         common.DateTime `json:"father_dob" db:"father_dob" swaggertype:"string"`
+	MotherDob         common.DateTime `json:"mother_dob" db:"mother_dob" swaggertype:"string"`
+	FatherName        string          `json:"father_name" db:"father_name"`
+	MotherName        string          `json:"mother_name" db:"mother_name"`
+	Landlord          string          `json:"parent_land_lord" db:"land_lord"`
+	FatherOccupation  string          `json:"father_occupation" db:"father_occupation"`
+	MotherOccupation  string          `json:"mother_occupation" db:"mother_occupation"`
+	FatherPhoneNumber string          `json:"father_phone_number" db:"father_phone_number"`
+	MotherPhoneNumber string          `json:"mother_phone_number" db:"mother_phone_number"`
+	ResRegistration   string          `json:"parent_res_registration" db:"res_registration"`
+	Roi               string          `json:"parent_roi" db:"roi"`
+	Zalo              string          `json:"parent_zalo" db:"zalo"`
 }
 
 type InsertStudentRequest struct {
