@@ -1477,6 +1477,9 @@ const docTemplate = `{
                 "father_occupation": {
                     "type": "string"
                 },
+                "father_phone_number": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1492,10 +1495,10 @@ const docTemplate = `{
                 "mother_occupation": {
                     "type": "string"
                 },
-                "parent_land_lord": {
+                "mother_phone_number": {
                     "type": "string"
                 },
-                "parent_phone_number": {
+                "parent_land_lord": {
                     "type": "string"
                 },
                 "parent_res_registration": {
@@ -1551,6 +1554,9 @@ const docTemplate = `{
                 "father_occupation": {
                     "type": "string"
                 },
+                "father_phone_number": {
+                    "type": "string"
+                },
                 "firstName": {
                     "type": "string"
                 },
@@ -1578,7 +1584,7 @@ const docTemplate = `{
                 "mother_occupation": {
                     "type": "string"
                 },
-                "parent_phone_number": {
+                "mother_phone_number": {
                     "type": "string"
                 },
                 "parent_res_registration": {
@@ -1646,6 +1652,9 @@ const docTemplate = `{
                 "father_occupation": {
                     "type": "string"
                 },
+                "father_phone_number": {
+                    "type": "string"
+                },
                 "firstName": {
                     "type": "string"
                 },
@@ -1670,7 +1679,7 @@ const docTemplate = `{
                 "mother_occupation": {
                     "type": "string"
                 },
-                "parent_phone_number": {
+                "mother_phone_number": {
                     "type": "string"
                 },
                 "parent_res_registration": {
