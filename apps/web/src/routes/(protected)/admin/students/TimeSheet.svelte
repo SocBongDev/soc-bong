@@ -17,7 +17,6 @@
 	const token = localStorage.getItem('access_token')
 
 	const unsubscribe = statusChange.subscribe((value) => {
-		console.log('check value', value)
 		statusArray = value
 	})
 
