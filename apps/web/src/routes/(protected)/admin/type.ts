@@ -1,3 +1,16 @@
+export type RegistrationProps = {
+        createdAt?: string,
+        id?: number,
+        isProcessed?: boolean,
+        note?: string,
+        parentName: string,
+        phoneNumber: string,
+        studentClass: string,
+        studentDob: string,
+        studentName: string,
+        updatedAt?: string
+}
+
 
 export type AgencyProps = {
     address: string,
