@@ -221,8 +221,8 @@
 	}
 </script>
 
-<div class="h-full w-full">
-	<div class="row-span-full mt-1 grid grid-cols-6 px-2">
+<div class="h-full w-full flex flex-col justify-start gap-4">
+	<div class="row-span-full mt-1 grid grid-cols-5 px-2">
 		{#each status as { name, color, letter } (name)}
 			<div class="flex items-center gap-1">
 				<div class={`h-5 w-5 ${color} rounded-full border border-black/50`} />
