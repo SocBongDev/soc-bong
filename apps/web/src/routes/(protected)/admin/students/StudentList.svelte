@@ -211,63 +211,72 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#if data}
-				{#each data?.students.data as student (student.id)}
-					<tr class="hover cursor-pointer text-center">
-						<th>
-							<label>
-								<input
-									id={student.id.toString()}
-									type="checkbox"
-									class="checkbox checkbox-sm rounded"
-									checked={isChecked.includes(student.id?.toString())}
-									on:click={handleCheck}
-								/>
-							</label>
-						</th>
-						<td on:click={() => onClick(student.id)}>{formatStudentClass(student.grade)}</td>
-						<th on:click={() => onClick(student.id)}>{student.firstName}</th>
-						<th on:click={() => onClick(student.id)}>{student.lastName}</th>
-						<td on:click={() => onClick(student.id)}
-							>{formatStudentDate(student.enrollDate) || ''}</td
-						>
-						<td on:click={() => onClick(student.id)}>{formatStudentDate(student.dob) || ''}</td>
-						<td on:click={() => onClick(student.id)}>{student.birthYear}</td>
-						<td on:click={() => onClick(student.id)}>{formatStudentGender(student.gender)}</td>
-						<td on:click={() => onClick(student.id)}
-							>{formatAgencyName(student.agencyId)}</td
-						>
-						<td on:click={() => onClick(student.id)}>{formatStudentClassId(student.classRoomId)}</td
-						>
-						<td on:click={() => onClick(student.id)}>
-							<div class="px-2 text-center align-middle">
-								<ArrowRightIcon />
-							</div>
-						</td>
-					</tr>
+			{#if studentList.data.length > 0}
+				{#each studentList?.data as student (student.id)}
+					{#if student.id !== undefined}
+						<tr class="hover cursor-pointer text-center">
+							<th>
+								<label>
+									<input
+										id={student.id.toString()}
+										type="checkbox"
+										class="checkbox checkbox-sm rounded"
+										checked={isChecked.includes(student.id?.toString())}
+										on:click={handleCheck}
+									/>
+								</label>
+							</th>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatStudentClassId(student.classId)}</td
+							>
+							<th on:click={() => onClick(Number(student.id))}>{student.firstName}</th>
+							<th on:click={() => onClick(Number(student.id))}>{student.lastName}</th>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatStudentDate(student.enrolledAt) || ''}</td
+							>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatStudentDate(student.dob) || ''}</td
+							>
+							<td on:click={() => onClick(Number(student.id))}>{formatBirthYear(student.dob)}</td>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatStudentGender(student.gender)}</td
+							>
+							<td on:click={() => onClick(Number(student.id))}
+								>{formatAgencyName(student.agencyId)}</td
+							>
+							<td on:click={() => onClick(Number(student.id))}>
+								<div class="px-2 text-center align-middle">
+									<ArrowRightIcon />
+								</div>
+							</td>
+						</tr>
+					{/if}
 				{/each}
+			{:else }
+				<tr class="h-12 flex flex-row justify-center items-center w-full border-none">
+					<p class="w-full text-base font-medium">Không có dữ liệu...</p>
+				</tr>
 			{/if}
 		</tbody>
 	</table>
 	<!-- Page Num -->
 	<div class="join mt-auto self-center">
 		<a
-			class={data.students.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-			href={`/admin?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
+			class={studentList.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
+			href={`/admin?page=${studentList.page - 1}&pageSize=${studentList.pageSize}`}
 		>
 			<button class="btn join-item">«</button>
 		</a>
-		<button class="btn join-item">Trang {data.students.page}</button>
+		<button class="btn join-item">Trang {studentList.page}</button>
 		<a
-			class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
+			class={studentList.data.length < studentList.pageSize || studentList.data.length === 0
 				? 'pointer-events-none cursor-default opacity-40'
 				: ''}
-			href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
+			href={`/admin?page=${studentList.page + 1}&pageSize=${studentList.pageSize}`}
 		>
 			<button class="btn join-item">»</button>
 		</a>
 	</div>
-	<!-- handle check -->
 	{#if isChecked.length > 0}
 		<div class="absolute bottom-20 left-1/2 w-1/2 -translate-x-1/2" transition:fade>
 			<div class="alert flex justify-between rounded-full bg-white py-2.5 text-sm shadow">
