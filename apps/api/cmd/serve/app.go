@@ -102,6 +102,226 @@ func (a *App) RunHttpServer() {
 			return c.JSON(map[string]string{"message": "Lmao"})
 		},
 	)
+	//registrations
+	app.Get(
+		"/api/v1/registrations",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:registrations"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read registrations"})
+		},
+	)
+
+	app.Get(
+		"/api/v1/registrations/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:registrations"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read one registration"})
+		},
+	)
+
+	app.Post(
+		"/api/v1/registrations",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"create:registrations"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "create a registration"})
+		},
+	)
+
+	app.Patch(
+		"/api/v1/registrations/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"update:registrations"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "update one registration"})
+		},
+	)
+
+	app.Put(
+		"/api/v1/registrations/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"update:registrations"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "update one registration"})
+		},
+	)
+
+	app.Delete(
+		"/api/v1/registrations/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"delete:registrations"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "delete one registration"})
+		},
+	)
+	// agencies
+	app.Get(
+		"/api/v1/agencies",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:agencies"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read agencies"})
+		},
+	)
+
+	app.Get(
+		"/api/v1/agencies/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:agencies"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read one agency"})
+		},
+	)
+
+	app.Post(
+		"/api/v1/agencies",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"create:agencies"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "create an agency"})
+		},
+	)
+
+	app.Put(
+		"/api/v1/agencies/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"update:agencies"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "update an agency"})
+		},
+	)
+	//attendances
+	app.Get(
+		"/api/v1/attendances",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:attendances"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read attendances"})
+		},
+	)
+
+	app.Post(
+		"/api/v1/attendances",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"create:attendances"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "create attendances"})
+		},
+	)
+
+	app.Patch(
+		"/api/v1/attendances",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"update:attendances"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "update attendances"})
+		},
+	)
+	//classes
+	app.Get(
+		"/api/v1/classes",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:classes"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read classes"})
+		},
+	)
+
+	app.Get(
+		"/api/v1/classes/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:classes"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read one class"})
+		},
+	)
+
+	app.Post(
+		"/api/v1/classes",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"create:classes"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "create a class"})
+		},
+	)
+
+	app.Put(
+		"/api/v1/classes/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"update:classes"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "update one class"})
+		},
+	)
+
+	app.Get(
+		"/api/v1/classes/:id<int,min(1)>/export-excel",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:classes"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read classes excel"})
+		},
+	)
+	//students
+	app.Get(
+		"/api/v1/students",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:students"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read students"})
+		},
+	)
+
+	app.Get(
+		"/api/v1/students/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:students"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read one student"})
+		},
+	)
+
+	app.Post(
+		"/api/v1/students",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"create:students"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "create new students"})
+		},
+	)
+
+	app.Put(
+		"/api/v1/students/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"update:students"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "update one student"})
+		},
+	)
 
 	go func() {
 		if err := app.Listen(":5000"); err != nil {
