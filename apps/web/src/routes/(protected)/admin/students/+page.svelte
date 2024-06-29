@@ -539,9 +539,9 @@
 
 		<div class="mt-4">
 			{#if activeTabValue === 0}
-				<TimeSheet />
+				<TimeSheet data={data} />
 			{:else if activeTabValue === 1}
-				<StudentList {data} onClick={(id) => show(id)} />
+				<StudentList data={data} onClick={(id) => show(id)} />
 			{/if}
 		</div>
 	</div>
