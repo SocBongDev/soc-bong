@@ -119,7 +119,7 @@
 			required: true
 		},
 		{
-			name: 'enrolledAt', //enrolledAt
+			name: 'enrolledAt',
 			type: 'date',
 			required: false
 		},
@@ -148,7 +148,7 @@
 			required: false
 		},
 		{
-			name: 'tempAdress',
+			name: 'tempAddress',
 			type: 'text',
 			required: false
 		},
@@ -188,26 +188,57 @@
 		options?: { label: string; value: string | boolean }[]
 	}[] = [
 		{
-			name: 'parentName',
+			name: 'fatherName',
 			type: 'text',
 			required: true
 		},
 		{
-			name: 'parentDob',
+			name: 'fatherDob',
 			type: 'date',
 			required: false
 		},
 		{
-			name: 'parentGender',
-			type: 'select',
-			required: true,
-			options: [
-				{ label: 'Nam', value: '1' },
-				{ label: 'Nữ', value: '2' }
-			]
+			name: 'fatherBirthPlace',
+			type: 'text',
+			required: false
 		},
 		{
-			name: 'parentPhoneNumber',
+			name: 'fatherOccupation',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'motherName',
+			type: 'text',
+			required: true
+		},
+		{
+			name: 'motherDob',
+			type: 'date',
+			required: false
+		},
+		{
+			name: 'motherOccupation',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'motherBirthPlace',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'parentLandLord',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'fatherPhoneNumber',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'motherPhoneNumber',
 			type: 'text',
 			required: false
 		},
@@ -217,22 +248,7 @@
 			required: false
 		},
 		{
-			name: 'parentOccupation',
-			type: 'text',
-			required: false
-		},
-		{
-			name: 'parentLandlord',
-			type: 'text',
-			required: false
-		},
-		{
 			name: 'parentRoi',
-			type: 'text',
-			required: false
-		},
-		{
-			name: 'parentBirthPlace',
 			type: 'text',
 			required: false
 		},
