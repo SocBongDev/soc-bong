@@ -605,6 +605,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Patch attendance api
       tags:
       - Attendance

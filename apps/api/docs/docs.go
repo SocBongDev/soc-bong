@@ -351,6 +351,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Patch attendance",
                 "consumes": [
                     "application/json"
