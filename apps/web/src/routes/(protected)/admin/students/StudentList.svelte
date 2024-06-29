@@ -105,7 +105,7 @@
 		}
 
 		isChecked = [...isChecked, id]
-		const isValidCheckAll = isChecked.length === data.students.data.length
+		const isValidCheckAll = isChecked.length === studentList?.data.length
 		if (isValidCheckAll) {
 			isCheckedAll = true
 		}
