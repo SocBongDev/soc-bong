@@ -395,6 +395,24 @@
 			</tbody>
 		</table>
 
+		<div class="join mt-auto self-center">
+			<a
+				class={data.students.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
+				href={`/admin?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
+			>
+				<button class="btn join-item">«</button>
+			</a>
+			<button class="btn join-item">Trang {data.students.page}</button>
+			<a
+				class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
+					? 'pointer-events-none cursor-default opacity-40'
+					: ''}
+				href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
+			>
+				<button class="btn join-item">»</button>
+			</a>
+		</div>
+
 		{#if statusArray.length > 0}
 			<div class="absolute bottom-10 left-1/2 w-1/2 -translate-x-1/2" transition:fade>
 				<div class="alert flex justify-between rounded-full bg-white py-2.5 text-sm shadow">
@@ -419,22 +437,5 @@
 				</div>
 			</div>
 		{/if}
-		<!-- <div class="join mt-auto self-center">
-			<a
-			class={data.students.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-			href={`/admin?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
-			>
-			<button class="btn join-item">«</button>
-		</a>
-		<button class="btn join-item">Trang {data.students.page}</button>
-		<a
-		class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
-			? 'pointer-events-none cursor-default opacity-40'
-			: ''}
-			href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
-			>
-			<button class="btn join-item">»</button>
-		</a>
-	</div> -->
 	{/if}
 </div>
