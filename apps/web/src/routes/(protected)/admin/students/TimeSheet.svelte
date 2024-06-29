@@ -60,13 +60,34 @@
 		}
 	}
 
+	async function getClassId() {
+		const res = await fetch(`${PUBLIC_API_SERVER_URL}/classes`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
+		const data = await res.json()
+		return data
+	}
+
 	async function handleInput(event: any) {
 		const value = (event.target as HTMLInputElement).value
 		inputValue = value
 		yearPicked = parseInt(value.split('-')[0], 10)
 		monthPicked = parseInt(value.split('-')[1], 10)
 		let datePicked = dayjs(value).format('MM-YYYY')
-		const res = await fetch(`${API}/attendances?classId=${classId}&period=${datePicked}`)
+		const res = await fetch(
+			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			}
+		)
 		attendances = await res.json()
 	}
 
@@ -84,27 +105,53 @@
 	}
 
 	async function fetchData() {
-		const getStudent = await fetch(`${API}/students?classId=${classId}`)
+		const getStudent = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
 		const studentData = await getStudent.json()
 		studentList = studentData.data
 		const res = await fetch(
-			`${API}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`
+			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			}
 		)
 		attendances = await res.json()
 		loading = false
 	}
 
 	onMount(() => {
-		fetchData();
+		fetchData()
 	})
 
 	async function handleSelectClassId(event: any) {
 		classId = parseInt((event.target as HTMLSelectElement).value)
 		const datePicked = dayjs(inputValue).format('MM-YYYY')
 
-		const studentsList = await fetch(`${API}/students?classId=${classId}`)
+		const studentsList = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
 		const attendancesList = await fetch(
-			`${API}/attendances?classId=${classId}&period=${datePicked}`
+			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			}
 		)
 		const studentData = await studentsList.json()
 
@@ -122,13 +169,13 @@
 	}
 
 	async function batchUpdate() {
-		console.log('get this statusArray', statusArray)
 		if (statusArray.length > 0) {
 			statusArray.forEach(async (status) => {
 				if (status?.id) {
-					const res = await fetch(`${API}/attendances`, {
+					const res = await fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
 						method: 'PATCH',
 						headers: {
+							Authorization: `Bearer ${token}`,
 							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify([
@@ -139,9 +186,10 @@
 						])
 					})
 				} else {
-					const res = await fetch(`${API}/attendances`, {
+					const res = await fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
 						method: 'POST',
 						headers: {
+							Authorization: `Bearer ${token}`,
 							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify([
