@@ -9,5 +9,5 @@ export const CreateRegistrationSchema = z.object({
 		.length(10, { message: 'Số điện thoại phải đúng 10 chữ số' }),
 	studentDob: z.string().nonempty({ message: 'Ngày sinh của bé không được bỏ trống' }),
 	studentClass: z.enum(['seed', 'buds', 'leaf', 'toddlers']),
-	agencyId: z.number().int().positive({ message: 'Đơn vị không hợp lệ' }),
+	note: z.string(),
 })
