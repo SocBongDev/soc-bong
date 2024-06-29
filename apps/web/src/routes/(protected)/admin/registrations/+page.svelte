@@ -157,7 +157,7 @@
 		}
 
 		isChecked = [...isChecked, id]
-		const isValidCheckAll = isChecked.length === data.registrations.data.length
+		const isValidCheckAll = isChecked.length === data?.registrations?.data.length
 		if (isValidCheckAll) {
 			isCheckedAll = true
 		}
@@ -170,7 +170,7 @@
 			return
 		}
 
-		isChecked = data.registrations?.data?.map((el: any) => el?.id)
+		isChecked = data.registrations?.data?.map((el: any) => el?.id.toString())
 	}
 
 	function handleContentScroll(panel: HTMLElement) {
