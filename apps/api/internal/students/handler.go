@@ -2,35 +2,38 @@ package students
 
 import (
 	"github.com/SocBongDev/soc-bong/internal/common"
-	"github.com/SocBongDev/soc-bong/internal/parents"
+	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
 
 type StudentHandler struct {
-	repo       StudentRepository
-	parentRepo parents.ParentRepository
+	repo StudentRepository
 }
 
 func (h *StudentHandler) RegisterRoute(router fiber.Router) {
 	r := router.Group("/students")
-<<<<<<< HEAD
-
-	r.Get(
-		"/:id<int,min(1)>",
-		h.FindOne,
-	)
-
 	r.Get(
 		"/",
+		middlewares.ValidatePermissions([]string{"read:students"}),
 		h.Find,
 	)
-=======
-	r.Get("/", h.Find)
-	r.Get("/:id<int,min(1)>", h.FindOne)
-	r.Post("/", h.Insert)
->>>>>>> d34fe274eb4f889099a7833b941bcaf0c65b76cd
+	r.Get(
+		"/:id<int,min(1)>",
+		middlewares.ValidatePermissions([]string{"read:students"}),
+		h.FindOne,
+	)
+	r.Post(
+		"/",
+		middlewares.ValidatePermissions([]string{"create:students"}),
+		h.Insert,
+	)
+	r.Put(
+		"/:id<int,min(1)>",
+		middlewares.ValidatePermissions([]string{"update:students"}),
+		h.Update,
+	)
 }
 
-func New(repo StudentRepository, parentRepo parents.ParentRepository) common.APIHandler {
-	return &StudentHandler{repo: repo, parentRepo: parentRepo}
+func New(repo StudentRepository) common.APIHandler {
+	return &StudentHandler{repo: repo}
 }
