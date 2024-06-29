@@ -287,16 +287,65 @@
 		}
 	}
 
-	async function save(req: ParentProps & StudentProps) {
+	async function save(req: StudentProps) {
 		loading = true
-		const body = JSON.stringify(req)
-		console.log('body student: ', body)
+		const body = {
+			agencyId: req.agencyId,
+			birthPlace: req.birthPlace,
+			classId: req.classId,
+			dob: req.dob,
+			enrolledAt: req.enrolledAt,
+			ethnic: req.ethnic,
+			father_birth_place: req.fatherBirthPlace,
+			father_dob: req.fatherDob,
+			father_name: req.fatherName,
+			father_occupation: req.fatherOccupation,
+			firstName: req.firstName,
+			gender: genderMap(req.gender),
+			land_lord: req.parentLandLord,
+			lastName: req.lastName,
+			mother_birth_place: req.motherBirthPlace,
+			mother_dob: req.motherDob,
+			mother_name: req.motherName,
+			mother_occupation: req.motherOccupation,
+			father_phone_number: req.fatherPhoneNumber,
+			mother_phone_number: req.motherPhoneNumber,
+			parent_res_registration: req.parentResRegistration,
+			parent_roi: req.parentRoi,
+			parent_zalo: req.parentZalo,
+			permanentAddressCommune: req.permanentAddressCommune,
+			permanentAddressDistrict: req.permanentAddressDistrict,
+			permanentAddressProvince: req.permanentAddressProvince,
+			tempAddress: req.tempAddress
+		}
+		const bodyFormated = JSON.stringify(body)
 		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew ? `${API_URL}/students` : `${API_URL}/students/${recordData?.id}`
+		const url = isNew
+			? `${PUBLIC_API_SERVER_URL}/students`
+			: `${PUBLIC_API_SERVER_URL}/students/${recordData?.id}`
 		const request = fetch(url, {
 			method,
-			body
-		}).then((res) => res.json())
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+				accept: 'application/json'
+			},
+			body: bodyFormated
+		}).then((res) => {
+			if (res.status == 422) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			} else if (res.status == 403) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Người dùng hiện không có quyền thực hiện này!'
+				})
+			}
+		})
 
 		try {
 			const res = await request
