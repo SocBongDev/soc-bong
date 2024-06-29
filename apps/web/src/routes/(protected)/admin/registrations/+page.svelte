@@ -10,21 +10,21 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import DateField from '$lib/components/DateField.svelte'
 	import { createForm } from 'felte'
-	import type { CreateRegistrationBody, Registration } from '$lib'
 	import { CreateRegistrationSchema as schema } from './validate'
 	import { validator } from '@felte/validator-zod'
 	import SelectField from '$lib/components/SelectField.svelte'
 	import { invalidate } from '$app/navigation'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import { blur, fade } from 'svelte/transition'
-
+	import type { RegistrationProps } from '../type'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	export let data: PageData
 	let drawerToggleRef: HTMLInputElement
 	let isChecked: string[] = []
 	let scrollClass = ''
 	let isCheckedAll = false
 	let isNew = true
-	let recordData: Registration | null = null
+	let recordData: RegistrationProps | null = null
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
