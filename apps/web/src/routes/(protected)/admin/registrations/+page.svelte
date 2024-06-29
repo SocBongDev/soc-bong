@@ -405,44 +405,40 @@
 				</thead>
 				<tbody>
 					{#each data.registrations.data as registration (registration.id)}
-						<tr class="hover cursor-pointer">
-							<th>
-								<label>
-									<input
-										id={registration.id?.toString()}
-										type="checkbox"
-										class="checkbox checkbox-sm rounded"
-										on:click={handleCheck}
-										checked={isChecked.includes(registration.id?.toString())}
-									/>
-								</label>
-							</th>
-							<th on:click={() => show(registration.id)}>{registration.studentName}</th>
-							<td on:click={() => show(registration.id)}
-								>{formatStudentClass(registration.studentClass || '')}</td
-							>
-							<td on:click={() => show(registration.id)}
-								>{dayjs(registration.studentDob).format('DD/MM/YYYY')}</td
-							>
-							<td on:click={() => show(registration.id)}>{registration.parentName}</td>
-							<td on:click={() => show(registration.id)}>{registration.phoneNumber}</td>
-							<td on:click={() => show(registration.id)}
-								>{formatAgencyName(registration.agencyId)}</td
-							>
-							{#if registration.note === null}
-								<td on:click={() => show(registration.id)} />
-							{:else}
-								<td on:click={() => show(registration.id)}>{registration.note}</td>
-							{/if}
-							<!-- <td on:click={() => show(registration.id)}
-								>{registration.note === null ? '' : registration.note}</td
-							> -->
-							<td on:click={() => show(registration.id)}>
-								<div class="px-2">
-									<ArrowRightIcon />
-								</div>
-							</td>
-						</tr>
+						{#if registration.id}
+							<tr class="hover cursor-pointer">
+								<th>
+									<label>
+										<input
+											id={registration.id?.toString()}
+											type="checkbox"
+											class="checkbox checkbox-sm rounded"
+											on:click={handleCheck}
+											checked={isChecked.includes(registration.id?.toString())}
+										/>
+									</label>
+								</th>
+								<th on:click={() => show(registration.id)}>{registration.studentName}</th>
+								<td on:click={() => show(registration.id)}
+									>{formatStudentClass(registration.studentClass || '')}</td
+								>
+								<td on:click={() => show(registration.id)}
+									>{dayjs(registration.studentDob).format('DD/MM/YYYY')}</td
+								>
+								<td on:click={() => show(registration.id)}>{registration.parentName}</td>
+								<td on:click={() => show(registration.id)}>{registration.phoneNumber}</td>
+								{#if registration.note === null}
+									<td on:click={() => show(registration.id)} />
+								{:else}
+									<td on:click={() => show(registration.id)}>{registration.note}</td>
+								{/if}
+								<td on:click={() => show(registration.id)}>
+									<div class="px-2">
+										<ArrowRightIcon />
+									</div>
+								</td>
+							</tr>
+						{/if}
 					{/each}
 				</tbody>
 			</table>
