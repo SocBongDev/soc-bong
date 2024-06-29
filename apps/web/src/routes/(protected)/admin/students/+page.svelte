@@ -264,10 +264,10 @@
 		extend: validator({ schema }),
 		transform: (values: any) => ({
 			...values,
-			gender: genderMap(values.gender),
+			gender: values.gender,
 			parentGender: genderMap(values.parentGender),
 			agencyId: parseInt(values.agencyId, 10),
-			classId: parseInt(values.classRoomId, 10)
+			classId: parseInt(values.classId, 10)
 		}),
 		onSubmit: save
 	})
