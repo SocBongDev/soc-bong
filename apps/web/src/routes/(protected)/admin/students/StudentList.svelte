@@ -18,6 +18,19 @@
 		pageSize: data.students.pageSize ?? '15'
 	}
 	export let onClick: (id: number) => void
+	const token = localStorage.getItem('access_token')
+
+	async function getClassId() {
+		const res = await fetch(`${PUBLIC_API_SERVER_URL}/classes`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
+		const data = await res.json()
+		return data
+	}
 
 	const studentClassMap = {
 		seed: 'Lớp mầm',
