@@ -395,7 +395,6 @@
 						<th>Ngày sinh</th>
 						<th>Tên phụ huynh</th>
 						<th>Số điện thoại</th>
-						<th>Cơ Sở Nhà Trẻ</th>
 						<th>Ghi chú</th>
 						<th>
 							<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
