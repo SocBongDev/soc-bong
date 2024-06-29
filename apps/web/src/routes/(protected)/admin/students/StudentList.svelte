@@ -76,8 +76,10 @@
 	}
 
 	function formatAgencyName(agencyId: number) {
-		const agency = data.agencies.data.find((el) => parseInt(el.id.toString()) === agencyId)
-		return agency?.agencyName || 'N/A'
+		const agency = data.agencies.data.find(
+			(el) => (el.id && parseInt(el.id?.toString())) === agencyId
+		)
+		return agency?.name || 'N/A'
 	}
 
 	function handleCheckAll() {
