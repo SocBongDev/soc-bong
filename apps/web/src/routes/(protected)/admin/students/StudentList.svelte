@@ -10,7 +10,13 @@
 
 	export let data: PageData
 	let isChecked: string[] = []
+	let classId = 1
 	let isCheckedAll = false
+	let studentList = {
+		data: data.students.data,
+		page: data.students.page,
+		pageSize: data.students.pageSize ?? '15'
+	}
 	export let onClick: (id: number) => void
 
 	const studentClassMap = {
