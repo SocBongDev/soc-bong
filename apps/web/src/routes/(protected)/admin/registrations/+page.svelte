@@ -188,15 +188,36 @@
 		}
 	}
 
-	async function save(req: CreateRegistrationBody) {
+	async function save(req: RegistrationProps) {
 		loading = true
 		const body = JSON.stringify(req)
 		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew ? '/api/registrations' : `/api/registrations/${recordData?.id}`
+		const url = isNew
+			? `${PUBLIC_API_SERVER_URL}/registrations`
+			: `${PUBLIC_API_SERVER_URL}/registrations/${recordData?.id}`
 		const request = fetch(url, {
 			method,
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json',
+				accept: 'application/json'
+			},
 			body
-		}).then((res) => res.json())
+		}).then((res) => {
+			if (res.status == 422) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			} else if (res.status == 403) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Người dùng hiện không có quyền thực hiện này!'
+				})
+			}
+		})
 
 		try {
 			const res = await request
@@ -213,16 +234,24 @@
 
 	function refreshData() {
 		invalidate('app:registrations')
-		invalidate('app:agencies')
 	}
 
 	async function loadData(id: number, signal: AbortSignal) {
 		loading = true
 
 		try {
-			const res = await fetch(`/api/registrations/${id}`, {
-				signal
-			}).then((res) => res.json())
+			const res = await fetch(
+				`${PUBLIC_API_SERVER_URL}/registrations/${id}`,
+
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+						'Content-Type': 'application/json',
+						accept: 'application/json'
+					},
+					signal
+				}
+			).then((res) => res.json())
 			res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
 			recordData = res
 		} catch (e) {
@@ -245,10 +274,23 @@
 		loading = true
 
 		try {
-			const res = await fetch(`/api/registrations`, {
-				body: JSON.stringify({ ids: [Number(recordData.id)] }),
-				method: 'DELETE'
-			}).then((res) => res.json())
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/registrations`, {
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				},
+				body: JSON.stringify({ ids: [Number(recordData.id)] })
+			}).then((res) => {
+				if (res.status === 403) {
+					Notify({
+						type: 'error',
+						id: crypto.randomUUID(),
+						description: 'Người dùng hiện không có quyền thực hiện này!'
+					})
+				}
+			})
 			refreshData()
 			resetDefaultForm()
 			hide()
@@ -268,7 +310,23 @@
 	async function batchDelete() {
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch('/api/registrations', { body: JSON.stringify({ ids }), method: 'DELETE' })
+			await fetch(`${PUBLIC_API_SERVER_URL}/registrations`, {
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				},
+				body: JSON.stringify({ ids })
+			}).then((res) => {
+				if (res.status == 403) {
+					Notify({
+						type: 'error',
+						id: crypto.randomUUID(),
+						description: 'Người dùng hiện không có quyền thực hiện này!'
+					})
+				}
+			})
 			refreshData()
 			clearSelected()
 		} catch (e) {
