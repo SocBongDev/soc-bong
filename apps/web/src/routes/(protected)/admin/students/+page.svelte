@@ -361,8 +361,8 @@
 	}
 
 	const tabData = [
-		{ name: 'Time Sheet', section: 'timeSheet', value: 0 },
-		{ name: 'Student List', section: 'studentlist', value: 1 }
+		{ name: 'Danh sách điểm danh', section: 'timeSheet', value: 0 },
+		{ name: 'Danh sách học sinh', section: 'studentlist', value: 1 }
 	]
 
 	function refreshData() {
