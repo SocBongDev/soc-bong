@@ -15,7 +15,7 @@
 	const sidebarData: SidebarData[] = [
 		{ children: 'Danh sách đăng ký', icon: RegisterIcon, name: 'registrations' },
 		{ children: 'Danh sách học viên', icon: StudentIcon, isDisabled: false, name: 'students' },
-		{ children: 'Quản lý vai trò', icon: RoleIcon, isDisabled: false, name: 'roles'},
+		{ children: 'Quản lý vai trò', icon: RoleIcon, isDisabled: true, name: 'roles'},
 		{ children: 'Quản lý người dùng', icon: UserIcon, isDisabled: true, name: 'users'},
 		{ children: 'Quản lý cơ sở', icon: SchoolIcon, isDisabled: false, name: 'agencies'}
 	]
