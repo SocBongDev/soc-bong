@@ -24,6 +24,7 @@
 		unsubscribe()
 	})
 
+	export let data
 	let classId = 1
 	let attendances: any = {}
 	let studentList: any = []
