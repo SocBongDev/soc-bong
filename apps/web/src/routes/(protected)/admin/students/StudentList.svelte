@@ -87,9 +87,8 @@
 		if (!isCheckedAll) {
 			isChecked = []
 			return
-		} else {
-			isChecked = data.students?.data?.map((student: any) => student?.id)
 		}
+		isChecked = studentList?.data?.map((student: any) => student?.id.toString())
 	}
 
 	function handleCheck(e: any) {
