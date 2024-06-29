@@ -44,11 +44,17 @@
 		return dayjs(studentDate).format('DD/MM/YYYY')
 	}
 
-	function formatStudentGender(studentGender: string | null) {
+	function formatBirthYear(studentDate: string | null) {
+		if (!studentDate) return 'Chưa điền'
+		return dayjs(studentDate).format('YYYY')
+	}
+
+	function formatStudentGender(studentGender: string | boolean | null) {
 		switch (studentGender) {
-			case 'male':
-			case 'female':
-				return studentGenderMap[studentGender as keyof typeof studentGenderMap]
+			case true:
+				return 'Nam'
+			case false:
+				return 'Nữ'
 			case null:
 				return 'Chưa điền giới tính'
 			default:
@@ -56,26 +62,16 @@
 		}
 	}
 
-	function formatStudentClassId(studentClass: number) {
-		switch (studentClass) {
-			case 1:
-			case 2:
-			case 3:
-				return studentClassIdMap[studentClass as keyof typeof studentClassIdMap]
-			default:
-				return 'Lớp chưa đúng'
-		}
-	}
-
-	function formatStudentClass(studentClass: string) {
-		switch (studentClass) {
-			case 'seed':
+	function formatStudentClassId(classId: number) {
+		const classRoomId = data?.classes?.data.find((cl) => cl.id == classId)
+		switch (classRoomId?.grade) {
 			case 'buds':
+			case 'seed':
 			case 'leaf':
 			case 'toddlers':
-				return studentClassMap[studentClass as keyof typeof studentClassMap]
+				return studentClassMap[classRoomId?.grade as keyof typeof studentClassMap]
 			default:
-				return 'N/A'
+				return 'Lớp chưa đúng!'
 		}
 	}
 
