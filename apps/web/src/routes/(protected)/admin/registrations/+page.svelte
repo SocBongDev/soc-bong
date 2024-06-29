@@ -34,18 +34,16 @@
 		setInitialValues(initialValues)
 		reset()
 	}
-	var agencyOptions = data?.agencies?.data?.map((el) => ({
-		label: el.agencyName,
-		value: el.id.toString()
-	}))
+
+	const token = localStorage.getItem('access_token')
+
 	const defaultFormValues = {
 		studentClass: 'seed',
 		studentName: '',
 		phoneNumber: '',
 		studentDob: '',
 		parentName: '',
-		note: undefined,
-		agencyId: parseInt(agencyOptions[0]?.value)
+		note: undefined
 	}
 	const registrationSchema: {
 		name: string
@@ -88,12 +86,6 @@
 			name: 'note',
 			type: 'text',
 			required: false
-		},
-		{
-			name: 'agencyId',
-			type: 'select',
-			required: true,
-			options: agencyOptions
 		}
 	]
 	const studentClassMap = {
