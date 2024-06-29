@@ -238,10 +238,17 @@
 				id="classId"
 				class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold"
 			>
-				<option value="1">Lớp nhà trẻ</option>
-				<option value="2">Lớp Mầm</option>
-				<option value="3">Lớp Chồi</option>
-				<option value="4">Lớp Lá</option>
+				{#await getClassId()}
+					Loading Classroom...
+				{:then classes}
+					{#if classes.data.length > 0}
+						{#each classes?.data as classroom, index}
+							<option value={`${classroom?.id}`}>{classroom?.name}</option>
+						{/each}
+					{/if}
+				{:catch error}
+					System error: {error.message}
+				{/await}
 			</select>
 			<div class="dropdown-calendar text-sm">
 				<input
