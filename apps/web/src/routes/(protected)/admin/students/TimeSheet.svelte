@@ -3,7 +3,7 @@
 	import ExportIcon from '~icons/mdi/export'
 	import ClickDropdown from '$lib/components/ClickDropdown.svelte'
 	import dayjs from 'dayjs'
-	import { getContext, onDestroy, onMount } from 'svelte'
+	import { onDestroy, onMount } from 'svelte'
 	import { fade } from 'svelte/transition'
 	import { Notify, dialogProps, openDialog } from '$lib/store'
 	import { statusChange } from '$lib/store'
