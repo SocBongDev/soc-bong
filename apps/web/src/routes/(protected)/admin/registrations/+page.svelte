@@ -367,7 +367,10 @@
 			</div>
 			<button
 				class="btn btn-primary btn-sm rounded normal-case active:!translate-y-1"
-				on:click={() => show()}
+				on:click={() => {
+					recordData = null
+					show()
+				}}
 			>
 				<PlusIcon />
 				Thêm mới
