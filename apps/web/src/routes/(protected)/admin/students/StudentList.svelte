@@ -123,18 +123,66 @@
 	async function batchDelete() {
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch('/api/students', { body: JSON.stringify({ ids }), method: 'DELETE' })
+			await fetch('/api/students', {
+				body: JSON.stringify({ ids }),
+				headers: {
+					method: 'DELETE',
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
 			refreshData()
 			clearSelected()
 		} catch (e) {
 			console.error('Batch Delete error', e)
 			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
+			if (e.status === 403) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Bạn không đủ quyền hạn làm việc này!'
+				})
+			}
 		}
+	}
+
+	async function handleSelectClassId(event: any) {
+		classId = parseInt((event.target as HTMLSelectElement).value)
+		const studentsList = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
+
+		const studentData = await studentsList.json()
+		studentList = { ...studentList, data: studentData.data }
 	}
 </script>
 
 <div class="relative flex h-auto flex-col gap-10 overflow-x-auto">
-	<table class="table">
+	<div class="flex items-center justify-end gap-4 pl-4">
+		<h3 class="">Chọn Lớp:</h3>
+		<select
+			on:change={handleSelectClassId}
+			id="classId"
+			class="select select-ghost h-fit min-h-0 w-fit max-w-xs font-bold"
+		>
+			{#await getClassId()}
+				Loading Classroom...
+			{:then classes}
+				{#if classes.data.length > 0}
+					{#each classes?.data as classroom, index}
+						<option value={`${classroom?.id}`}>{classroom?.name}</option>
+					{/each}
+				{/if}
+			{:catch error}
+				System error: {error.message}
+			{/await}
+		</select>
+	</div>
+	<table class="-mt-8 table">
 		<thead>
 			<tr class="text-center">
 				<th>
