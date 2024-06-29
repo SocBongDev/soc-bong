@@ -3,7 +3,6 @@
 	import StudentList from './StudentList.svelte'
 	import RefreshIcon from '~icons/ri/refresh-line'
 	import type { PageData } from './$types'
-	import type { CreateParentBody, CreateStudentBody, Parent, Student } from '$lib'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import PlusIcon from '~icons/ic/round-add'
 	import { createForm } from 'felte'
@@ -16,21 +15,20 @@
 	import TrashIcon from '~icons/fa-solid/trash-alt'
 	import TimesIcon from '~icons/uil/times'
 	import { invalidate } from '$app/navigation'
-	import type { StudentProps, ParentProps } from '../type'
+	import type { StudentProps } from '../type'
 	import dayjs from 'dayjs'
-
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	export let data: PageData
-
-	const API_URL = 'http://127.0.0.1:5000/api/v1'
 
 	let drawerToggleRef: HTMLInputElement
 	let scrollClass = ''
 	let isNew = true
-
-	let recordData: (StudentProps & ParentProps) | null = null
+	let isCheckedAll = false
+	let recordData: StudentProps | null = null
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
+	const token = localStorage.getItem('access_token')
 	$: isNew = !recordData
 	$: if (recordData !== null) {
 		const { id, ...restOfStudentData } = recordData
