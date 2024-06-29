@@ -95,7 +95,7 @@
 		const { id, checked } = e.currentTarget
 
 		if (!checked) {
-			const isValidCheckAll = isChecked.length === data.students.data.length
+			const isValidCheckAll = isChecked.length === studentList.data.length
 			if (isValidCheckAll) {
 				isCheckedAll = false
 			}
