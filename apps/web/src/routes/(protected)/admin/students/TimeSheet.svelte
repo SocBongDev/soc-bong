@@ -326,8 +326,6 @@
 				</tr>
 			</thead>
 			<tbody>
-				<!-- thêm studentList -->
-				<!-- {#each Object.entries(data) as student, index (index)} -->
 				{#if studentList.length === 0}
 					<tr class="hover cursor-pointer text-center">
 						<td class="max-w-xs px-0">Không có dữ liệu</td>
