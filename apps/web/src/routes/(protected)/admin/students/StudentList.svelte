@@ -39,17 +39,6 @@
 		toddlers: 'Trẻ ( 18 - 24 tháng tuổi )'
 	}
 
-	const studentClassIdMap = {
-		1: 'Lớp 1',
-		2: 'Lớp 2',
-		3: 'Lớp 3'
-	}
-
-	const studentGenderMap = {
-		male: 'Nam',
-		female: 'Nữ'
-	}
-
 	function formatStudentDate(studentDate: string | null) {
 		if (!studentDate) return 'Chưa điền'
 		return dayjs(studentDate).format('DD/MM/YYYY')
