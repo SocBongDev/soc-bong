@@ -114,11 +114,6 @@
 		}
 	}
 
-	function formatAgencyName(agencyId: number) {
-		const agency = data.agencies.data.find((el) => parseInt(el.id.toString()) === agencyId)
-		return agency?.agencyName || 'N/A'
-	}
-
 	let prevPromise: Promise<void>
 	async function show(id?: number) {
 		checked = true
