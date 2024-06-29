@@ -32,12 +32,11 @@
 	$: isReset = false
 
 	const status = [
-		{ name: 'unknown', color: 'bg-white', letter: '⚪' },
-		{ name: 'absented', color: 'bg-red-600', letter: '🔴' },
-		{ name: 'attended', color: 'bg-green-500', letter: '🟢' },
-		{ name: 'excused', color: 'bg-yellow-400', letter: '🟡' },
-		{ name: 'dayoff', color: 'bg-gray-700', letter: '⚫' },
-		{ name: 'holiday', color: 'bg-blue-600', letter: '🔵' }
+		{ name: 'Nghỉ không phép', color: 'bg-red-600', letter: '🔴' },
+		{ name: 'Có mặt', color: 'bg-green-500', letter: '🟢' },
+		{ name: 'Nghỉ có phép', color: 'bg-yellow-400', letter: '🟡' },
+		{ name: 'Ngày nghỉ ở trường', color: 'bg-gray-700', letter: '⚫' },
+		{ name: 'Ngày nghỉ lễ', color: 'bg-blue-600', letter: '🔵' }
 	]
 
 	function generateWeekDays(day: number) {
