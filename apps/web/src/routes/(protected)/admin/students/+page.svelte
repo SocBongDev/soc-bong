@@ -390,28 +390,37 @@
 	async function loadData(id: number, signal: AbortSignal) {
 		loading = true
 		try {
-			const res = await fetch(`${API_URL}/students/${id}`, {
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/students/${id}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
 				signal
 			})
+
 			const studentData = await res.json()
-			
 			if (studentData.id) {
 				recordData = {
 					...studentData,
+					tempAdress: studentData.temp_address,
+
 					gender: genderBooleantoString(studentData.gender),
 					enrolledAt: dayjs(studentData.enrolledAt).format('YYYY-MM-DD'),
 					dob: dayjs(studentData.dob).format('YYYY-MM-DD'),
-					parentBirthPlace: studentData.parent_birth_place,
-					parentDob: dayjs(studentData.parent_dob).format('YYYY-MM-DD'),
-					parentGender: genderBooleantoString(studentData.parent_gender),
-					parentLandlord: studentData.landlord,
-					parentName: studentData.parent_name,
-					parentOccupation: studentData.occupation,
-					parentPhoneNumber: studentData.phone_number,
-					parentResRegistration: studentData.res_registration,
-					parentRoi: studentData.roi,
-					parentZalo: studentData.zalo,
-					studentId: studentData.student_id,
+					fatherBirthPlace: studentData.father_birth_place,
+					motherBirthPlace: studentData.mother_birth_place,
+					fatherDob: dayjs(studentData.father_dob).format('YYYY-MM-DD'),
+					motherDob: dayjs(studentData.mother_dob).format('YYYY-MM-DD'),
+					fatherOccupation: studentData.father_occupation,
+					motherOccupation: studentData.mother_occupation,
+					fatherName: studentData.father_name,
+					motherName: studentData.mother_name,
+
+					parentLandLord: studentData.land_lord,
+					parentPhoneNumber: studentData.parent_phone_number,
+					parentResRegistration: studentData.parent_res_registration,
+					parentRoi: studentData.parent_roi,
+					parentZalo: studentData.parent_zalo
 				}
 			} else {
 				throw new Error('Student ID not found can not find Parent of Student')
@@ -449,7 +458,11 @@
 		try {
 			const res = await fetch(`/api/students`, {
 				body: JSON.stringify({ ids: [Number(recordData.id)] }),
-				method: 'DELETE'
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
 			}).then((res) => res.json())
 			refreshData()
 			resetDefaultForm()
