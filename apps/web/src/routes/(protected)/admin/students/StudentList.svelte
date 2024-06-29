@@ -203,7 +203,6 @@
 				<th>Năm sinh</th>
 				<th>Giới tính</th>
 				<th>Cơ Sở Trường Học</th>
-				<th>Mã phòng học</th>
 				<th>
 					<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
 						<EllipsisIcon />
