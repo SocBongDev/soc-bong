@@ -6,6 +6,7 @@
 	import dayjs from 'dayjs'
 	import type { PageData } from './$types'
 	import { invalidate } from '$app/navigation'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 
 	export let data: PageData
 	let isChecked: string[] = []
