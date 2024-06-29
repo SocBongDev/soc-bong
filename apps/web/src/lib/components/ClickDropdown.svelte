@@ -36,11 +36,15 @@
 	}
 
 	function handleChangeState(index: number) {
-		activeStatus = status[index]	
+		activeStatus = status[index]
 		statusChange.update((status) => {
-			let id = data?.id;
+			let id = data?.id
 			if (!id) {
-				const existingIndex = status.findIndex((s) => s.date === dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD') && s.studentId === studentId)
+				const existingIndex = status.findIndex(
+					(s) =>
+						s.date === dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD') &&
+						s.studentId === studentId
+				)
 				if (existingIndex !== -1) {
 					return status.map((s, i) => {
 						if (i === existingIndex) {
@@ -51,11 +55,11 @@
 				}
 				return [
 					...status,
-					{ 
-						date: dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD'), 
+					{
+						date: dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD'),
 						studentId: studentId,
 						attendedStatus: activeStatus.name,
-						classId: classId 
+						classId: classId
 					}
 				]
 			} else {
@@ -72,7 +76,9 @@
 					...status,
 					{
 						id: id,
-						date: dayjs(`${yearPicked}-${monthPicked}-${date} ${dayjs().format('HH:mm:ss')}`).format('YYYY-MM-DD HH:mm:ss.SSS[Z]'),
+						date: dayjs(
+							`${yearPicked}-${monthPicked}-${date} ${dayjs().format('HH:mm:ss')}`
+						).format('YYYY-MM-DD HH:mm:ss.SSS[Z]'),
 						studentId: studentId,
 						attendedStatus: activeStatus.name,
 						classId: classId
