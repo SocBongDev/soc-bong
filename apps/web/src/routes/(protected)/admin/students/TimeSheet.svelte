@@ -8,12 +8,13 @@
 	import { Notify, dialogProps, openDialog } from '$lib/store'
 	import { statusChange } from '$lib/store'
 	import type { AttendedStatus } from '$lib/store'
-
-	let API = 'http://127.0.0.1:5000/api/v1'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	let inputValue: string = dayjs().format('YYYY-MM') || '2023-05'
 	let yearPicked: number = parseInt(inputValue.split('-')[0], 10)
 	let monthPicked: number = parseInt(inputValue.split('-')[1], 10)
 	let statusArray: AttendedStatus[] = []
+
+	const token = localStorage.getItem('access_token')
 
 	const unsubscribe = statusChange.subscribe((value) => {
 		console.log('check value', value)
