@@ -215,9 +215,9 @@
 				description: 'Lỗi không thể thực hiện chức năng này'
 			})
 		}
-		statusChange.set([]);
-		statusArray = [];
-		fetchData();
+		statusChange.set([])
+		statusArray = []
+		fetchData()
 	}
 </script>
 
