@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { statusChange } from '$lib/store'
-	import dayjs from 'dayjs';
+	import dayjs from 'dayjs'
 	export let data: any
-	
+
 	export let date: string
 	export let studentId: string
 	export let classId: string
 	export let monthPicked: number
 	export let yearPicked: number
-	
+
 	let isDropdownOpen: boolean = false
 
-	type attendedStatus = 'attended' | 'absented' | 'excused' | 'dayoff' | 'holiday' | 'unknown'
+	type attendedStatus = 'attended' | 'absented' | 'excused' | 'dayoff' | 'holiday'
 
 	type statusType = {
 		name: attendedStatus
@@ -20,7 +20,6 @@
 	}[]
 
 	const status: statusType = [
-		{ name: 'unknown', color: 'text-white', letter: '⚪' },
 		{ name: 'absented', color: 'text-red-500', letter: '🔴' },
 		{ name: 'attended', color: 'text-green-500', letter: '🟢' },
 		{ name: 'excused', color: 'text-gray-500', letter: '🟡' },
