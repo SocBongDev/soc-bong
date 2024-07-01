@@ -11,9 +11,6 @@ import (
 // @Description Get list attendance
 // @Tags Attendance
 // @Accept json
-// @Param  page query int false "Page"
-// @Param  pageSize query int false "Page Size"
-// @Param  sort query string false "Sort direction" Enums(asc, desc) default(desc)
 // @Param  classId query string true "Class id"
 // @Param  period query string false "Time range"
 // @Success 200 {object} map[int][]Attendance
@@ -29,16 +26,10 @@ func (h *AttendanceHandler) Find(c *fiber.Ctx) error {
 	query.Format()
 
 	log.Printf("FindAttendances request: %+v\n", query)
-
-	data, err := h.repo.Find(query)
+	resp, err := h.formatAttendances(query)
 	if err != nil {
-		log.Println("FindAttendances.All err: ", err)
-		return fiber.ErrInternalServerError
-	}
-
-	resp := make(map[int][]Attendance)
-	for _, a := range data {
-		resp[a.StudentId] = append(resp[a.StudentId], a)
+		log.Println("FindAttendances.formatAttendances err: ", err)
+		return err
 	}
 
 	log.Printf("FindAttendances success. Response: %+v\n", resp)
