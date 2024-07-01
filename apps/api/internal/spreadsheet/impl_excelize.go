@@ -2,7 +2,6 @@ package spreadsheet
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"log"
 
@@ -28,19 +27,29 @@ var (
 
 const WORKSHEET = "sheet1"
 
-func CreateNumberCell(colIdx int, f *excelize.File, cellName, color string) int {
+func createNumberCell(colIdx int, f *excelize.File, cellName, color string) (int, error) {
 	no1StartCell, err := excelize.CoordinatesToCellName(colIdx, 1)
 	if err != nil {
-		log.Fatal("excelize.CoordinatesToCellName err: ", err)
+		log.Println("createNumberCell.excelize.CoordinatesToCellName err: ", err)
+		return 0, err
 	}
 
 	no1EndCell, err := excelize.CoordinatesToCellName(colIdx+1, 2)
 	if err != nil {
-		log.Fatal("excelize.CoordinatesToCellName err: ", err)
+		log.Println("createNumberCell.excelize.CoordinatesToCellName err: ", err)
+		return 0, err
 	}
 
-	f.MergeCell(WORKSHEET, no1StartCell, no1EndCell)
-	f.SetCellStr(WORKSHEET, no1StartCell, cellName)
+	if err := f.MergeCell(WORKSHEET, no1StartCell, no1EndCell); err != nil {
+		log.Println("createNumberCell.MergeCell err: ", err)
+		return 0, err
+	}
+
+	if err := f.SetCellStr(WORKSHEET, no1StartCell, cellName); err != nil {
+		log.Println("createNumberCell.SetCellStr err: ", err)
+		return 0, err
+	}
+
 	numberCellStyle, err := f.NewStyle(&excelize.Style{
 		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "middle"},
 		Border: []excelize.Border{
@@ -50,13 +59,22 @@ func CreateNumberCell(colIdx int, f *excelize.File, cellName, color string) int 
 		Fill: excelize.Fill{Type: "pattern", Pattern: 1, Color: []string{color}},
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Println("createNumberCell.NewStyle err: ", err)
+		return 0, err
 	}
-	f.SetCellStyle(WORKSHEET, no1StartCell, no1EndCell, numberCellStyle)
-	f.SetColWidth(WORKSHEET, no1StartCell, no1StartCell, 15)
+
+	if err := f.SetCellStyle(WORKSHEET, no1StartCell, no1EndCell, numberCellStyle); err != nil {
+		log.Println("createNumberCell.SetCellStyle err: ", err)
+		return 0, err
+	}
+
+	if err := f.SetColWidth(WORKSHEET, no1StartCell, no1StartCell, 15); err != nil {
+		log.Println("createNumberCell.SetColWidth err: ", err)
+		return 0, err
+	}
 	colIdx += 2
 
-	return colIdx
+	return colIdx, nil
 }
 
 func (s *spreadSheetExcelize) ExportClassAttendances(
@@ -65,53 +83,141 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 	f := excelize.NewFile()
 	defer func() {
 		if err := f.Close(); err != nil {
-			log.Println(err)
+			log.Println("ExportClassAttendances.Close err: ", err)
 		}
 	}()
 
 	// Open template.xlsx
 	f, err := excelize.OpenFile("./internal/spreadsheet/template.xlsx")
 	if err != nil {
-		log.Fatal("writeDataToExcel.OpenFile err: ", err)
+		log.Println("ExportClassAttendances.writeDataToExcel.OpenFile err: ", err)
+		return nil, err
 	}
 
 	// Set value of a cell
 	rowIdx := 3
 	isHandleFirstFormula := false
 	for _, v := range classAttendances {
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("A%d", rowIdx), v.Student.Class.Grade)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("B%d", rowIdx), v.Student.LastName)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("C%d", rowIdx), v.Student.FirstName)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("D%d", rowIdx), v.Student.EnrolledAt.Time().Format(common.DayMonthYearLayout))
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("E%d", rowIdx), v.Student.Dob.Time().Format(common.DayMonthYearLayout))
-
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("F%d", rowIdx), v.Student.FatherPhoneNumber)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("G%d", rowIdx), v.Student.MotherPhoneNumber)
-
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("H%d", rowIdx), v.Student.Zalo)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("I%d", rowIdx), v.Student.Dob.Time().Year())
-
-		if v.Student.Gender {
-			f.SetCellValue(WORKSHEET, fmt.Sprintf("J%d", rowIdx), "x")
-		} else {
-			f.SetCellValue(WORKSHEET, fmt.Sprintf("K%d", rowIdx), "x")
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("A%d", rowIdx), v.Student.Class.Grade); err != nil {
+			log.Println("ExportClassAttendances.SetStudentGrade err: ", err)
+			return f.WriteToBuffer()
 		}
 
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("L%d", rowIdx), v.Student.Ethnic)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("M%d", rowIdx), v.Student.BirthPlace)
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("B%d", rowIdx), v.Student.LastName); err != nil {
+			log.Println("ExportClassAttendances.SetStudentLastName err: ", err)
+			return f.WriteToBuffer()
+		}
 
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("N%d", rowIdx), v.Student.FatherName)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("O%d", rowIdx), v.Student.FatherDob.Time().Year())
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("P%d", rowIdx), v.Student.FatherOccupation)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("Q%d", rowIdx), v.Student.MotherName)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("R%d", rowIdx), v.Student.MotherDob.Time().Year())
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("S%d", rowIdx), v.Student.MotherOccupation)
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("C%d", rowIdx), v.Student.FirstName); err != nil {
+			log.Println("ExportClassAttendances.SetStudentFirstName err: ", err)
+			return f.WriteToBuffer()
+		}
 
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("T%d", rowIdx), v.Student.PermanentAddressCommune)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("U%d", rowIdx), v.Student.PermanentAddressDistrict)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("V%d", rowIdx), v.Student.PermanentAddressProvince)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("W%d", rowIdx), v.Student.TempAddress)
-		f.SetCellValue(WORKSHEET, fmt.Sprintf("X%d", rowIdx), v.Student.Landlord)
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("D%d", rowIdx), v.Student.EnrolledAt.Time().Format(common.DayMonthYearLayout)); err != nil {
+			log.Println("ExportClassAttendances.SetStudentEnrolledAt err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("E%d", rowIdx), v.Student.Dob.Time().Format(common.DayMonthYearLayout)); err != nil {
+			log.Println("ExportClassAttendances.SetStudentDob err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("F%d", rowIdx), v.Student.FatherPhoneNumber); err != nil {
+			log.Println("ExportClassAttendances.SetFatherPhoneNumber err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("G%d", rowIdx), v.Student.MotherPhoneNumber); err != nil {
+			log.Println("ExportClassAttendances.SetMortherPhoneNumber err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("H%d", rowIdx), v.Student.Zalo); err != nil {
+			log.Println("ExportClassAttendances.SetParentZalo err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("I%d", rowIdx), v.Student.Dob.Time().Year()); err != nil {
+			log.Println("ExportClassAttendances.SetStudentDobYear err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		genderCol := ""
+		if v.Student.Gender {
+			genderCol = fmt.Sprintf("J%d", rowIdx)
+		} else {
+			genderCol = fmt.Sprintf("K%d", rowIdx)
+		}
+		if err := f.SetCellValue(WORKSHEET, genderCol, "x"); err != nil {
+			log.Println("ExportClassAttendances.SetStudentGender err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("L%d", rowIdx), v.Student.Ethnic); err != nil {
+			log.Println("ExportClassAttendances.SetStudentEthnic err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("M%d", rowIdx), v.Student.BirthPlace); err != nil {
+			log.Println("ExportClassAttendances.SetStudentBirthPlace err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("N%d", rowIdx), v.Student.FatherName); err != nil {
+			log.Println("ExportClassAttendances.SetFatherName err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("O%d", rowIdx), v.Student.FatherDob.Time().Year()); err != nil {
+			log.Println("ExportClassAttendances.SetFatherDob err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("P%d", rowIdx), v.Student.FatherOccupation); err != nil {
+			log.Println("ExportClassAttendances.SetFatherOccupation err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("Q%d", rowIdx), v.Student.MotherName); err != nil {
+			log.Println("ExportClassAttendances.SetMotherName err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("R%d", rowIdx), v.Student.MotherDob.Time().Year()); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("S%d", rowIdx), v.Student.MotherOccupation); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("T%d", rowIdx), v.Student.PermanentAddressCommune); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("U%d", rowIdx), v.Student.PermanentAddressDistrict); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("V%d", rowIdx), v.Student.PermanentAddressProvince); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("W%d", rowIdx), v.Student.TempAddress); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("X%d", rowIdx), v.Student.Landlord); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 		/* f.SetCellValue(WORKSHEET, fmt.Sprintf("Y%d", rowIdx),v.Student.)
 		f.SetCellValue(WORKSHEET, fmt.Sprintf("Z%d", rowIdx), "N/A") */
 
@@ -121,25 +227,29 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			// Write day number to row 0 idx, date to row 1
 			cell, err := excelize.CoordinatesToCellName(dateColIdx, 1)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
 			}
-			f.SetCellValue(WORKSHEET, cell, d.AttendedAt.Time().Day())
+
+			if err := f.SetCellValue(WORKSHEET, cell, d.AttendedAt.Time().Day()); err != nil {
+				log.Println("ExportClassAttendances. err: ", err)
+				return f.WriteToBuffer()
+			}
 
 			cell, err = excelize.CoordinatesToCellName(dateColIdx, 2)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			vietnameseWeekday, ok := VietnameseWeekdayMap[d.AttendedAt.Time().Weekday().String()]
 			if !ok {
-				return nil, errors.New("Ain't noway this will happen lmao")
+				return f.WriteToBuffer()
 			}
 
-			f.SetCellValue(
-				WORKSHEET,
-				cell,
-				vietnameseWeekday,
-			)
+			if err := f.SetCellValue(WORKSHEET, cell, vietnameseWeekday); err != nil {
+				log.Println("ExportClassAttendances. err: ", err)
+				return f.WriteToBuffer()
+			}
 			dateColIdx++
 		}
 
@@ -148,9 +258,14 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			// Fill in attendances status
 			cell, err := excelize.CoordinatesToCellName(colIdx, rowIdx)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
-			f.SetCellValue(WORKSHEET, cell, int(d.AttendedStatus))
+
+			if err := f.SetCellValue(WORKSHEET, cell, int(d.AttendedStatus)); err != nil {
+				log.Println("ExportClassAttendances. err: ", err)
+				return f.WriteToBuffer()
+			}
 			colIdx++
 		}
 
@@ -159,12 +274,14 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 		if !isHandleFirstFormula {
 			topLeftCell, err := excelize.CoordinatesToCellName(colIdx, 1)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			bottomRightCell, err := excelize.CoordinatesToCellName(colIdx+1, 1)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			style, err := f.NewStyle(&excelize.Style{
@@ -177,15 +294,27 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			})
 			if err != nil {
 				log.Println("f.NewStyle err: ", err)
+				return f.WriteToBuffer()
 			}
 
-			f.MergeCell(WORKSHEET, topLeftCell, bottomRightCell)
-			f.SetCellValue(
+			if err := f.MergeCell(WORKSHEET, topLeftCell, bottomRightCell); err != nil {
+				log.Println("ExportClassAttendances. err: ", err)
+				return f.WriteToBuffer()
+			}
+
+			if err := f.SetCellValue(
 				WORKSHEET,
 				topLeftCell,
 				fmt.Sprintf("Tăng ca T%02d/%d", 9, 2024),
-			)
-			f.SetCellStyle(WORKSHEET, topLeftCell, bottomRightCell, style)
+			); err != nil {
+				log.Println("ExportClassAttendances. err: ", err)
+				return f.WriteToBuffer()
+			}
+
+			if err := f.SetCellStyle(WORKSHEET, topLeftCell, bottomRightCell, style); err != nil {
+				log.Println("ExportClassAttendances. err: ", err)
+				return f.WriteToBuffer()
+			}
 			isHandleFirstFormula = true
 		}
 
@@ -193,24 +322,43 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			&excelize.Style{Alignment: &excelize.Alignment{Horizontal: "center"}},
 		)
 		if err != nil {
-			log.Fatal("f.NewStyle err: ", err)
+			log.Println("f.NewStyle err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		// Time cell
 		cell, err := excelize.CoordinatesToCellName(colIdx, 2)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
-		f.SetCellStr(WORKSHEET, cell, "Giờ")
-		f.SetCellStyle(WORKSHEET, cell, cell, horizontalCenterStyle)
+
+		if err := f.SetCellStr(WORKSHEET, cell, "Giờ"); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellStyle(WORKSHEET, cell, cell, horizontalCenterStyle); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 
 		// Dinner cell
 		cell, err = excelize.CoordinatesToCellName(colIdx+1, 2)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
-		f.SetCellStr(WORKSHEET, cell, "Ăn tối")
-		f.SetCellStyle(WORKSHEET, cell, cell, horizontalCenterStyle)
+
+		if err := f.SetCellStr(WORKSHEET, cell, "Ăn tối"); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellStyle(WORKSHEET, cell, cell, horizontalCenterStyle); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 
 		// P cell
 		pCellStyle, err := f.NewStyle(
@@ -224,30 +372,43 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			},
 		)
 		if err != nil {
-			log.Fatal("f.NewStyle err: ", err)
+			log.Println("f.NewStyle err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		excuseColIdx := colIdx + 2
 		cell, err = excelize.CoordinatesToCellName(excuseColIdx, 2)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
-		f.SetCellStr(WORKSHEET, cell, "Phép")
-		f.SetCellStyle(WORKSHEET, cell, cell, pCellStyle)
+
+		if err := f.SetCellStr(WORKSHEET, cell, "Phép"); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellStyle(WORKSHEET, cell, cell, pCellStyle); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 		for i := 3; i < 3+len(classAttendances); i++ {
 			cell, err := excelize.CoordinatesToCellName(colIdx+2, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			attendancesStartCell, err := excelize.CoordinatesToCellName(29, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			attendancesEndCell, err := excelize.CoordinatesToCellName(dateColIdx-1, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			if err := f.SetCellFormula(
@@ -255,7 +416,8 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 				cell,
 				fmt.Sprintf(`COUNTIF(%s:%s; "P")`, attendancesStartCell, attendancesEndCell),
 			); err != nil {
-				log.Fatal("f.SetCellFormula err: ", err)
+				log.Println("f.SetCellFormula err: ", err)
+				return f.WriteToBuffer()
 			}
 		}
 		colIdx += 3
@@ -270,22 +432,36 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			},
 		})
 		if err != nil {
-			log.Fatal("f.NewStyle err: ", err)
+			log.Println("f.NewStyle err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		topLeftCell, err := excelize.CoordinatesToCellName(colIdx, 1)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		bottomRightCell, err := excelize.CoordinatesToCellName(colIdx+9, 1)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
 
-		f.MergeCell(WORKSHEET, topLeftCell, bottomRightCell)
-		f.SetCellStr(WORKSHEET, topLeftCell, fmt.Sprintf("CÁC KHOẢN PHẢI THU T%02d/%d", 9, 2023))
-		f.SetCellStyle(WORKSHEET, topLeftCell, bottomRightCell, placeholderStyle)
+		if err := f.MergeCell(WORKSHEET, topLeftCell, bottomRightCell); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellStr(WORKSHEET, topLeftCell, fmt.Sprintf("CÁC KHOẢN PHẢI THU T%02d/%d", 9, 2023)); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellStyle(WORKSHEET, topLeftCell, bottomRightCell, placeholderStyle); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 
 		subHeaderStyle, err := f.NewStyle(&excelize.Style{
 			Alignment: &excelize.Alignment{Horizontal: "center"},
@@ -296,7 +472,8 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			},
 		})
 		if err != nil {
-			log.Fatal("f.NewStyle err: ", err)
+			log.Println("f.NewStyle err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		subHeader := []string{
@@ -314,39 +491,56 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 		subHeaderStartIdx, subHeaderEndIdx := colIdx, colIdx+len(subHeader)-1
 		subHeaderStartCell, err := excelize.CoordinatesToCellName(subHeaderStartIdx, 2)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		subHeaderEndCell, err := excelize.CoordinatesToCellName(subHeaderEndIdx, 2)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		for i, header := range subHeader {
 			cell, err := excelize.CoordinatesToCellName(colIdx+i, 2)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
-			f.SetCellStr(WORKSHEET, cell, header)
+			if err := f.SetCellStr(WORKSHEET, cell, header); err != nil {
+				log.Println("ExportClassAttendances. err: ", err)
+				return f.WriteToBuffer()
+			}
 		}
-		f.SetCellStyle(WORKSHEET, subHeaderStartCell, subHeaderEndCell, subHeaderStyle)
-		f.SetColWidth(WORKSHEET, subHeaderStartCell, subHeaderEndCell, 12)
+
+		if err := f.SetCellStyle(WORKSHEET, subHeaderStartCell, subHeaderEndCell, subHeaderStyle); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetColWidth(WORKSHEET, subHeaderStartCell, subHeaderEndCell, 12); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 
 		for i := 3; i < 3+len(classAttendances); i++ {
 			cell, err := excelize.CoordinatesToCellName(colIdx+1, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			hourCell, err := excelize.CoordinatesToCellName(colIdx-3, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			dinnerCell, err := excelize.CoordinatesToCellName(colIdx-2, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			if err := f.SetCellFormula(
@@ -354,7 +548,8 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 				cell,
 				fmt.Sprintf(`%s*10+%s*10`, hourCell, dinnerCell),
 			); err != nil {
-				log.Fatal("f.SetCellFormula err: ", err)
+				log.Println("f.SetCellFormula err: ", err)
+				return f.WriteToBuffer()
 			}
 		}
 		colIdx += 10
@@ -363,16 +558,25 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 		minusEatMoneyIdx := colIdx
 		minusEatMoneyCell, err := excelize.CoordinatesToCellName(colIdx, 1)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		bottomRightCell, err = excelize.CoordinatesToCellName(colIdx+1, 2)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
 
-		f.SetCellStr(WORKSHEET, minusEatMoneyCell, "Trừ tiền ăn")
-		f.MergeCell(WORKSHEET, minusEatMoneyCell, bottomRightCell)
+		if err := f.SetCellStr(WORKSHEET, minusEatMoneyCell, "Trừ tiền ăn"); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.MergeCell(WORKSHEET, minusEatMoneyCell, bottomRightCell); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 		style, err := f.NewStyle(
 			&excelize.Style{
 				Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "middle"},
@@ -386,35 +590,50 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 		)
 		if err != nil {
 			log.Println("f.NewStyle err: ", err)
+			return f.WriteToBuffer()
 		}
 
-		f.SetCellStyle(WORKSHEET, minusEatMoneyCell, bottomRightCell, style)
-		f.SetColWidth(WORKSHEET, minusEatMoneyCell, bottomRightCell, 15)
+		if err := f.SetCellStyle(WORKSHEET, minusEatMoneyCell, bottomRightCell, style); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetColWidth(WORKSHEET, minusEatMoneyCell, bottomRightCell, 15); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 
 		for i := 3; i < 3+len(classAttendances); i++ {
 			cell, err := excelize.CoordinatesToCellName(colIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			nextCell, err := excelize.CoordinatesToCellName(colIdx+1, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			excuseCell, err := excelize.CoordinatesToCellName(excuseColIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
-			f.MergeCell(WORKSHEET, cell, nextCell)
+			if err := f.MergeCell(WORKSHEET, cell, nextCell); err != nil {
+				log.Println("ExportClassAttendances. err: ", err)
+				return f.WriteToBuffer()
+			}
 
 			if err := f.SetCellFormula(
 				WORKSHEET,
 				cell,
 				fmt.Sprintf(`+%s*30`, excuseCell),
 			); err != nil {
-				log.Fatal("f.SetCellFormula err: ", err)
+				log.Println("f.SetCellFormula err: ", err)
+				return f.WriteToBuffer()
 			}
 		}
 		colIdx += 2
@@ -429,41 +648,59 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			},
 		)
 		if err != nil {
-			log.Fatal("f.NewStyle err: ", err)
+			log.Println("f.NewStyle err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		sumCell, err := excelize.CoordinatesToCellName(colIdx, 1)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
 
 		collectCell, err := excelize.CoordinatesToCellName(colIdx, 2)
 		if err != nil {
-			log.Fatal("excelize.CoordinatesToCellName err: ", err)
+			log.Println("excelize.CoordinatesToCellName err: ", err)
+			return f.WriteToBuffer()
 		}
 
-		f.SetCellStr(WORKSHEET, sumCell, "TỔNG")
-		f.SetCellStr(WORKSHEET, collectCell, fmt.Sprintf("THU T%02d", 1))
-		f.SetCellStyle(WORKSHEET, sumCell, collectCell, sumCellStyle)
+		if err := f.SetCellStr(WORKSHEET, sumCell, "TỔNG"); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellStr(WORKSHEET, collectCell, fmt.Sprintf("THU T%02d", 1)); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
+
+		if err := f.SetCellStyle(WORKSHEET, sumCell, collectCell, sumCellStyle); err != nil {
+			log.Println("ExportClassAttendances. err: ", err)
+			return f.WriteToBuffer()
+		}
 		for i := 3; i < 3+len(classAttendances); i++ {
 			cell, err := excelize.CoordinatesToCellName(colIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			subHeaderStartCell, err := excelize.CoordinatesToCellName(subHeaderStartIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			subHeaderEndCell, err := excelize.CoordinatesToCellName(subHeaderEndIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			minusEatMoneyCell, err := excelize.CoordinatesToCellName(minusEatMoneyIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			if err := f.SetCellFormula(
@@ -471,31 +708,47 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 				cell,
 				fmt.Sprintf(`SUM(%s:%s)-%s`, subHeaderStartCell, subHeaderEndCell, minusEatMoneyCell),
 			); err != nil {
-				log.Fatal("f.SetCellFormula err: ", err)
+				log.Println("f.SetCellFormula err: ", err)
+				return f.WriteToBuffer()
 			}
 		}
 		colIdx++
 
 		// Fifth formular
-		colIdx = CreateNumberCell(colIdx, f, "SỐ 2/03", "425da6")
+		colIdx, err = createNumberCell(colIdx, f, "SỐ 2/03", "425da6")
+		if err != nil {
+			log.Println("ExportClassAttendances.createNumberCell err: ", err)
+			return f.WriteToBuffer()
+		}
 		number1ColIdx := colIdx
-		colIdx = CreateNumberCell(colIdx, f, "SỐ 1/04", "425da6")
-		colIdx = CreateNumberCell(colIdx, f, "SỐ 2/04", "425da6")
+		colIdx, err = createNumberCell(colIdx, f, "SỐ 1/04", "425da6")
+		if err != nil {
+			log.Println("ExportClassAttendances.createNumberCell err: ", err)
+			return f.WriteToBuffer()
+		}
+		colIdx, err = createNumberCell(colIdx, f, "SỐ 2/04", "425da6")
+		if err != nil {
+			log.Println("ExportClassAttendances.createNumberCell err: ", err)
+			return f.WriteToBuffer()
+		}
 
 		for i := 3; i < 3+len(classAttendances); i++ {
 			cell, err := excelize.CoordinatesToCellName(colIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			number1Cell, err := excelize.CoordinatesToCellName(number1ColIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			number3Cell, err := excelize.CoordinatesToCellName(colIdx-1, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			if err := f.SetCellFormula(
@@ -503,27 +756,35 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 				cell,
 				fmt.Sprintf(`SUM(%s:%s)`, number1Cell, number3Cell),
 			); err != nil {
-				log.Fatal("f.SetCellFormula err: ", err)
+				log.Println("f.SetCellFormula err: ", err)
+				return f.WriteToBuffer()
 			}
 		}
 		collectedIdx := colIdx
-		colIdx = CreateNumberCell(colIdx, f, "ĐÃ THU", "a64258")
+		colIdx, err = createNumberCell(colIdx, f, "ĐÃ THU", "a64258")
+		if err != nil {
+			log.Println("ExportClassAttendances.createNumberCell err: ", err)
+			return f.WriteToBuffer()
+		}
 
 		// Sixth formular
 		for i := 3; i < 3+len(classAttendances); i++ {
 			cell, err := excelize.CoordinatesToCellName(colIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			sumCell, err := excelize.CoordinatesToCellName(sumCellIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			collectedCell, err := excelize.CoordinatesToCellName(collectedIdx, i)
 			if err != nil {
-				log.Fatal("excelize.CoordinatesToCellName err: ", err)
+				log.Println("excelize.CoordinatesToCellName err: ", err)
+				return f.WriteToBuffer()
 			}
 
 			if err := f.SetCellFormula(
@@ -531,26 +792,29 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 				cell,
 				fmt.Sprintf(`%s-%s`, sumCell, collectedCell),
 			); err != nil {
-				log.Fatal("f.SetCellFormula err: ", err)
+				log.Println("f.SetCellFormula err: ", err)
+				return f.WriteToBuffer()
 			}
 		}
-		colIdx = CreateNumberCell(colIdx, f, "CÒN NỢ", "ffa500")
+		colIdx, err = createNumberCell(colIdx, f, "CÒN NỢ", "ffa500")
+		if err != nil {
+			log.Println("ExportClassAttendances.createNumberCell err: ", err)
+			return f.WriteToBuffer()
+		}
 		/* for i := 3; i < 3+len(resp.Data); i++ {
 
 		   } */
 
-		_ = CreateNumberCell(colIdx, f, "GHI CHÚ", "46a642")
+		_, err = createNumberCell(colIdx, f, "GHI CHÚ", "46a642")
+		if err != nil {
+			log.Println("ExportClassAttendances.createNumberCell err: ", err)
+			return f.WriteToBuffer()
+		}
 
 		rowIdx++
 	}
 
-	// Save the spreadsheet
-	if err := f.SaveAs("Book1.xlsx"); err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Excel file created successfully!")
-
+	log.Println("Excel file created successfully!")
 	return f.WriteToBuffer()
 }
 
