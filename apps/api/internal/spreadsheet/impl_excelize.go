@@ -70,7 +70,7 @@ func createNumberCell(colIdx int, f *excelize.File, cellName, color string) (int
 
 	if err := f.SetColWidth(WORKSHEET, no1StartCell, no1StartCell, 15); err != nil {
 		log.Println("createNumberCell.SetColWidth err: ", err)
-		return 0, err
+		// return 0, err
 	}
 	colIdx += 2
 
@@ -449,17 +449,17 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 		}
 
 		if err := f.MergeCell(WORKSHEET, topLeftCell, bottomRightCell); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
+			log.Println("ExportClassAttendances.Lmao err: ", err)
 			return f.WriteToBuffer()
 		}
 
 		if err := f.SetCellStr(WORKSHEET, topLeftCell, fmt.Sprintf("CÁC KHOẢN PHẢI THU T%02d/%d", 9, 2023)); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
+			log.Println("ExportClassAttendances.Kekw err: ", err)
 			return f.WriteToBuffer()
 		}
 
 		if err := f.SetCellStyle(WORKSHEET, topLeftCell, bottomRightCell, placeholderStyle); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
+			log.Println("ExportClassAttendances.Kek err: ", err)
 			return f.WriteToBuffer()
 		}
 
@@ -509,19 +509,19 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			}
 
 			if err := f.SetCellStr(WORKSHEET, cell, header); err != nil {
-				log.Println("ExportClassAttendances. err: ", err)
+				log.Println("ExportClassAttendances.SetCellStr err: ", err)
 				return f.WriteToBuffer()
 			}
 		}
 
 		if err := f.SetCellStyle(WORKSHEET, subHeaderStartCell, subHeaderEndCell, subHeaderStyle); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
+			log.Println("ExportClassAttendances.SetCellStyle err: ", err)
 			return f.WriteToBuffer()
 		}
 
 		if err := f.SetColWidth(WORKSHEET, subHeaderStartCell, subHeaderEndCell, 12); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
-			return f.WriteToBuffer()
+			log.Println("ExportClassAttendances.Lord err: ", err)
+			// return f.WriteToBuffer()
 		}
 
 		for i := 3; i < 3+len(classAttendances); i++ {
@@ -569,12 +569,12 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 		}
 
 		if err := f.SetCellStr(WORKSHEET, minusEatMoneyCell, "Trừ tiền ăn"); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
+			log.Println("ExportClassAttendances.SetEatMoneyStr err: ", err)
 			return f.WriteToBuffer()
 		}
 
 		if err := f.MergeCell(WORKSHEET, minusEatMoneyCell, bottomRightCell); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
+			log.Println("ExportClassAttendances.MergeEatMoneyCell err: ", err)
 			return f.WriteToBuffer()
 		}
 		style, err := f.NewStyle(
@@ -594,13 +594,13 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 		}
 
 		if err := f.SetCellStyle(WORKSHEET, minusEatMoneyCell, bottomRightCell, style); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
+			log.Println("ExportClassAttendances.SetEatMoneyStyle err: ", err)
 			return f.WriteToBuffer()
 		}
 
 		if err := f.SetColWidth(WORKSHEET, minusEatMoneyCell, bottomRightCell, 15); err != nil {
-			log.Println("ExportClassAttendances. err: ", err)
-			return f.WriteToBuffer()
+			log.Println("ExportClassAttendances.SetEatMoneyColWidth err: ", err)
+			// return f.WriteToBuffer()
 		}
 
 		for i := 3; i < 3+len(classAttendances); i++ {
@@ -623,7 +623,7 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 			}
 
 			if err := f.MergeCell(WORKSHEET, cell, nextCell); err != nil {
-				log.Println("ExportClassAttendances. err: ", err)
+				log.Println("ExportClassAttendances.Help me err: ", err)
 				return f.WriteToBuffer()
 			}
 
