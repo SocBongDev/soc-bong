@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/entities"
@@ -14,14 +15,14 @@ type spreadSheetExcelize struct{}
 
 var (
 	_                    SpreadSheet = (*spreadSheetExcelize)(nil)
-	VietnameseWeekdayMap             = map[string]string{
-		"Monday":    "T2",
-		"Tuesday":   "T3",
-		"Wednesday": "T4",
-		"Thursday":  "T5",
-		"Friday":    "T6",
-		"Saturday":  "T7",
-		"Sunday":    "CN",
+	VietnameseWeekdayMap             = map[time.Weekday]string{
+		time.Monday:    "T2",
+		time.Tuesday:   "T3",
+		time.Wednesday: "T4",
+		time.Thursday:  "T5",
+		time.Friday:    "T6",
+		time.Saturday:  "T7",
+		time.Sunday:    "CN",
 	}
 )
 
@@ -241,7 +242,7 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 				return f.WriteToBuffer()
 			}
 
-			vietnameseWeekday, ok := VietnameseWeekdayMap[d.AttendedAt.Time().Weekday().String()]
+			vietnameseWeekday, ok := VietnameseWeekdayMap[d.AttendedAt.Time().Weekday()]
 			if !ok {
 				return f.WriteToBuffer()
 			}
