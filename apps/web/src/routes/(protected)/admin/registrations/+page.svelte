@@ -19,6 +19,7 @@
 	import type { RegistrationProps } from '../type'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	export let data: PageData
+	const API_URL = 'http://127.0.0.1:5000/api/v1'
 	let drawerToggleRef: HTMLInputElement
 	let isChecked: string[] = []
 	let scrollClass = ''
@@ -87,6 +88,12 @@
 			type: 'text',
 			required: false
 		}
+		// {
+		// 	name: 'agencyId',
+		// 	type: 'select',
+		// 	required: true,
+		// 	options: agencyOptions
+		// }
 	]
 	const studentClassMap = {
 		seed: 'Lớp mầm',
