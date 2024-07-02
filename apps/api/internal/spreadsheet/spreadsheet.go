@@ -3,9 +3,9 @@ package spreadsheet
 import (
 	"bytes"
 
-	"github.com/SocBongDev/soc-bong/internal/attendances"
+	"github.com/SocBongDev/soc-bong/internal/entities"
 )
 
 type SpreadSheet interface {
-	ExportClassAttendances(classAttendances []attendances.Attendance) (*bytes.Buffer, error)
+	ExportClassAttendances(map[int]entities.AttendanceResponse) (*bytes.Buffer, error)
 }

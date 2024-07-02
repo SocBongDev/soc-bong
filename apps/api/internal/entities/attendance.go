@@ -1,4 +1,4 @@
-package attendances
+package entities
 
 import (
 	"encoding/json"
@@ -8,10 +8,7 @@ import (
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/common"
-	"github.com/SocBongDev/soc-bong/internal/entities"
 )
-
-const TABLE = "attendances"
 
 type AttendEnum int
 
@@ -122,7 +119,7 @@ type Attendance struct {
 }
 
 func (e *Attendance) TableName() string {
-	return TABLE
+	return "attendances"
 }
 
 type DbAttendanceResult struct {
@@ -144,19 +141,20 @@ type DbAttendanceResult struct {
 	TempAddress              string          `db:"temp_address"`
 	AgencyId                 int             `db:"agency_id"`
 
-	FatherBirthPlace string          `json:"father_birth_place" db:"father_birth_place"`
-	MotherBirthPlace string          `json:"mother_birth_place" db:"mother_birth_place"`
-	FatherDob        common.DateTime `json:"father_dob" db:"father_dob" swaggertype:"string"`
-	MotherDob        common.DateTime `json:"mother_dob" db:"mother_dob" swaggertype:"string"`
-	FatherName       string          `json:"father_name" db:"father_name"`
-	MotherName       string          `json:"mother_name" db:"mother_name"`
-	Landlord         string          `json:"land_lord" db:"land_lord"`
-	FatherOccupation string          `json:"father_occupation" db:"father_occupation"`
-	MotherOccupation string          `json:"mother_occupation" db:"mother_occupation"`
-	PhoneNumber      string          `json:"parent_phone_number" db:"phone_number"`
-	ResRegistration  string          `json:"parent_res_registration" db:"res_registration"`
-	Roi              string          `json:"parent_roi" db:"roi"`
-	Zalo             string          `json:"parent_zalo" db:"zalo"`
+	FatherBirthPlace  string          `json:"father_birth_place" db:"father_birth_place"`
+	MotherBirthPlace  string          `json:"mother_birth_place" db:"mother_birth_place"`
+	FatherDob         common.DateTime `json:"father_dob" db:"father_dob" swaggertype:"string"`
+	MotherDob         common.DateTime `json:"mother_dob" db:"mother_dob" swaggertype:"string"`
+	FatherName        string          `json:"father_name" db:"father_name"`
+	MotherName        string          `json:"mother_name" db:"mother_name"`
+	Landlord          string          `json:"land_lord" db:"land_lord"`
+	FatherOccupation  string          `json:"father_occupation" db:"father_occupation"`
+	MotherOccupation  string          `json:"mother_occupation" db:"mother_occupation"`
+	FatherPhoneNumber string          `json:"father_phone_number" db:"father_phone_number"`
+	MotherPhoneNumber string          `json:"mother_phone_number" db:"mother_phone_number"`
+	ResRegistration   string          `json:"parent_res_registration" db:"res_registration"`
+	Roi               string          `json:"parent_roi" db:"roi"`
+	Zalo              string          `json:"parent_zalo" db:"zalo"`
 
 	ClassCreatedAt time.Time `db:"class_created_at" json:"class_created_at"`
 	ClassUpdatedAt time.Time `db:"class_updated_at" json:"class_updated_at"`
@@ -231,6 +229,6 @@ type DbAttendanceResult struct {
 } */
 
 type AttendanceResponse struct {
-	Attendances []Attendance     `json:"attendances"`
-	Student     entities.Student `json:"student"`
+	Attendances []Attendance `json:"attendances"`
+	Student     Student      `json:"student"`
 }

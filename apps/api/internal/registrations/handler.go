@@ -19,7 +19,7 @@ func (h *RegistrationHandler) RegisterRoute(group fiber.Router) {
 	)
 	r.Get(
 		"/",
-		middlewares.ValidatePermissions([]string{"read:registrations"}),
+		// middlewares.ValidatePermissions([]string{"read:registrations"}),
 		h.Find,
 	)
 	r.Get(

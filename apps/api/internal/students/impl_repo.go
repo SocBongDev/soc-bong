@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/entities"
 	"github.com/pocketbase/dbx"
 )
 
@@ -32,13 +32,13 @@ var (
 		fmt.Sprintf("%s.permanent_address_province as permanent_address_province", TABLE),
 		fmt.Sprintf("%s.temp_address as temp_address", TABLE),
 		fmt.Sprintf("%s.agency_id as agency_id", TABLE),
-		fmt.Sprintf("%s.id as class_id", classes.TABLE),
-		fmt.Sprintf("%s.created_at as class_created_at", classes.TABLE),
-		fmt.Sprintf("%s.updated_at as class_updated_at", classes.TABLE),
-		fmt.Sprintf("%s.name as class_name", classes.TABLE),
-		fmt.Sprintf("%s.grade as class_grade", classes.TABLE),
-		fmt.Sprintf("%s.agency_id as class_agency_id", classes.TABLE),
-		fmt.Sprintf("%s.teacher_id as class_teacher_id", classes.TABLE),
+		fmt.Sprintf("%s.id as class_id", "classes"),
+		fmt.Sprintf("%s.created_at as class_created_at", "classes"),
+		fmt.Sprintf("%s.updated_at as class_updated_at", "classes"),
+		fmt.Sprintf("%s.name as class_name", "classes"),
+		fmt.Sprintf("%s.grade as class_grade", "classes"),
+		fmt.Sprintf("%s.agency_id as class_agency_id", "classes"),
+		fmt.Sprintf("%s.teacher_id as class_teacher_id", "classes"),
 		fmt.Sprintf("%s.id as parent_id", TABLE),
 		fmt.Sprintf("%s.created_at as parent_created_at", TABLE),
 		fmt.Sprintf("%s.updated_at as parent_updated_at", TABLE),
@@ -69,32 +69,41 @@ func (r *studentRepo) Delete(ids []int) error {
 	return err
 }
 
-func (r *studentRepo) Find(query *StudentQuery) ([]Student, error) {
-	resp := make([]Student, 0, query.GetPageSize())
+func (r *studentRepo) Find(query *StudentQuery) ([]entities.Student, error) {
+	resp := make([]entities.Student, 0, query.GetPageSize())
 	q := r.db.Select(SelectFields...).
 		From(TABLE).
 		Offset(query.GetOffset()).
 		Limit(query.GetPageSize()).
 		OrderBy("created_at desc")
+	if len(query.Ids) > 0 {
+		ids := make([]any, len(query.Ids))
+		for i, id := range query.Ids {
+			ids[i] = id
+		}
+
+		q = q.AndWhere(dbx.In("students.id", ids...))
+	}
+
 	if query.Search != "" {
-		q = q.Where(
+		q = q.AndWhere(
 			dbx.Or(
-				dbx.Like("first_name", query.Search),
-				dbx.Like("last_name", query.Search),
+				dbx.Like("students.first_name", query.Search),
+				dbx.Like("students.last_name", query.Search),
 			),
 		)
 	}
 	if query.ClassId != 0 {
-		q = q.AndWhere(dbx.HashExp{"class_id": query.ClassId})
+		q = q.AndWhere(dbx.HashExp{"students.class_id": query.ClassId})
 	}
 
 	if err := q.
 		InnerJoin(
-			classes.TABLE,
+			"classes",
 			dbx.NewExp(
 				fmt.Sprintf(
 					"%s.id = %s.class_id",
-					classes.TABLE,
+					"classes",
 					TABLE,
 				),
 			),
@@ -113,11 +122,11 @@ func (r *studentRepo) FindOne(req *Student) error {
 	if err := r.db.Select(SelectFields...).From(TABLE).
 		Where(dbx.HashExp{fmt.Sprintf("%s.id", TABLE): req.Id}).
 		InnerJoin(
-			classes.TABLE,
+			"classes",
 			dbx.NewExp(
 				fmt.Sprintf(
 					"%s.id = %s.class_id",
-					classes.TABLE,
+					"classes",
 					TABLE,
 				),
 			),

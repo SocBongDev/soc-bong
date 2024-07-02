@@ -1,8 +1,6 @@
-package classes
+package entities
 
 import "github.com/SocBongDev/soc-bong/internal/common"
-
-const TABLE = "classes"
 
 type WriteClassRequest struct {
 	Name string `json:"name"`
@@ -19,10 +17,9 @@ type ClassQuery struct {
 	common.Pagination
 	common.Sorter
 
-	AgencyId  int    `json:"agencyId"`
-	Ids       []int  `json:"ids"`
+	AgencyId  int    `json:"agencyId" db:"agency_id"`
 	Search    string `json:"search"`
-	TeacherId int    `json:"teacherId"`
+	TeacherId int    `json:"teacherId" db:"teacher_id"`
 }
 
 type FindClassResp common.FindResponse[Class]
@@ -33,5 +30,5 @@ type Class struct {
 }
 
 func (e *Class) TableName() string {
-	return TABLE
+	return "classes"
 }

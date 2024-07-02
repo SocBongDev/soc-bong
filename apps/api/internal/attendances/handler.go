@@ -1,25 +1,31 @@
 package attendances
 
 import (
+	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
+	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
+	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/gofiber/fiber/v2"
 )
 
 type AttendanceHandler struct {
-	repo AttendanceRepository
+	classRepo   classes.ClassRepository
+	repo        AttendanceRepository
+	spreadsheet spreadsheet.SpreadSheet
+	studentRepo students.StudentRepository
 }
 
 func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 	r := group.Group("/attendances")
 	r.Get(
 		"/",
-		middlewares.ValidatePermissions([]string{"read:attendances"}),
+		// middlewares.ValidatePermissions([]string{"read:attendances"}),
 		h.Find,
 	)
 	r.Post(
 		"/",
-		middlewares.ValidatePermissions([]string{"create:attendances"}),
+		// middlewares.ValidatePermissions([]string{"create:attendances"}),
 		h.Insert,
 	)
 	r.Patch(
@@ -27,8 +33,9 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 		middlewares.ValidatePermissions([]string{"update:attendances"}),
 		h.Patch,
 	)
+	r.Get("/:classId<int,min(1)>/export-excel", h.ExportExcel)
 }
 
-func New(repo AttendanceRepository) common.APIHandler {
-	return &AttendanceHandler{repo}
+func New(repo AttendanceRepository, classRepo classes.ClassRepository, spreadsheet spreadsheet.SpreadSheet, studentRepo students.StudentRepository) common.APIHandler {
+	return &AttendanceHandler{repo: repo, classRepo: classRepo, spreadsheet: spreadsheet, studentRepo: studentRepo}
 }

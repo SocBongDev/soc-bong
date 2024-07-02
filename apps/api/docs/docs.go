@@ -247,29 +247,6 @@ const docTemplate = `{
                 "summary": "Get list attendance details api",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Page",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Page Size",
-                        "name": "pageSize",
-                        "in": "query"
-                    },
-                    {
-                        "enum": [
-                            "asc",
-                            "desc"
-                        ],
-                        "type": "string",
-                        "default": "desc",
-                        "description": "Sort direction",
-                        "name": "sort",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
                         "description": "Class id",
                         "name": "classId",
@@ -389,6 +366,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/attendances/{id}/export-excel": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get one class excel file",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Attendance"
+                ],
+                "summary": "Get class excel api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Class ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Time range",
+                        "name": "period",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/classes": {
             "get": {
                 "security": [
@@ -405,6 +431,16 @@ const docTemplate = `{
                 ],
                 "summary": "Get list class details api",
                 "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Ids",
+                        "name": "ids",
+                        "in": "query"
+                    },
                     {
                         "type": "integer",
                         "description": "Page",
@@ -583,49 +619,6 @@ const docTemplate = `{
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/classes/{id}/export-excel": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get one class excel file",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Class"
-                ],
-                "summary": "Get class excel api",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Class ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "type": "string"
                         }
@@ -1361,6 +1354,136 @@ const docTemplate = `{
                 }
             }
         },
+        "entities.Class": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "grade": {
+                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "type": "string",
+                    "enum": [
+                        "buds",
+                        "seed",
+                        "leaf"
+                    ]
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "teacherId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Student": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "birthPlace": {
+                    "type": "string"
+                },
+                "class": {
+                    "$ref": "#/definitions/entities.Class"
+                },
+                "classId": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "enrolledAt": {
+                    "type": "string"
+                },
+                "ethnic": {
+                    "type": "string"
+                },
+                "father_birth_place": {
+                    "type": "string"
+                },
+                "father_dob": {
+                    "type": "string"
+                },
+                "father_name": {
+                    "type": "string"
+                },
+                "father_occupation": {
+                    "type": "string"
+                },
+                "father_phone_number": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "land_lord": {
+                    "type": "string"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "mother_birth_place": {
+                    "type": "string"
+                },
+                "mother_dob": {
+                    "type": "string"
+                },
+                "mother_name": {
+                    "type": "string"
+                },
+                "mother_occupation": {
+                    "type": "string"
+                },
+                "mother_phone_number": {
+                    "type": "string"
+                },
+                "parent_res_registration": {
+                    "type": "string"
+                },
+                "parent_roi": {
+                    "type": "string"
+                },
+                "parent_zalo": {
+                    "type": "string"
+                },
+                "permanentAddressCommune": {
+                    "type": "string"
+                },
+                "permanentAddressDistrict": {
+                    "type": "string"
+                },
+                "permanentAddressProvince": {
+                    "type": "string"
+                },
+                "tempAddress": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "registrations.FindRegistrationResp": {
             "type": "object",
             "properties": {
@@ -1451,67 +1574,11 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/students.Student"
+                        "$ref": "#/definitions/entities.Student"
                     }
                 },
                 "page": {
                     "type": "integer"
-                }
-            }
-        },
-        "students.Parent": {
-            "type": "object",
-            "properties": {
-                "createdAt": {
-                    "type": "string"
-                },
-                "father_birth_place": {
-                    "type": "string"
-                },
-                "father_dob": {
-                    "type": "string"
-                },
-                "father_name": {
-                    "type": "string"
-                },
-                "father_occupation": {
-                    "type": "string"
-                },
-                "father_phone_number": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "mother_birth_place": {
-                    "type": "string"
-                },
-                "mother_dob": {
-                    "type": "string"
-                },
-                "mother_name": {
-                    "type": "string"
-                },
-                "mother_occupation": {
-                    "type": "string"
-                },
-                "mother_phone_number": {
-                    "type": "string"
-                },
-                "parent_land_lord": {
-                    "type": "string"
-                },
-                "parent_res_registration": {
-                    "type": "string"
-                },
-                "parent_roi": {
-                    "type": "string"
-                },
-                "parent_zalo": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
                 }
             }
         },
@@ -1525,7 +1592,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "class": {
-                    "$ref": "#/definitions/classes.Class"
+                    "$ref": "#/definitions/entities.Class"
                 },
                 "classId": {
                     "type": "integer"
@@ -1595,12 +1662,6 @@ const docTemplate = `{
                 },
                 "parent_zalo": {
                     "type": "string"
-                },
-                "parents": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/students.Parent"
-                    }
                 },
                 "permanentAddressCommune": {
                     "type": "string"
