@@ -30,9 +30,6 @@ func (h *ClassHandler) RegisterRoute(group fiber.Router) {
 		middlewares.ValidatePermissions([]string{"update:classes"}),
 		h.Update,
 	)
-	r.Get("/:id<int,min(1)>/export-excel",
-		h.ExportExcel,
-	)
 }
 
 func New(
