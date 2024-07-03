@@ -20,12 +20,12 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 	r := group.Group("/attendances")
 	r.Get(
 		"/",
-		// middlewares.ValidatePermissions([]string{"read:attendances"}),
+		middlewares.ValidatePermissions([]string{"read:attendances"}),
 		h.Find,
 	)
 	r.Post(
 		"/",
-		// middlewares.ValidatePermissions([]string{"create:attendances"}),
+		middlewares.ValidatePermissions([]string{"create:attendances"}),
 		h.Insert,
 	)
 	r.Patch(
