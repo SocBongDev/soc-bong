@@ -13,7 +13,18 @@
 	}
 
 	async function handleSignOut() {
-		return goto('/')
+		if (localStorage.getItem("access_token") && localStorage.getItem("user")) {
+			localStorage.removeItem("access_token");
+			localStorage.removeItem("id_token");
+			localStorage.removeItem("user");
+			return goto('/')
+		} else {
+			Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Chưa thể thực hiện đăng xuất lúc này, vui lòng thử lại sau!'
+				})
+		}
 	}
 
 	function showModal() {
