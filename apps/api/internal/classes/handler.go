@@ -1,17 +1,15 @@
 package classes
 
 import (
-	"github.com/SocBongDev/soc-bong/internal/attendances"
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
-	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
 	"github.com/gofiber/fiber/v2"
 )
 
 type ClassHandler struct {
-	attendanceRepo attendances.AttendanceRepository
-	repo           ClassRepository
-	spreadsheet    spreadsheet.SpreadSheet
+	// attendanceRepo attendances.AttendanceRepository
+	repo ClassRepository
+	// spreadsheet    spreadsheet.SpreadSheet
 }
 
 func (h *ClassHandler) RegisterRoute(group fiber.Router) {
@@ -38,9 +36,10 @@ func (h *ClassHandler) RegisterRoute(group fiber.Router) {
 }
 
 func New(
-	attendanceRepo attendances.AttendanceRepository,
+	// attendanceRepo attendances.AttendanceRepository,
 	repo ClassRepository,
-	spreadsheet spreadsheet.SpreadSheet,
+	// spreadsheet spreadsheet.SpreadSheet,
 ) common.APIHandler {
-	return &ClassHandler{attendanceRepo: attendanceRepo, repo: repo, spreadsheet: spreadsheet}
+	// return &ClassHandler{attendanceRepo: attendanceRepo, repo: repo, spreadsheet: spreadsheet}
+	return &ClassHandler{repo}
 }

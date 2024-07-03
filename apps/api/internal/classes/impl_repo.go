@@ -18,8 +18,18 @@ func (r *classRepo) Find(query *ClassQuery) ([]Class, error) {
 		Offset(query.GetOffset()).
 		Limit(query.GetPageSize()).
 		OrderBy("created_at desc")
+
+	if len(query.Ids) > 0 {
+		ids := make([]any, len(query.Ids))
+		for i, id := range query.Ids {
+			ids[i] = id
+		}
+
+		q = q.AndWhere(dbx.In("id", ids...))
+	}
+
 	if query.Search != "" {
-		q = q.Where(dbx.Or(dbx.Like("name", query.Search), dbx.Like("grade", query.Search)))
+		q = q.AndWhere(dbx.Or(dbx.Like("name", query.Search), dbx.Like("grade", query.Search)))
 	}
 
 	if err := q.All(&resp); err != nil {

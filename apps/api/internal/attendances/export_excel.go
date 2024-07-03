@@ -1,18 +1,26 @@
-package classes
+package attendances
 
-/* // @FindOneClass godoc
+import (
+	"fmt"
+	"log"
+
+	"github.com/gofiber/fiber/v2"
+)
+
+// @ExportExcel godoc
 // @Summary Get class excel api
 // @Description Get one class excel file
-// @Tags Class
+// @Tags Attendance
 // @Accept json
 // @Param id path int true "Class ID"
+// @Param  period query string false "Time range"
 // @Success 200
 // @Failure 404 {string} string
 // @Failure 500 {string} string
 // @Security ApiKeyAuth
-// @Router /classes/{id}/export-excel [get]
-func (h *ClassHandler) ExportExcel(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+// @Router /attendances/{id}/export-excel [get]
+func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("classId")
 	if err != nil {
 		log.Println("ExportExcel.ParamsInt err: ", err)
 		return fiber.ErrBadRequest
@@ -20,13 +28,21 @@ func (h *ClassHandler) ExportExcel(c *fiber.Ctx) error {
 
 	log.Println("ExportExcel id: ", id)
 
-	classAttendances, err := h.attendanceRepo.Find(&attendances.AttendanceQuery{ClassId: id})
+	query := &AttendanceQuery{}
+	if err := c.QueryParser(query); err != nil {
+		log.Println("FindAttendances.QueryParser err: ", err)
+		return fiber.ErrBadRequest
+	}
+	query.ClassId = id
+	query.Format()
+
+	attendanceResp, err := h.formatAttendances(query)
 	if err != nil {
-		log.Println("ExportExcel.Find err: ", err)
-		return fiber.ErrInternalServerError
+		log.Println("ExportExcel.formatAttendances err: ", err)
+		return err
 	}
 
-	buf, err := h.spreadsheet.ExportClassAttendances(classAttendances)
+	buf, err := h.spreadsheet.ExportClassAttendances(attendanceResp)
 	if err != nil {
 		log.Println("f.WriteToBuffer err: ", err)
 		return fiber.ErrInternalServerError
@@ -37,4 +53,4 @@ func (h *ClassHandler) ExportExcel(c *fiber.Ctx) error {
 	c.Set("Content-Transfer-Encoding", "binary")
 	c.Set("Expires", "0")
 	return c.SendStream(buf)
-} */
+}

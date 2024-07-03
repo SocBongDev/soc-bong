@@ -8,7 +8,10 @@ import (
 	"github.com/spf13/cast"
 )
 
-const DefaultDateLayout = "2006-01-02 15:04:05.000Z"
+const (
+	DefaultDateLayout  = "2006-01-02 15:04:05.000Z"
+	DayMonthYearLayout = "2006/01/02"
+)
 
 // DateTime represents a [time.Time] instance in UTC that is wrapped
 // and serialized using the app default date layout.

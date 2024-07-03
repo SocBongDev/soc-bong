@@ -1,52 +1,28 @@
 package students
 
 import (
-	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/entities"
 	"github.com/pocketbase/dbx"
 )
 
 func mapStudents(dbResult []DbStudentResult) []Student {
 	studentsMap := make(map[int]*Student)
 	for _, v := range dbResult {
-		if student, ok := studentsMap[v.Id]; ok {
-			student.Parents = append(student.Parents, Parent{
-				BaseEntity: common.BaseEntity{
-					Id:        v.ParentId,
-					CreatedAt: v.ParentCreatedAt,
-					UpdatedAt: v.ParentUpdatedAt,
-				},
-				WriteParentRequest: WriteParentRequest{
-					FatherBirthPlace:  v.FatherBirthPlace,
-					MotherBirthPlace:  v.MotherBirthPlace,
-					FatherDob:         v.FatherDob,
-					MotherDob:         v.MotherDob,
-					FatherName:        v.FatherName,
-					MotherName:        v.MotherName,
-					Landlord:          v.Landlord,
-					FatherOccupation:  v.FatherOccupation,
-					MotherOccupation:  v.MotherOccupation,
-					FatherPhoneNumber: v.FatherPhoneNumber,
-					MotherPhoneNumber: v.MotherPhoneNumber,
-					ResRegistration:   v.ResRegistration,
-					Roi:               v.Roi,
-					Zalo:              v.Zalo,
-				},
-			})
-		} else {
+		if _, ok := studentsMap[v.Id]; ok {
 			studentsMap[v.Id] = &Student{
 				BaseEntity: common.BaseEntity{
 					Id:        v.Id,
 					CreatedAt: v.CreatedAt,
 					UpdatedAt: v.UpdatedAt,
 				},
-				Class: classes.Class{
+				Class: entities.Class{
 					BaseEntity: common.BaseEntity{
 						Id:        v.ClassId,
 						CreatedAt: v.ClassCreatedAt,
 						UpdatedAt: v.ClassUpdatedAt,
 					},
-					WriteClassRequest: classes.WriteClassRequest{
+					WriteClassRequest: entities.WriteClassRequest{
 						Name:      v.ClassName,
 						Grade:     v.ClassGrade,
 						AgencyId:  v.AgencyId,
@@ -81,31 +57,6 @@ func mapStudents(dbResult []DbStudentResult) []Student {
 					ResRegistration:          v.ResRegistration,
 					Roi:                      v.Roi,
 					Zalo:                     v.Zalo,
-				},
-				Parents: []Parent{
-					{
-						BaseEntity: common.BaseEntity{
-							Id:        v.ParentId,
-							CreatedAt: v.ParentCreatedAt,
-							UpdatedAt: v.ParentUpdatedAt,
-						},
-						WriteParentRequest: WriteParentRequest{
-							FatherBirthPlace:  v.FatherBirthPlace,
-							MotherBirthPlace:  v.MotherBirthPlace,
-							FatherDob:         v.FatherDob,
-							MotherDob:         v.MotherDob,
-							FatherName:        v.FatherName,
-							MotherName:        v.MotherName,
-							Landlord:          v.Landlord,
-							FatherOccupation:  v.FatherOccupation,
-							MotherOccupation:  v.MotherOccupation,
-							FatherPhoneNumber: v.FatherPhoneNumber,
-							MotherPhoneNumber: v.MotherPhoneNumber,
-							ResRegistration:   v.ResRegistration,
-							Roi:               v.Roi,
-							Zalo:              v.Zalo,
-						},
-					},
 				},
 			}
 		}

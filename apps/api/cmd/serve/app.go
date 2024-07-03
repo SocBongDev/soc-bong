@@ -60,9 +60,7 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	)
 	spreadsheet := spreadsheet.New()
 
-	publicHandlers := []common.APIHandler{
-		classes.New(attendanceRepo, classRepo, spreadsheet),
-	}
+	publicHandlers := []common.APIHandler{}
 	a.RegisterAPIHandlers(v1, publicHandlers)
 
 	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))

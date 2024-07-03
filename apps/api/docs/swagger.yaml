@@ -153,6 +153,97 @@ definitions:
       teacherId:
         type: string
     type: object
+  entities.Class:
+    properties:
+      agencyId:
+        type: integer
+      createdAt:
+        type: string
+      grade:
+        description: |-
+          Grade type:
+          * buds - Children who is 3 yo.
+          * seed - Children who is 4 yo.
+          * leaf - Children who is 5 yo.
+        enum:
+        - buds
+        - seed
+        - leaf
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      teacherId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entities.Student:
+    properties:
+      agencyId:
+        type: integer
+      birthPlace:
+        type: string
+      class:
+        $ref: '#/definitions/entities.Class'
+      classId:
+        type: integer
+      createdAt:
+        type: string
+      dob:
+        type: string
+      enrolledAt:
+        type: string
+      ethnic:
+        type: string
+      father_birth_place:
+        type: string
+      father_dob:
+        type: string
+      father_name:
+        type: string
+      father_occupation:
+        type: string
+      father_phone_number:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: boolean
+      id:
+        type: integer
+      land_lord:
+        type: string
+      lastName:
+        type: string
+      mother_birth_place:
+        type: string
+      mother_dob:
+        type: string
+      mother_name:
+        type: string
+      mother_occupation:
+        type: string
+      mother_phone_number:
+        type: string
+      parent_res_registration:
+        type: string
+      parent_roi:
+        type: string
+      parent_zalo:
+        type: string
+      permanentAddressCommune:
+        type: string
+      permanentAddressDistrict:
+        type: string
+      permanentAddressProvince:
+        type: string
+      tempAddress:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   registrations.FindRegistrationResp:
     properties:
       data:
@@ -222,47 +313,10 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/students.Student'
+          $ref: '#/definitions/entities.Student'
         type: array
       page:
         type: integer
-    type: object
-  students.Parent:
-    properties:
-      createdAt:
-        type: string
-      father_birth_place:
-        type: string
-      father_dob:
-        type: string
-      father_name:
-        type: string
-      father_occupation:
-        type: string
-      father_phone_number:
-        type: string
-      id:
-        type: integer
-      mother_birth_place:
-        type: string
-      mother_dob:
-        type: string
-      mother_name:
-        type: string
-      mother_occupation:
-        type: string
-      mother_phone_number:
-        type: string
-      parent_land_lord:
-        type: string
-      parent_res_registration:
-        type: string
-      parent_roi:
-        type: string
-      parent_zalo:
-        type: string
-      updatedAt:
-        type: string
     type: object
   students.Student:
     properties:
@@ -271,7 +325,7 @@ definitions:
       birthPlace:
         type: string
       class:
-        $ref: '#/definitions/classes.Class'
+        $ref: '#/definitions/entities.Class'
       classId:
         type: integer
       createdAt:
@@ -318,10 +372,6 @@ definitions:
         type: string
       parent_zalo:
         type: string
-      parents:
-        items:
-          $ref: '#/definitions/students.Parent'
-        type: array
       permanentAddressCommune:
         type: string
       permanentAddressDistrict:
@@ -540,22 +590,6 @@ paths:
       - application/json
       description: Get list attendance
       parameters:
-      - description: Page
-        in: query
-        name: page
-        type: integer
-      - description: Page Size
-        in: query
-        name: pageSize
-        type: integer
-      - default: desc
-        description: Sort direction
-        enum:
-        - asc
-        - desc
-        in: query
-        name: sort
-        type: string
       - description: Class id
         in: query
         name: classId
@@ -639,12 +673,50 @@ paths:
       summary: Create attendance api
       tags:
       - Attendance
+  /attendances/{id}/export-excel:
+    get:
+      consumes:
+      - application/json
+      description: Get one class excel file
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Time range
+        in: query
+        name: period
+        type: string
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get class excel api
+      tags:
+      - Attendance
   /classes:
     get:
       consumes:
       - application/json
       description: Get list class
       parameters:
+      - collectionFormat: csv
+        description: Ids
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
       - description: Page
         in: query
         name: page
@@ -769,33 +841,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update class api
-      tags:
-      - Class
-  /classes/{id}/export-excel:
-    get:
-      consumes:
-      - application/json
-      description: Get one class excel file
-      parameters:
-      - description: Class ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-        "404":
-          description: Not Found
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      security:
-      - ApiKeyAuth: []
-      summary: Get class excel api
       tags:
       - Class
   /registrations:
