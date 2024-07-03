@@ -67,9 +67,10 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 
 	privateHandlers := []common.APIHandler{
 		agencies.New(agencyRepo),
-		attendances.New(attendanceRepo),
-		students.New(studentRepo),
+		attendances.New(attendanceRepo, classRepo, spreadsheet, studentRepo),
+		classes.New(classRepo),
 		registrations.New(registrationRepo),
+		students.New(studentRepo),
 	}
 	a.RegisterAPIHandlers(v1, privateHandlers)
 }
