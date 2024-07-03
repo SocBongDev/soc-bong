@@ -13,10 +13,10 @@
 	}
 
 	async function handleSignOut() {
-		if (localStorage.getItem("access_token") && localStorage.getItem("user")) {
+		if (localStorage.getItem("access_token")) {
 			localStorage.removeItem("access_token");
 			localStorage.removeItem("id_token");
-			localStorage.removeItem("user");
+			localStorage.removeItem("expires_at")
 			return goto('/')
 		} else {
 			Notify({
