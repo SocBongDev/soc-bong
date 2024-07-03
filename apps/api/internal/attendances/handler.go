@@ -35,7 +35,7 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 	)
 	r.Get(
 		"/:classId<int,min(1)>/export-excel",
-		middlewares.ValidatePermissions([]string{"read:attendancess"}),
+		middlewares.ValidatePermissions([]string{"read:attendances"}),
 		h.ExportExcel,
 	)
 }
