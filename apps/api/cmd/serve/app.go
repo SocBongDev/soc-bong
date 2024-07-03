@@ -231,6 +231,17 @@ func (a *App) RunHttpServer() {
 			return c.JSON(map[string]string{"message": "update attendances"})
 		},
 	)
+
+	app.Get(
+		"/api/v1/attendances/:classId<int,min(1)>/export-excel",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:attendances"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read attendances excel"})
+		},
+	)
+
 	//classes
 	app.Get(
 		"/api/v1/classes",
@@ -272,15 +283,6 @@ func (a *App) RunHttpServer() {
 		},
 	)
 
-	app.Get(
-		"/api/v1/classes/:id<int,min(1)>/export-excel",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:classes"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read classes excel"})
-		},
-	)
 	//students
 	app.Get(
 		"/api/v1/students",
