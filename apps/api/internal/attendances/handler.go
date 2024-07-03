@@ -33,7 +33,11 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 		middlewares.ValidatePermissions([]string{"update:attendances"}),
 		h.Patch,
 	)
-	r.Get("/:classId<int,min(1)>/export-excel", h.ExportExcel)
+	r.Get(
+		"/:classId<int,min(1)>/export-excel",
+		middlewares.ValidatePermissions([]string{"read:attendancess"}),
+		h.ExportExcel,
+	)
 }
 
 func New(repo AttendanceRepository, classRepo classes.ClassRepository, spreadsheet spreadsheet.SpreadSheet, studentRepo students.StudentRepository) common.APIHandler {
