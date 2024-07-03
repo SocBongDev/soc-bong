@@ -1525,12 +1525,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "studentClass": {
-                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.\n* toddler - Children who is 1 - 3 yo.",
                     "type": "string",
                     "enum": [
                         "buds",
                         "seed",
-                        "leaf"
+                        "leaf",
+                        " toddler"
                     ]
                 },
                 "studentDob": {
@@ -1557,12 +1558,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "studentClass": {
-                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.\n* toddler - Children who is 1 - 3 yo.",
                     "type": "string",
                     "enum": [
                         "buds",
                         "seed",
-                        "leaf"
+                        "leaf",
+                        " toddler"
                     ]
                 },
                 "studentDob": {
