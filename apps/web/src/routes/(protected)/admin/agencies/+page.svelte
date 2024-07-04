@@ -18,6 +18,7 @@
 	import { onMount } from 'svelte'
 	import type { AgencyProps } from '../type'
 	import dayjs from 'dayjs'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 
 	export let data: PageData
 	const API_URL = 'http://127.0.0.1:5000/api/v1'
@@ -30,6 +31,8 @@
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
+	const token = localStorage.getItem('access_token')
+
 	$: isNew = !recordData
 	$: if (recordData !== null) {
 		const { id, createdAt, updatedAt, ...initialValues } = recordData
@@ -124,10 +127,13 @@
 		loading = true
 		const body = JSON.stringify(req)
 		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew ? `${API_URL}/agencies` : `${API_URL}/agencies/${recordData?.id}`
+		const url = isNew
+			? `${PUBLIC_API_SERVER_URL}/agencies`
+			: `${PUBLIC_API_SERVER_URL}/agencies/${recordData?.id}`
 		const request = fetch(url, {
 			method,
 			headers: {
+				Authorization: `Bearer ${token}`,
 				'Content-Type': 'application/json',
 				accept: 'application/json'
 			},
@@ -138,6 +144,12 @@
 					type: 'error',
 					id: crypto.randomUUID(),
 					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			} else if (res.status == 403) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Người dùng hiện không có quyền thực hiện này!'
 				})
 			}
 		})
@@ -163,7 +175,13 @@
 		loading = true
 
 		try {
-			const res = await fetch(`${API_URL}/agencies/${id}`, {
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/agencies/${id}`, {
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				},
 				signal
 			}).then((res) => res.json())
 			// res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
@@ -222,10 +240,11 @@
 		loading = true
 
 		try {
-			const res = await fetch(`${API_URL}/agencies`, {
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/agencies`, {
 				body: JSON.stringify({ ids: [Number(recordData.id)] }),
 				method: 'DELETE',
 				headers: {
+					Authorization: `Bearer ${token}`,
 					'Content-Type': 'application/json',
 					accept: 'application/json'
 				}
@@ -249,7 +268,15 @@
 	async function batchDelete() {
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch(`${API_URL}/agencies`, { body: JSON.stringify({ ids }), method: 'DELETE' })
+			await fetch(`${PUBLIC_API_SERVER_URL}/agencies`, {
+				body: JSON.stringify({ ids }),
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				}
+			})
 			refreshData()
 			clearSelected()
 		} catch (e) {

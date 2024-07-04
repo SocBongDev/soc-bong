@@ -8,15 +8,15 @@
 	import { Notify, dialogProps, openDialog } from '$lib/store'
 	import { statusChange } from '$lib/store'
 	import type { AttendedStatus } from '$lib/store'
-
-	let API = 'http://127.0.0.1:5000/api/v1'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	let inputValue: string = dayjs().format('YYYY-MM') || '2023-05'
 	let yearPicked: number = parseInt(inputValue.split('-')[0], 10)
 	let monthPicked: number = parseInt(inputValue.split('-')[1], 10)
 	let statusArray: AttendedStatus[] = []
 
+	const token = localStorage.getItem('access_token')
+
 	const unsubscribe = statusChange.subscribe((value) => {
-		console.log('check value', value)
 		statusArray = value
 	})
 
@@ -24,6 +24,7 @@
 		unsubscribe()
 	})
 
+	export let data
 	let classId = 1
 	let attendances: any = {}
 	let studentList: any = []
@@ -31,11 +32,11 @@
 	$: isReset = false
 
 	const status = [
-		{ name: 'absented', color: 'bg-red-600', letter: '🔴' },
-		{ name: 'attended', color: 'bg-green-500', letter: '🟢' },
-		{ name: 'excused', color: 'bg-yellow-400', letter: '🟡' },
-		{ name: 'dayoff', color: 'bg-gray-700', letter: '⚫' },
-		{ name: 'holiday', color: 'bg-blue-600', letter: '🔵' }
+		{ name: 'Nghỉ không phép', color: 'bg-red-600', letter: '🔴' },
+		{ name: 'Có mặt', color: 'bg-green-500', letter: '🟢' },
+		{ name: 'Nghỉ có phép', color: 'bg-yellow-400', letter: '🟡' },
+		{ name: 'Ngày nghỉ ở trường', color: 'bg-gray-700', letter: '⚫' },
+		{ name: 'Ngày nghỉ lễ', color: 'bg-blue-600', letter: '🔵' }
 	]
 
 	function generateWeekDays(day: number) {
@@ -59,13 +60,34 @@
 		}
 	}
 
+	async function getClassId() {
+		const res = await fetch(`${PUBLIC_API_SERVER_URL}/classes`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
+		const data = await res.json()
+		return data
+	}
+
 	async function handleInput(event: any) {
 		const value = (event.target as HTMLInputElement).value
 		inputValue = value
 		yearPicked = parseInt(value.split('-')[0], 10)
 		monthPicked = parseInt(value.split('-')[1], 10)
 		let datePicked = dayjs(value).format('MM-YYYY')
-		const res = await fetch(`${API}/attendances?classId=${classId}&period=${datePicked}`)
+		const res = await fetch(
+			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			}
+		)
 		attendances = await res.json()
 	}
 
@@ -83,27 +105,53 @@
 	}
 
 	async function fetchData() {
-		const getStudent = await fetch(`${API}/students?classId=${classId}`)
+		const getStudent = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
 		const studentData = await getStudent.json()
 		studentList = studentData.data
 		const res = await fetch(
-			`${API}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`
+			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			}
 		)
 		attendances = await res.json()
 		loading = false
 	}
 
 	onMount(() => {
-		fetchData();
+		fetchData()
 	})
 
 	async function handleSelectClassId(event: any) {
 		classId = parseInt((event.target as HTMLSelectElement).value)
 		const datePicked = dayjs(inputValue).format('MM-YYYY')
 
-		const studentsList = await fetch(`${API}/students?classId=${classId}`)
+		const studentsList = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
 		const attendancesList = await fetch(
-			`${API}/attendances?classId=${classId}&period=${datePicked}`
+			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			}
 		)
 		const studentData = await studentsList.json()
 
@@ -121,13 +169,13 @@
 	}
 
 	async function batchUpdate() {
-		console.log('get this statusArray', statusArray)
 		if (statusArray.length > 0) {
 			statusArray.forEach(async (status) => {
 				if (status?.id) {
-					const res = await fetch(`${API}/attendances`, {
+					const res = await fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
 						method: 'PATCH',
 						headers: {
+							Authorization: `Bearer ${token}`,
 							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify([
@@ -138,9 +186,10 @@
 						])
 					})
 				} else {
-					const res = await fetch(`${API}/attendances`, {
+					const res = await fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
 						method: 'POST',
 						headers: {
+							Authorization: `Bearer ${token}`,
 							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify([
@@ -166,14 +215,14 @@
 				description: 'Lỗi không thể thực hiện chức năng này'
 			})
 		}
-		statusChange.set([]);
-		statusArray = [];
-		fetchData();
+		statusChange.set([])
+		statusArray = []
+		fetchData()
 	}
 </script>
 
-<div class="h-full w-full">
-	<div class="row-span-full mt-1 grid grid-cols-6 px-2">
+<div class="h-full w-full flex flex-col justify-start gap-4">
+	<div class="row-span-full mt-1 grid grid-cols-5 px-2">
 		{#each status as { name, color, letter } (name)}
 			<div class="flex items-center gap-1">
 				<div class={`h-5 w-5 ${color} rounded-full border border-black/50`} />
@@ -189,10 +238,17 @@
 				id="classId"
 				class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold"
 			>
-				<option value="1">Lớp nhà trẻ</option>
-				<option value="2">Lớp Mầm</option>
-				<option value="3">Lớp Chồi</option>
-				<option value="4">Lớp Lá</option>
+				{#await getClassId()}
+					Loading Classroom...
+				{:then classes}
+					{#if classes.data.length > 0}
+						{#each classes?.data as classroom, index}
+							<option value={`${classroom?.id}`}>{classroom?.name}</option>
+						{/each}
+					{/if}
+				{:catch error}
+					System error: {error.message}
+				{/await}
 			</select>
 			<div class="dropdown-calendar text-sm">
 				<input
@@ -270,8 +326,6 @@
 				</tr>
 			</thead>
 			<tbody>
-				<!-- thêm studentList -->
-				<!-- {#each Object.entries(data) as student, index (index)} -->
 				{#if studentList.length === 0}
 					<tr class="hover cursor-pointer text-center">
 						<td class="max-w-xs px-0">Không có dữ liệu</td>
@@ -341,6 +395,24 @@
 			</tbody>
 		</table>
 
+		<div class="join mt-auto self-center">
+			<a
+				class={data.students.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
+				href={`/admin?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
+			>
+				<button class="btn join-item">«</button>
+			</a>
+			<button class="btn join-item">Trang {data.students.page}</button>
+			<a
+				class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
+					? 'pointer-events-none cursor-default opacity-40'
+					: ''}
+				href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
+			>
+				<button class="btn join-item">»</button>
+			</a>
+		</div>
+
 		{#if statusArray.length > 0}
 			<div class="absolute bottom-10 left-1/2 w-1/2 -translate-x-1/2" transition:fade>
 				<div class="alert flex justify-between rounded-full bg-white py-2.5 text-sm shadow">
@@ -365,22 +437,5 @@
 				</div>
 			</div>
 		{/if}
-		<!-- <div class="join mt-auto self-center">
-			<a
-			class={data.students.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-			href={`/admin?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
-			>
-			<button class="btn join-item">«</button>
-		</a>
-		<button class="btn join-item">Trang {data.students.page}</button>
-		<a
-		class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
-			? 'pointer-events-none cursor-default opacity-40'
-			: ''}
-			href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
-			>
-			<button class="btn join-item">»</button>
-		</a>
-	</div> -->
 	{/if}
 </div>

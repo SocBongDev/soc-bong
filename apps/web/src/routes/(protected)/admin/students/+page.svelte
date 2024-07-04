@@ -15,12 +15,10 @@
 	import TrashIcon from '~icons/fa-solid/trash-alt'
 	import TimesIcon from '~icons/uil/times'
 	import { invalidate } from '$app/navigation'
-	import type { StudentProps} from '../type'
+	import type { StudentProps } from '../type'
 	import dayjs from 'dayjs'
-
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	export let data: PageData
-
-	const API_URL = 'http://127.0.0.1:5000/api/v1'
 
 	let drawerToggleRef: HTMLInputElement
 	let scrollClass = ''
@@ -30,6 +28,7 @@
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
+	const token = localStorage.getItem('access_token')
 	$: isNew = !recordData
 	$: if (recordData !== null) {
 		const { id, ...restOfStudentData } = recordData
@@ -75,7 +74,7 @@
 	const defaultFormValues = {
 		firstName: '',
 		lastName: '',
-		enrolledAt: '', //enrolledAt
+		enrolledAt: '',
 		dob: '',
 		gender: '1', //boolean
 		ethnic: '',
@@ -95,7 +94,8 @@
 		motherBirthPlace: '',
 		fatherOccupation: '',
 		motherOccupation: '',
-		parentPhoneNumber: '',
+		fatherPhoneNumber: '',
+		motherPhoneNumber: '',
 		parentZalo: '',
 		parentLandLord: '',
 		parentRoi: '',
@@ -119,7 +119,7 @@
 			required: true
 		},
 		{
-			name: 'enrolledAt', //enrolledAt
+			name: 'enrolledAt',
 			type: 'date',
 			required: false
 		},
@@ -233,7 +233,12 @@
 			required: false
 		},
 		{
-			name: 'parentPhoneNumber',
+			name: 'fatherPhoneNumber',
+			type: 'text',
+			required: false
+		},
+		{
+			name: 'motherPhoneNumber',
 			type: 'text',
 			required: false
 		},
@@ -303,31 +308,41 @@
 			mother_dob: req.motherDob,
 			mother_name: req.motherName,
 			mother_occupation: req.motherOccupation,
-			parent_phone_number: req.parentPhoneNumber,
+			father_phone_number: req.fatherPhoneNumber,
+			mother_phone_number: req.motherPhoneNumber,
 			parent_res_registration: req.parentResRegistration,
 			parent_roi: req.parentRoi,
 			parent_zalo: req.parentZalo,
 			permanentAddressCommune: req.permanentAddressCommune,
 			permanentAddressDistrict: req.permanentAddressDistrict,
 			permanentAddressProvince: req.permanentAddressProvince,
-			tempAddress: req.tempAddress,
+			tempAddress: req.tempAddress
 		}
 		const bodyFormated = JSON.stringify(body)
 		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew ? `${API_URL}/students` : `${API_URL}/students/${recordData?.id}`
+		const url = isNew
+			? `${PUBLIC_API_SERVER_URL}/students`
+			: `${PUBLIC_API_SERVER_URL}/students/${recordData?.id}`
 		const request = fetch(url, {
 			method,
 			headers: {
+				Authorization: `Bearer ${token}`,
 				'Content-Type': 'application/json',
 				accept: 'application/json'
 			},
-			body: bodyFormated,
+			body: bodyFormated
 		}).then((res) => {
 			if (res.status == 422) {
 				Notify({
 					type: 'error',
 					id: crypto.randomUUID(),
 					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			} else if (res.status == 403) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Người dùng hiện không có quyền thực hiện này!'
 				})
 			}
 		})
@@ -346,8 +361,8 @@
 	}
 
 	const tabData = [
-		{ name: 'Time Sheet', section: 'timeSheet', value: 0 },
-		{ name: 'Student List', section: 'studentlist', value: 1 }
+		{ name: 'Danh sách điểm danh', section: 'timeSheet', value: 0 },
+		{ name: 'Danh sách học sinh', section: 'studentlist', value: 1 }
 	]
 
 	function refreshData() {
@@ -375,7 +390,11 @@
 	async function loadData(id: number, signal: AbortSignal) {
 		loading = true
 		try {
-			const res = await fetch(`${API_URL}/students/${id}`, {
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/students/${id}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				},
 				signal
 			})
 
@@ -439,7 +458,11 @@
 		try {
 			const res = await fetch(`/api/students`, {
 				body: JSON.stringify({ ids: [Number(recordData.id)] }),
-				method: 'DELETE'
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
 			}).then((res) => res.json())
 			refreshData()
 			resetDefaultForm()
@@ -516,9 +539,9 @@
 
 		<div class="mt-4">
 			{#if activeTabValue === 0}
-				<TimeSheet />
+				<TimeSheet data={data} />
 			{:else if activeTabValue === 1}
-				<StudentList {data} onClick={(id) => show(id)} />
+				<StudentList data={data} onClick={(id) => show(id)} />
 			{/if}
 		</div>
 	</div>

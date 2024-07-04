@@ -10,5 +10,4 @@ export const CreateRegistrationSchema = z.object({
 	studentDob: z.string().nonempty({ message: 'Ngày sinh của bé không được bỏ trống' }),
 	studentClass: z.enum(['seed', 'buds', 'leaf', 'toddlers']),
 	note: z.string(),
-	// agencyId: z.number().int().positive({ message: 'Đơn vị không hợp lệ' }),
 })

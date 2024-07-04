@@ -12,7 +12,8 @@ type WriteRegistrationRequest struct {
 	// * buds - Children who is 3 yo.
 	// * seed - Children who is 4 yo.
 	// * leaf - Children who is 5 yo.
-	StudentClass string          `json:"studentClass" enums:"buds,seed,leaf"`
+	// * toddler - Children who is 1 - 3 yo.
+	StudentClass string          `json:"studentClass" enums:"buds,seed,leaf, toddler"`
 	StudentDob   common.DateTime `json:"studentDob"                          swaggertype:"string"`
 	StudentName  string          `json:"studentName"`
 }

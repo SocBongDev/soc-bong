@@ -49,7 +49,8 @@ export type StudentProps = {
     fatherOccupation: string,
     motherOccupation: string,
     parentLandLord: string,
-    parentPhoneNumber: string,
+    fatherPhoneNumber: string,
+    motherPhoneNumber: string,
     parentResRegistration: string,
     parentRoi: string,
     parentZalo: string
@@ -68,7 +69,8 @@ export type ParentProps = {
     father_occupation: string,
     mother_occupation: string,
     land_lord: string,
-    parent_phone_number: string,
+    father_phone_number: string,
+    mother_phone_number: string,
     parent_res_registration: string,
     parent_roi: string,
     parent_zalo: string

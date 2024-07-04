@@ -20,12 +20,12 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 	r := group.Group("/attendances")
 	r.Get(
 		"/",
-		// middlewares.ValidatePermissions([]string{"read:attendances"}),
+		middlewares.ValidatePermissions([]string{"read:attendances"}),
 		h.Find,
 	)
 	r.Post(
 		"/",
-		// middlewares.ValidatePermissions([]string{"create:attendances"}),
+		middlewares.ValidatePermissions([]string{"create:attendances"}),
 		h.Insert,
 	)
 	r.Patch(
@@ -33,7 +33,11 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 		middlewares.ValidatePermissions([]string{"update:attendances"}),
 		h.Patch,
 	)
-	r.Get("/:classId<int,min(1)>/export-excel", h.ExportExcel)
+	r.Get(
+		"/:classId<int,min(1)>/export-excel",
+		middlewares.ValidatePermissions([]string{"read:attendances"}),
+		h.ExportExcel,
+	)
 }
 
 func New(repo AttendanceRepository, classRepo classes.ClassRepository, spreadsheet spreadsheet.SpreadSheet, studentRepo students.StudentRepository) common.APIHandler {

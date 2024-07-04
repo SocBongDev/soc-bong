@@ -1,24 +1,43 @@
 // import type { Registration, Agency } from '$lib'
 import type { PageLoad } from './$types'
 import type { AgencyProps, RegistrationProps } from '../type'
-
-const API_URL = 'http://127.0.0.1:5000/api/v1'
+import { PUBLIC_API_SERVER_URL } from "$env/static/public"
 
 export const load: PageLoad = async ({ fetch, url, depends }) => {
 	const page = Number(url.searchParams.get('page') || '1')
 	const pageSize = Number(url.searchParams.get('pageSize') || '15')
 	const query = new URLSearchParams()
+
+	const token = localStorage.getItem("access_token");
 	query.set('page', String(page))
 	query.set('pageSize', String(pageSize))
 
-	const res = await fetch(`${API_URL}/registrations?${query}`)
-	const agencyRes = await fetch(`${API_URL}/agencies?${query}`)
+	const registration = await fetch(
+		`${PUBLIC_API_SERVER_URL}/registrations?${query}`,
+		{
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			}
+		}
+	)
+	const agencies = await fetch(
+		`${PUBLIC_API_SERVER_URL}/agencies?${query}`,
+		{
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${token}`,
+				"Content-Type": "application/json",
+			}
+		}
+	)
+
 
 	depends('app:registrations')
-	depends('app:agencies')
 
 	return {
-		registrations: res.json() as Promise<{ page: number; pageSize: number; data: RegistrationProps[] }>,
-		agencies: agencyRes.json() as Promise<{ page: number; pageSize: number; data: AgencyProps[] }>
+		registrations: registration.json() as Promise<{ page: number; pageSize: number; data: RegistrationProps[] }>,
+		agencies: agencies.json() as Promise<{ page: number; pageSize: number; data: AgencyProps[] }>
 	}
 }

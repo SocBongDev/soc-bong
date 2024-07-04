@@ -14,19 +14,22 @@ type ClassHandler struct {
 
 func (h *ClassHandler) RegisterRoute(group fiber.Router) {
 	r := group.Group("/classes")
-	r.Get(
-		"/",
-		// middlewares.ValidatePermissions([]string{"read:classes"}),
+	r.Get("/",
+		middlewares.ValidatePermissions([]string{"read:classes"}),
 		h.Find,
 	)
-	r.Get("/:id<int,min(1)>", middlewares.ValidatePermissions([]string{"read:classes"}), h.FindOne)
-	r.Post(
-		"/",
-		// middlewares.ValidatePermissions([]string{"create:classes"}),
+	r.Get("/:id<int,min(1)>",
+		middlewares.ValidatePermissions([]string{"read:classes"}),
+		h.FindOne,
+	)
+	r.Post("/",
+		middlewares.ValidatePermissions([]string{"create:classes"}),
 		h.Insert,
 	)
-	r.Put("/:id<int,min(1)>", middlewares.ValidatePermissions([]string{"update:classes"}), h.Update)
-	// r.Get("/:id<int,min(1)>/export-excel", h.ExportExcel)
+	r.Put("/:id<int,min(1)>",
+		middlewares.ValidatePermissions([]string{"update:classes"}),
+		h.Update,
+	)
 }
 
 func New(

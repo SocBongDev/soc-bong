@@ -6,11 +6,31 @@
 	import dayjs from 'dayjs'
 	import type { PageData } from './$types'
 	import { invalidate } from '$app/navigation'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 
 	export let data: PageData
 	let isChecked: string[] = []
+	let classId = 1
 	let isCheckedAll = false
+	let studentList = {
+		data: data.students.data,
+		page: data.students.page,
+		pageSize: data.students.pageSize ?? '15'
+	}
 	export let onClick: (id: number) => void
+	const token = localStorage.getItem('access_token')
+
+	async function getClassId() {
+		const res = await fetch(`${PUBLIC_API_SERVER_URL}/classes`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
+		const data = await res.json()
+		return data
+	}
 
 	const studentClassMap = {
 		seed: 'Lớp mầm',
@@ -31,9 +51,9 @@
 
 	function formatStudentGender(studentGender: string | boolean | null) {
 		switch (studentGender) {
-			case true: 
+			case true:
 				return 'Nam'
-			case false: 
+			case false:
 				return 'Nữ'
 			case null:
 				return 'Chưa điền giới tính'
@@ -43,15 +63,15 @@
 	}
 
 	function formatStudentClassId(classId: number) {
-		const classRoomId = data?.classes?.data.find((cl) => cl.id == classId);
-		switch (classRoomId?.grade){
+		const classRoomId = data?.classes?.data.find((cl) => cl.id == classId)
+		switch (classRoomId?.grade) {
 			case 'buds':
 			case 'seed':
 			case 'leaf':
 			case 'toddlers':
-				return studentClassMap[classRoomId?.grade as keyof typeof  studentClassMap];
+				return studentClassMap[classRoomId?.grade as keyof typeof studentClassMap]
 			default:
-				return "Lớp chưa đúng!"
+				return 'Lớp chưa đúng!'
 		}
 	}
 
@@ -67,15 +87,15 @@
 		if (!isCheckedAll) {
 			isChecked = []
 			return
-		} 
-			isChecked = data.students?.data?.map((student: any) => student?.id.toString())
+		}
+		isChecked = studentList?.data?.map((student: any) => student?.id.toString())
 	}
 
 	function handleCheck(e: any) {
 		const { id, checked } = e.currentTarget
 
 		if (!checked) {
-			const isValidCheckAll = isChecked.length === data.students.data.length
+			const isValidCheckAll = isChecked.length === studentList.data.length
 			if (isValidCheckAll) {
 				isCheckedAll = false
 			}
@@ -85,7 +105,7 @@
 		}
 
 		isChecked = [...isChecked, id]
-		const isValidCheckAll = isChecked.length === data?.students?.data.length
+		const isValidCheckAll = isChecked.length === studentList?.data.length
 		if (isValidCheckAll) {
 			isCheckedAll = true
 		}
@@ -103,18 +123,66 @@
 	async function batchDelete() {
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch('/api/students', { body: JSON.stringify({ ids }), method: 'DELETE' })
+			await fetch('/api/students', {
+				body: JSON.stringify({ ids }),
+				headers: {
+					method: 'DELETE',
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
 			refreshData()
 			clearSelected()
 		} catch (e) {
 			console.error('Batch Delete error', e)
 			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
+			if (e.status === 403) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Bạn không đủ quyền hạn làm việc này!'
+				})
+			}
 		}
+	}
+
+	async function handleSelectClassId(event: any) {
+		classId = parseInt((event.target as HTMLSelectElement).value)
+		const studentsList = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			}
+		})
+
+		const studentData = await studentsList.json()
+		studentList = { ...studentList, data: studentData.data }
 	}
 </script>
 
 <div class="relative flex h-auto flex-col gap-10 overflow-x-auto">
-	<table class="table">
+	<div class="flex items-center justify-end gap-4 pl-4">
+		<h3 class="">Chọn Lớp:</h3>
+		<select
+			on:change={handleSelectClassId}
+			id="classId"
+			class="select select-ghost h-fit min-h-0 w-fit max-w-xs font-bold"
+		>
+			{#await getClassId()}
+				Loading Classroom...
+			{:then classes}
+				{#if classes.data.length > 0}
+					{#each classes?.data as classroom, index}
+						<option value={`${classroom?.id}`}>{classroom?.name}</option>
+					{/each}
+				{/if}
+			{:catch error}
+				System error: {error.message}
+			{/await}
+		</select>
+	</div>
+	<table class="-mt-8 table">
 		<thead>
 			<tr class="text-center">
 				<th>
@@ -135,7 +203,6 @@
 				<th>Năm sinh</th>
 				<th>Giới tính</th>
 				<th>Cơ Sở Trường Học</th>
-				<!-- <th>Mã phòng học</th> -->
 				<th>
 					<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
 						<EllipsisIcon />
@@ -144,8 +211,8 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#if data}
-				{#each data?.students.data as student (student.id)}
+			{#if studentList.data.length > 0}
+				{#each studentList?.data as student (student.id)}
 					{#if student.id !== undefined}
 						<tr class="hover cursor-pointer text-center">
 							<th>
@@ -159,7 +226,6 @@
 									/>
 								</label>
 							</th>
-							<!-- classId get name of class -->
 							<td on:click={() => onClick(Number(student.id))}
 								>{formatStudentClassId(student.classId)}</td
 							>
@@ -178,9 +244,6 @@
 							<td on:click={() => onClick(Number(student.id))}
 								>{formatAgencyName(student.agencyId)}</td
 							>
-							<!-- <td on:click={() => onClick(student.id)}
-								>{formatStudentClassId(student.classRoomId)}</td
-							> -->
 							<td on:click={() => onClick(Number(student.id))}>
 								<div class="px-2 text-center align-middle">
 									<ArrowRightIcon />
@@ -189,28 +252,31 @@
 						</tr>
 					{/if}
 				{/each}
+			{:else }
+				<tr class="h-12 flex flex-row justify-center items-center w-full border-none">
+					<p class="w-full text-base font-medium">Không có dữ liệu...</p>
+				</tr>
 			{/if}
 		</tbody>
 	</table>
 	<!-- Page Num -->
 	<div class="join mt-auto self-center">
 		<a
-			class={data.students.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-			href={`/admin?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
+			class={studentList.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
+			href={`/admin?page=${studentList.page - 1}&pageSize=${studentList.pageSize}`}
 		>
 			<button class="btn join-item">«</button>
 		</a>
-		<button class="btn join-item">Trang {data.students.page}</button>
+		<button class="btn join-item">Trang {studentList.page}</button>
 		<a
-			class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
+			class={studentList.data.length < studentList.pageSize || studentList.data.length === 0
 				? 'pointer-events-none cursor-default opacity-40'
 				: ''}
-			href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
+			href={`/admin?page=${studentList.page + 1}&pageSize=${studentList.pageSize}`}
 		>
 			<button class="btn join-item">»</button>
 		</a>
 	</div>
-	<!-- handle check -->
 	{#if isChecked.length > 0}
 		<div class="absolute bottom-20 left-1/2 w-1/2 -translate-x-1/2" transition:fade>
 			<div class="alert flex justify-between rounded-full bg-white py-2.5 text-sm shadow">
