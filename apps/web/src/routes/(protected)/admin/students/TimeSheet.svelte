@@ -353,12 +353,12 @@
 							</th>
 
 							{#each generateCalendar(yearPicked, monthPicked) as date, index (index)}
-								{#if attendances[`${id + 1}`]?.some((attendance) => {
+								{#if attendances[`${id + 1}`]?.attendances.some((attendance) => {
 									const attendedDate = dayjs(String(Object(attendance).attendedAt))
 									return attendedDate.date() === date.day && attendedDate.month() + 1 === monthPicked
 								})}
 									<td class="w-fit p-0.5">
-										{#each attendances[`${id + 1}`] as attendance}
+										{#each attendances[`${id + 1}`]?.attendances as attendance}
 											{#if dayjs(String(Object(attendance).attendedAt)).date() === date.day && dayjs(String(Object(attendance).attendedAt)).month() + 1 === monthPicked}
 												{#key isReset}
 													<ClickDropdown
