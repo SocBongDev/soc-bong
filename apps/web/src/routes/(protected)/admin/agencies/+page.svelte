@@ -21,7 +21,6 @@
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 
 	export let data: PageData
-	const API_URL = 'http://127.0.0.1:5000/api/v1'
 	let drawerToggleRef: HTMLInputElement
 	let isChecked: string[] = []
 	let scrollClass = ''
@@ -184,7 +183,6 @@
 				},
 				signal
 			}).then((res) => res.json())
-			// res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
 			recordData = res
 		} catch (e: any) {
 			console.error('LoadData: ', e)
