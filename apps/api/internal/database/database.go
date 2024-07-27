@@ -8,7 +8,7 @@ import (
 )
 
 func New(cfg *config.DatabaseSecret) (*dbx.DB, error) {
-	db, err := dbx.MustOpen("libsql", cfg.Url)
+	db, err := dbx.MustOpen("libsql", cfg.GetUrl())
 	if err != nil {
 		return nil, err
 	}
