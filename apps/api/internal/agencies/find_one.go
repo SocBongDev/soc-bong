@@ -2,7 +2,6 @@ package agencies
 
 import (
 	"database/sql"
-	"log/slog"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
 	"github.com/SocBongDev/soc-bong/internal/common"
@@ -31,7 +30,7 @@ func (h *AgencyHandler) FindOne(c *fiber.Ctx) error {
 	logger.InfoContext(c.Context(), "GetAgencyDetails request", " id", id)
 	resp := &Agency{BaseEntity: common.BaseEntity{Id: id}}
 	if err := h.repo.FindOne(resp); err != nil {
-		logger.ErrorContext(c.Context(), "GetAgencyDetails.Query err", slog.Any("err", apperr.New(err)))
+		logger.ErrorContext(c.Context(), "GetAgencyDetails.Query err", "err", apperr.New(err))
 		if err == sql.ErrNoRows {
 			return fiber.ErrNotFound
 		}
