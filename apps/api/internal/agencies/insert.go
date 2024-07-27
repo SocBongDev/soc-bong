@@ -4,6 +4,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,14 +22,14 @@ import (
 func (h *AgencyHandler) Insert(c *fiber.Ctx) error {
 	body := new(WriteAgencyRequest)
 	if err := c.BodyParser(body); err != nil {
-		log.Println("InsertAgency.BodyParser err: ", err)
+		log.Println("InsertAgency.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("InsertAgency request: %+v\n", body)
+	logger.InfoContext(c.Context(), "InsertAgency request", "req", body)
 	req := &Agency{WriteAgencyRequest: *body}
 	if err := h.repo.Insert(req); err != nil {
-		log.Println("InsertAgency.Insert err: ", err)
+		logger.ErrorContext(c.Context(), "InsertAgency.Insert err", "err", err)
 
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			return fiber.ErrUnprocessableEntity
@@ -37,7 +38,6 @@ func (h *AgencyHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("InsertAgency success. Response: %+v\n", body)
-
+	logger.DebugContext(c.Context(), "InsertAgency success", "resp", body)
 	return c.JSON(req)
 }

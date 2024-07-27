@@ -2,9 +2,11 @@ package agencies
 
 import (
 	"database/sql"
-	"log"
+	"log/slog"
 
+	"github.com/SocBongDev/soc-bong/internal/apperr"
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,14 +24,14 @@ import (
 func (h *AgencyHandler) FindOne(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		log.Println("GetAgencyDetails.ParamsInt err: ", err)
+		logger.ErrorContext(c.Context(), "GetAgencyDetails.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Println("GetAgencyDetails id: ", id)
+	logger.InfoContext(c.Context(), "GetAgencyDetails request", " id", id)
 	resp := &Agency{BaseEntity: common.BaseEntity{Id: id}}
 	if err := h.repo.FindOne(resp); err != nil {
-		log.Println("GetAgencyDetails.Query err: ", err)
+		logger.ErrorContext(c.Context(), "GetAgencyDetails.Query err", slog.Any("err", apperr.New(err)))
 		if err == sql.ErrNoRows {
 			return fiber.ErrNotFound
 		}
@@ -37,7 +39,6 @@ func (h *AgencyHandler) FindOne(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("GetAgencyDetails success. Response: %+v\n", resp)
-
+	logger.DebugContext(c.Context(), "GetAgencyDetails success", "resp", resp)
 	return c.JSON(resp)
 }
