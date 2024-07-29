@@ -284,23 +284,23 @@
 	</div>
 	<div class="mt-2 flex justify-between">
 		<div class="flex items-center justify-start">
-			<select
-				on:change={handleSelectClassId}
-				id="classId"
-				class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold"
-			>
-				{#await getClassId()}
-					Loading Classroom...
-				{:then classes}
-					{#if classes.data.length > 0}
-						{#each classes?.data as classroom, index}
-							<option value={`${classroom?.id}`}>{classroom?.name}</option>
-						{/each}
-					{/if}
-				{:catch error}
-					System error: {error.message}
-				{/await}
-			</select>
+			{#if data.classes?.data.length > 0}
+				<select
+					on:change={handleSelectClassId}
+					id="classId"
+					class="select select-ghost h-fit min-h-0 w-fit max-w-xs font-bold"
+				>
+					{#each data.classes?.data as classroom, index}
+						<option value={`${classroom?.id}`} selected={classroom?.id === classId}
+							>{classroom?.name}</option
+						>
+					{/each}
+				</select>
+			{:else}
+				<select class="select select-ghost disabled h-fit min-h-0 w-fit max-w-xs font-bold">
+					<option value="1">Không tồn tại lớp nào</option>
+				</select>
+			{/if}
 			<div class="dropdown-calendar text-sm">
 				<input
 					type="month"
