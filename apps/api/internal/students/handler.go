@@ -12,6 +12,11 @@ type StudentHandler struct {
 
 func (h *StudentHandler) RegisterRoute(router fiber.Router) {
 	r := router.Group("/students")
+	r.Delete(
+		"/",
+		middlewares.ValidatePermissions([]string{"delete:students"}),
+		h.Delete,
+	)
 	r.Get(
 		"/",
 		middlewares.ValidatePermissions([]string{"read:students"}),
