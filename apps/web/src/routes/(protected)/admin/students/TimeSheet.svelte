@@ -316,13 +316,8 @@
 		<div class="flex items-center justify-end gap-2">
 			<div class="group-button flex w-fit items-center gap-2">
 				<button
-					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-bold"
-				>
-					<LegendIcon class="h-4 w-4" />
-					Legend
-				</button>
-				<button
-					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-bold"
+					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-semibold"
+					on:click={handleExportAttendances}
 				>
 					<ExportIcon class="h-4 w-4" />
 					Export
@@ -331,7 +326,9 @@
 		</div>
 	</div>
 	{#if loading}
-		<p>Loading...</p>
+		<div class="my-4 w-full h-full flex justify-center items-center">
+			<span class="loading loading-infinity loading-lg"></span>
+		</div>
 	{:else}
 		<table class="table">
 			<thead class="text-center">
