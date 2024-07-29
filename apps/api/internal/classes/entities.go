@@ -23,7 +23,7 @@ type ClassQuery struct {
 	AgencyId  int    `json:"agencyId"`
 	Ids       []int  `json:"ids"`
 	Search    string `json:"search"`
-	TeacherId int    `json:"teacherId"`
+	TeacherId string `json:"teacherId"`
 }
 
 type FindClassResp common.FindResponse[Class]
