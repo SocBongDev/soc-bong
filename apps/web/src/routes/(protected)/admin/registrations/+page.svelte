@@ -16,10 +16,9 @@
 	import { invalidate } from '$app/navigation'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import { blur, fade } from 'svelte/transition'
-	import type { RegistrationProps } from '../type'
+	import type { RegistrationProps } from '$lib/common/type'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	export let data: PageData
-	const API_URL = 'http://127.0.0.1:5000/api/v1'
 	let drawerToggleRef: HTMLInputElement
 	let isChecked: string[] = []
 	let scrollClass = ''
