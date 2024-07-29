@@ -380,12 +380,12 @@
 							</th>
 
 							{#each generateCalendar(yearPicked, monthPicked) as date, index (index)}
-								{#if attendances[`${id + 1}`]?.attendances.some((attendance) => {
+								{#if attendances[`${id}`]?.attendances.some((attendance) => {
 									const attendedDate = dayjs(String(Object(attendance).attendedAt))
 									return attendedDate.date() === date.day && attendedDate.month() + 1 === monthPicked
 								})}
 									<td class="w-fit p-0.5">
-										{#each attendances[`${id + 1}`]?.attendances as attendance}
+										{#each attendances[`${id}`]?.attendances as attendance}
 											{#if dayjs(String(Object(attendance).attendedAt)).date() === date.day && dayjs(String(Object(attendance).attendedAt)).month() + 1 === monthPicked}
 												{#key isReset}
 													<ClickDropdown
@@ -415,7 +415,11 @@
 									</td>
 								{/if}
 							{/each}
-							<td class="min-w-[4rem] px-1">30 buổi</td>
+							<td class="min-w-[4rem] px-1"
+								>{attendances[`${id}`]?.attendances?.filter(
+									(att) => att.attendedStatus === 'attended'
+								).length || `0`} buổi</td
+							>
 						</tr>
 					{/each}
 				{/if}
