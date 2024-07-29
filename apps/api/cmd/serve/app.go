@@ -158,7 +158,7 @@ func (a *App) RunHttpServer() {
 	)
 
 	app.Delete(
-		"/api/v1/registrations/:id<int,min(1)>",
+		"/api/v1/registrations",
 		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
 		middlewares.ValidatePermissions([]string{"delete:registrations"}),
 		func(c *fiber.Ctx) error {
@@ -289,6 +289,16 @@ func (a *App) RunHttpServer() {
 	)
 
 	//students
+	app.Delete(
+		"/api/v1/students",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"delete:students"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "delete students"})
+		},
+	)
+
 	app.Get(
 		"/api/v1/students",
 		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
