@@ -424,7 +424,8 @@
 					motherName: studentData.mother_name,
 
 					parentLandLord: studentData.land_lord,
-					parentPhoneNumber: studentData.parent_phone_number,
+					fatherPhoneNumber: studentData.father_phone_number,
+					motherPhoneNumber: studentData.mother_phone_number,
 					parentResRegistration: studentData.parent_res_registration,
 					parentRoi: studentData.parent_roi,
 					parentZalo: studentData.parent_zalo
