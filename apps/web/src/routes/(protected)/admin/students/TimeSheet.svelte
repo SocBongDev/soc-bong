@@ -138,6 +138,7 @@
 
 	async function handleSelectClassId(event: any) {
 		classId = parseInt((event.target as HTMLSelectElement).value)
+		$classIdStore = classId
 		const datePicked = dayjs(inputValue).format('MM-YYYY')
 
 		const studentsList = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
