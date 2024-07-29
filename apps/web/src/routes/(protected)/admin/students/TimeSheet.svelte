@@ -314,27 +314,6 @@
 		</div>
 
 		<div class="flex items-center justify-end gap-2">
-			<select class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold">
-				<option value="1" disabled>All tracked hours</option>
-				<option value="2">All tracked hours</option>
-				<option value="3">All tracked hours</option>
-				<option value="4">All tracked hours 2</option>
-			</select>
-
-			<select class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold">
-				<option value="1" disabled>All Group</option>
-				<option value="2">All Group</option>
-				<option value="3">All Group</option>
-				<option value="4">All Group</option>
-			</select>
-
-			<select class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold">
-				<option value="1" disabled>All Schedules</option>
-				<option value="2">All Schedules</option>
-				<option value="3">All Schedules</option>
-				<option value="4">All Schedules</option>
-			</select>
-
 			<div class="group-button flex w-fit items-center gap-2">
 				<button
 					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-bold"
