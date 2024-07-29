@@ -117,12 +117,20 @@
 		loading = true;
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch('/api/students', {
-				body: JSON.stringify({ ids }),
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/students`, {
+				method: 'DELETE',
 				headers: {
-					method: 'DELETE',
 					Authorization: `Bearer ${token}`,
 					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ ids })
+			}).then((res) => {
+				if (res.status === 403) {
+					Notify({
+						type: 'error',
+						id: crypto.randomUUID(),
+						description: 'Bạn không đủ quyền hạn làm việc này!'
+					})
 				}
 			})
 			refreshData()
