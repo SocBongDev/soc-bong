@@ -25,11 +25,14 @@
 		unsubscribe()
 	})
 
-	export let data
-	let classId = 1
-	let attendances: any = {}
-	let studentList: any = []
-	let loading = true
+	export let data: PageData
+	let classId = get(classIdStore) || 1
+	let studentList: any = data.students.data ?? []
+	let attendances: any = data.attendances ?? []
+	const studentIds =
+		studentList && studentList.map((student: any) => student.id).sort((a: any, b: any) => b - a)
+	attendances = studentIds && studentIds?.map((id: any) => attendances[id])
+	let loading = false
 	$: isReset = false
 
 	const status = [
