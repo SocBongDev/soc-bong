@@ -547,9 +547,9 @@
 
 		<div class="mt-4">
 			{#if activeTabValue === 0}
-				<TimeSheet data={data} />
+				<TimeSheet {data} bind:this={attendancesComponent}/>
 			{:else if activeTabValue === 1}
-				<StudentList data={data} onClick={(id) => show(id)} />
+				<StudentList {data} onClick={(id) => show(id)} bind:this={studentListComponent}/>
 			{/if}
 		</div>
 	</div>
