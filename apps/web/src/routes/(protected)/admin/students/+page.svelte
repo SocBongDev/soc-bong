@@ -472,7 +472,7 @@
 					'Content-Type': 'application/json'
 				}
 			}).then((res) => res.json())
-			refreshData()
+			await refreshData()
 			resetDefaultForm()
 			hide()
 			recordData = null
