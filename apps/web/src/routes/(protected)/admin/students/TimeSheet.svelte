@@ -144,9 +144,13 @@
 		loadAttendancesData(classId, datePicked)
 	}
 
-	function clearStatusChanges() {
+	function resetStatusArray() {
 		statusChange.set([])
 		statusArray = []
+	}
+
+	function clearStatusChanges() {
+		resetStatusArray()
 		isReset = true
 		setTimeout(() => {
 			isReset = false
