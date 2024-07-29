@@ -5,15 +5,16 @@
 	import dayjs from 'dayjs'
 	import { onDestroy, onMount } from 'svelte'
 	import { fade } from 'svelte/transition'
-	import { Notify, dialogProps, openDialog } from '$lib/store'
+	import { Notify, classIdStore, dialogProps, openDialog } from '$lib/store'
 	import { statusChange } from '$lib/store'
+	import type { PageData } from './$types'
 	import type { AttendedStatus } from '$lib/store'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
-	let inputValue: string = dayjs().format('YYYY-MM') || '2023-05'
+	import { get } from 'svelte/store'
+	let inputValue: string = dayjs().format('YYYY-MM') || '07-2024'
 	let yearPicked: number = parseInt(inputValue.split('-')[0], 10)
 	let monthPicked: number = parseInt(inputValue.split('-')[1], 10)
 	let statusArray: AttendedStatus[] = []
-
 	const token = localStorage.getItem('access_token')
 
 	const unsubscribe = statusChange.subscribe((value) => {
