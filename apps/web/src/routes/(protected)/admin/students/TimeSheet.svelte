@@ -136,34 +136,6 @@
 		return thRow
 	}
 
-	async function fetchData() {
-		const getStudent = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		const studentData = await getStudent.json()
-		studentList = studentData.data
-		const res = await fetch(
-			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`,
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
-			}
-		)
-		attendances = await res.json()
-		loading = false
-	}
-
-	onMount(() => {
-		fetchData()
-	})
-
 	async function handleSelectClassId(event: any) {
 		classId = parseInt((event.target as HTMLSelectElement).value)
 		const datePicked = dayjs(inputValue).format('MM-YYYY')
