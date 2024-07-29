@@ -26,7 +26,7 @@ type ClassQuery struct {
 	TeacherId string `json:"teacherId"`
 }
 
-type FindClassResp common.FindResponse[Class]
+type FindClassResp common.FindResponse[*Class]
 
 type Class struct {
 	common.BaseEntity
