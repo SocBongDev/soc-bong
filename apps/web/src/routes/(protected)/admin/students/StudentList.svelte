@@ -188,101 +188,109 @@
 <div class="relative flex h-auto flex-col gap-10 overflow-x-auto">
 	<div class="flex items-center justify-end gap-4 pl-4">
 		<h3 class="">Chọn Lớp:</h3>
-		<select
-			on:change={handleSelectClassId}
-			id="classId"
-			class="select select-ghost h-fit min-h-0 w-fit max-w-xs font-bold"
-		>
-			{#await getClassId()}
-				Loading Classroom...
-			{:then classes}
-				{#if classes.data.length > 0}
-					{#each classes?.data as classroom, index}
-						<option value={`${classroom?.id}`}>{classroom?.name}</option>
-					{/each}
-				{/if}
-			{:catch error}
-				System error: {error.message}
-			{/await}
-		</select>
-	</div>
-	<table class="-mt-8 table">
-		<thead>
-			<tr class="text-center">
-				<th>
-					<label>
-						<input
-							type="checkbox"
-							class="checkbox checkbox-sm rounded"
-							checked={isCheckedAll}
-							on:click={handleCheckAll}
-						/>
-					</label>
-				</th>
-				<th>Khối lớp</th>
-				<th>Tên học sinh</th>
-				<th>Họ học sinh</th>
-				<th>Ngày nhập học</th>
-				<th>Ngày sinh nhật</th>
-				<th>Năm sinh</th>
-				<th>Giới tính</th>
-				<th>Cơ Sở Trường Học</th>
-				<th>
-					<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
-						<EllipsisIcon />
-					</button>
-				</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#if studentList.data.length > 0}
-				{#each studentList?.data as student (student.id)}
-					{#if student.id !== undefined}
-						<tr class="hover cursor-pointer text-center">
-							<th>
-								<label>
-									<input
-										id={student.id.toString()}
-										type="checkbox"
-										class="checkbox checkbox-sm rounded"
-										checked={isChecked.includes(student.id?.toString())}
-										on:click={handleCheck}
-									/>
-								</label>
-							</th>
-							<td on:click={() => onClick(Number(student.id))}
-								>{formatStudentClassId(student.classId)}</td
-							>
-							<th on:click={() => onClick(Number(student.id))}>{student.firstName}</th>
-							<th on:click={() => onClick(Number(student.id))}>{student.lastName}</th>
-							<td on:click={() => onClick(Number(student.id))}
-								>{formatStudentDate(student.enrolledAt) || ''}</td
-							>
-							<td on:click={() => onClick(Number(student.id))}
-								>{formatStudentDate(student.dob) || ''}</td
-							>
-							<td on:click={() => onClick(Number(student.id))}>{formatBirthYear(student.dob)}</td>
-							<td on:click={() => onClick(Number(student.id))}
-								>{formatStudentGender(student.gender)}</td
-							>
-							<td on:click={() => onClick(Number(student.id))}
-								>{formatAgencyName(student.agencyId)}</td
-							>
-							<td on:click={() => onClick(Number(student.id))}>
-								<div class="px-2 text-center align-middle">
-									<ArrowRightIcon />
-								</div>
-							</td>
-						</tr>
-					{/if}
+		{#if data.classes?.data.length > 0}
+			<select
+				on:change={handleSelectClassId}
+				id="classId"
+				class="select select-ghost h-fit min-h-0 w-fit max-w-xs font-bold"
+			>
+				{#each data.classes?.data as classroom, index}
+					<option value={`${classroom?.id}`} selected={classroom?.id === classId}
+						>{classroom?.name}</option
+					>
 				{/each}
-			{:else }
-				<tr class="h-12 flex flex-row justify-center items-center w-full border-none">
-					<p class="w-full text-base font-medium">Không có dữ liệu...</p>
+			</select>
+		{:else}
+			<select class="select select-ghost disabled h-fit min-h-0 w-fit max-w-xs font-bold">
+				<option value="1">Không tồn tại lớp nào</option>
+			</select>
+		{/if}
+	</div>
+
+	{#if loading}
+		<div class="my-4 w-full h-full flex justify-center items-center">
+			<span class="loading loading-infinity loading-lg"></span>
+		</div>
+	{:else}
+		<table class="-mt-8 table">
+			<thead>
+				<tr class="text-center">
+					<th>
+						<label>
+							<input
+								type="checkbox"
+								class="checkbox checkbox-sm rounded"
+								checked={isCheckedAll}
+								on:click={handleCheckAll}
+							/>
+						</label>
+					</th>
+					<th>Khối lớp</th>
+					<th>Tên học sinh</th>
+					<th>Họ học sinh</th>
+					<th>Ngày nhập học</th>
+					<th>Ngày sinh nhật</th>
+					<th>Năm sinh</th>
+					<th>Giới tính</th>
+					<th>Cơ Sở Trường Học</th>
+					<th>
+						<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
+							<EllipsisIcon />
+						</button>
+					</th>
 				</tr>
-			{/if}
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+				{#if studentList.data.length > 0}
+					{#each studentList?.data as student (student.id)}
+						{#if student.id !== undefined}
+							<tr class="hover cursor-pointer text-center">
+								<th>
+									<label>
+										<input
+											id={student.id.toString()}
+											type="checkbox"
+											class="checkbox checkbox-sm rounded"
+											checked={isChecked.includes(student.id?.toString())}
+											on:click={handleCheck}
+										/>
+									</label>
+								</th>
+								<td on:click={() => onClick(Number(student.id))}
+									>{formatStudentClassId(student.classId)}</td
+								>
+								<th on:click={() => onClick(Number(student.id))}>{student.firstName}</th>
+								<th on:click={() => onClick(Number(student.id))}>{student.lastName}</th>
+								<td on:click={() => onClick(Number(student.id))}
+									>{formatStudentDate(student.enrolledAt) || ''}</td
+								>
+								<td on:click={() => onClick(Number(student.id))}
+									>{formatStudentDate(student.dob) || ''}</td
+								>
+								<td on:click={() => onClick(Number(student.id))}>{formatBirthYear(student.dob)}</td>
+								<td on:click={() => onClick(Number(student.id))}
+									>{formatStudentGender(student.gender)}</td
+								>
+								<td on:click={() => onClick(Number(student.id))}
+									>{formatAgencyName(student.agencyId)}</td
+								>
+								<td on:click={() => onClick(Number(student.id))}>
+									<div class="px-2 text-center align-middle">
+										<ArrowRightIcon />
+									</div>
+								</td>
+							</tr>
+						{/if}
+					{/each}
+				{:else}
+					<tr class="flex h-12 w-full flex-row items-center justify-center border-none">
+						<p class="w-full text-base font-medium">Không có dữ liệu...</p>
+					</tr>
+				{/if}
+			</tbody>
+		</table>
+	{/if}
+
 	<!-- Page Num -->
 	<div class="join mt-auto self-center">
 		<a
