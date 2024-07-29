@@ -140,28 +140,8 @@
 		classId = parseInt((event.target as HTMLSelectElement).value)
 		$classIdStore = classId
 		const datePicked = dayjs(inputValue).format('MM-YYYY')
-
-		const studentsList = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		const attendancesList = await fetch(
-			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
-			}
-		)
-		const studentData = await studentsList.json()
-
-		studentList = studentData.data
-		attendances = await attendancesList.json()
+		loadStudentData(classId)
+		loadAttendancesData(classId, datePicked)
 	}
 
 	function clearStatusChanges() {
