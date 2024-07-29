@@ -351,7 +351,7 @@
 
 		try {
 			const res = await request
-			refreshData()
+			await refreshData()
 			resetDefaultForm()
 			hide()
 		} catch (e) {
@@ -367,8 +367,13 @@
 		{ name: 'Danh sách học sinh', section: 'studentlist', value: 1 }
 	]
 
-	function refreshData() {
-		invalidate('app:students')
+	async function refreshData() {
+		invalidate("app:students")
+		if (studentListComponent) {
+			studentListComponent.refreshStudentList();
+		} else if (attendancesComponent) {
+			attendancesComponent.refreshStudentAttendances();
+		}
 	}
 
 	let prevPromise: Promise<void>
