@@ -32,6 +32,10 @@ func (r *classRepo) Find(query *ClassQuery) ([]*Class, error) {
 		q = q.AndWhere(dbx.Or(dbx.Like("name", query.Search), dbx.Like("grade", query.Search)))
 	}
 
+	if query.TeacherId != "" {
+		q = q.AndWhere(dbx.NewExp("teacher_id = {:teacher_id}", dbx.Params{"teacher_id": query.TeacherId}))
+	}
+
 	if err := q.All(&resp); err != nil {
 		return nil, err
 	}
