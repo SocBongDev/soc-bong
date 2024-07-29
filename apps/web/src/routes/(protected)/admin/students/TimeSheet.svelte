@@ -159,9 +159,10 @@
 
 	async function batchUpdate() {
 		if (statusArray.length > 0) {
-			statusArray.forEach(async (status) => {
+			console.log('check statusArray: ', statusArray)
+			const updatePromises = statusArray.map((status) => {
 				if (status?.id) {
-					const res = await fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
+					return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
 						method: 'PATCH',
 						headers: {
 							Authorization: `Bearer ${token}`,
@@ -175,7 +176,7 @@
 						])
 					})
 				} else {
-					const res = await fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
+					return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
 						method: 'POST',
 						headers: {
 							Authorization: `Bearer ${token}`,
@@ -192,10 +193,30 @@
 					})
 				}
 			})
+
+			try {
+				await Promise.all(updatePromises)
+				Notify({
+					type: 'success',
+					id: crypto.randomUUID(),
+					description: `Đã cập nhật điểm danh thành công cho ${statusArray.length} ngày`
+				})
+			} catch (error) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Lỗi không thể thực hiện chức năng này'
+				})
+			}
+			resetStatusArray()
+			await refreshData()
+		} else {
+			resetStatusArray()
+			refreshData()
 			Notify({
-				type: 'success',
+				type: 'error',
 				id: crypto.randomUUID(),
-				description: `Đã cập nhật điểm danh thành công cho ${statusArray.length} ngày`
+				description: 'Lỗi không thể thực hiện chức năng này'
 			})
 		} else {
 			Notify({
