@@ -138,13 +138,27 @@
 		} catch (e) {
 			console.error('Batch Delete error', e)
 			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
-			if (e.status === 403) {
-				Notify({
-					type: 'error',
-					id: crypto.randomUUID(),
-					description: 'Bạn không đủ quyền hạn làm việc này!'
-				})
-			}
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function loadStudentData(classId: number) {
+		loading = true
+		try {
+			const response = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			const studentData = await response.json()
+			studentList = { ...studentList, data: studentData.data }
+		} catch (err) {
+			console.error('Error load student data: ', err)
+		} finally {
+			loading = false
 		}
 	}
 
