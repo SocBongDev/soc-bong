@@ -64,16 +64,54 @@
 		}
 	}
 
-	async function getClassId() {
-		const res = await fetch(`${PUBLIC_API_SERVER_URL}/classes`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		const data = await res.json()
-		return data
+	async function refreshData() {
+		loading = true
+		let datePicked = dayjs(inputValue).format('MM-YYYY')
+		loadAttendancesData(classId, datePicked)
+	}
+
+	async function loadStudentData(classId: number) {
+		loading = true
+		try {
+			const response = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			const studentData = await response.json()
+			studentList = studentData.data
+		} catch (err) {
+			console.error('Error load student data: ', err)
+		} finally {
+			loading = false
+		}
+	}
+
+	async function loadAttendancesData(classId: number, datePicked: string) {
+		loading = true
+		try {
+			const response = await fetch(
+				`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
+				{
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				}
+			)
+			attendances = await response.json()
+			const studentIds = studentList
+				.map((student: any) => student.id)
+				.sort((a: any, b: any) => b - a)
+			attendances = studentIds.map((id: any) => attendances[id])
+		} catch (err) {
+			console.error('Error load student attendances data: ', err)
+		} finally {
+			loading = false
+		}
 	}
 
 	async function handleInput(event: any) {
@@ -82,17 +120,7 @@
 		yearPicked = parseInt(value.split('-')[0], 10)
 		monthPicked = parseInt(value.split('-')[1], 10)
 		let datePicked = dayjs(value).format('MM-YYYY')
-		const res = await fetch(
-			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
-			}
-		)
-		attendances = await res.json()
+		loadAttendancesData(classId, datePicked)
 	}
 
 	function generateCalendar(year: number, month: number) {
