@@ -28,6 +28,8 @@
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
+	let studentListComponent: StudentList;
+	let attendancesComponent: TimeSheet;
 	const token = localStorage.getItem('access_token')
 	$: isNew = !recordData
 	$: if (recordData !== null) {
