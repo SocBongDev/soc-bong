@@ -25,6 +25,8 @@ definitions:
         type: array
       page:
         type: integer
+      pageSize:
+        type: integer
     type: object
   agencies.WriteAgencyRequest:
     properties:
@@ -110,10 +112,12 @@ definitions:
           * buds - Children who is 3 yo.
           * seed - Children who is 4 yo.
           * leaf - Children who is 5 yo.
+          * toddler - Children who is lower than 2 yo.
         enum:
         - buds
         - seed
         - leaf
+        - ' toddler'
         type: string
       id:
         type: integer
@@ -132,6 +136,8 @@ definitions:
         type: array
       page:
         type: integer
+      pageSize:
+        type: integer
     type: object
   classes.WriteClassRequest:
     properties:
@@ -143,10 +149,12 @@ definitions:
           * buds - Children who is 3 yo.
           * seed - Children who is 4 yo.
           * leaf - Children who is 5 yo.
+          * toddler - Children who is lower than 2 yo.
         enum:
         - buds
         - seed
         - leaf
+        - ' toddler'
         type: string
       name:
         type: string
@@ -165,10 +173,12 @@ definitions:
           * buds - Children who is 3 yo.
           * seed - Children who is 4 yo.
           * leaf - Children who is 5 yo.
+          * toddler - Children who are lower than 2 yo.
         enum:
         - buds
         - seed
         - leaf
+        - ' toddler'
         type: string
       id:
         type: integer
@@ -252,6 +262,8 @@ definitions:
         type: array
       page:
         type: integer
+      pageSize:
+        type: integer
     type: object
   registrations.Registration:
     properties:
@@ -320,6 +332,8 @@ definitions:
           $ref: '#/definitions/entities.Student'
         type: array
       page:
+        type: integer
+      pageSize:
         type: integer
     type: object
   students.Student:
@@ -443,6 +457,71 @@ definitions:
         type: string
       tempAddress:
         type: string
+    type: object
+  users.FindUserResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/users.User'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  users.User:
+    properties:
+      agencyId:
+        type: integer
+      connection:
+        type: string
+      createdAt:
+        type: string
+      dob:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      password:
+        description: Plaintext password for input
+        type: string
+      phone_number:
+        type: string
+      updatedAt:
+        type: string
+      verify_email:
+        type: boolean
+    type: object
+  users.UserInput:
+    properties:
+      agencyId:
+        type: integer
+      connection:
+        type: string
+      dob:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      password:
+        description: Plaintext password for input
+        type: string
+      phone_number:
+        type: string
+      verify_email:
+        type: boolean
     type: object
 info:
   contact:
@@ -1171,6 +1250,79 @@ paths:
       summary: Update student api
       tags:
       - Student
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get list user
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: Email term
+        in: query
+        name: email
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.FindUserResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list user details api
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Insert user
+      parameters:
+      - description: Create user body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserInput'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create user api
+      tags:
+      - User
 securityDefinitions:
   ApiKeyAuth:
     description: Apply "bearer " before token in authorization
