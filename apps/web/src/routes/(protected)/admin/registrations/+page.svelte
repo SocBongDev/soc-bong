@@ -64,7 +64,7 @@
 				{ label: 'Lớp mầm', value: 'seed' },
 				{ label: 'Lớp chồi', value: 'buds' },
 				{ label: 'Lớp lá', value: 'leaf' },
-				{ label: 'trẻ ( 18 - 24 tháng tuổi )', value: 'toddlers' }
+				{ label: 'Trẻ ( 18 - 24 tháng tuổi )', value: 'toddler' }
 			]
 		},
 		{
@@ -97,7 +97,8 @@
 	const studentClassMap = {
 		seed: 'Lớp mầm',
 		buds: 'Lớp chồi',
-		leaf: 'Lớp lá'
+		leaf: 'Lớp lá',
+		toddler: 'Trẻ ( 18 - 24 tháng tuổi )'
 	}
 	const { form, errors, setInitialValues, reset } = createForm({
 		debounced: { timeout: 500 },
@@ -114,6 +115,7 @@
 			case 'seed':
 			case 'buds':
 			case 'leaf':
+			case 'toddler':
 				return studentClassMap[studentClass as keyof typeof studentClassMap]
 			default:
 				return 'N/A'
