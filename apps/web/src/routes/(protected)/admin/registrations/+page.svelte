@@ -218,7 +218,7 @@
 					id: crypto.randomUUID(),
 					description: 'phía server đã tồn tại dữ liệu này!'
 				})
-			} else if (res.status == 403) {
+			} else if (res.status == 403 || res.status == 405) {
 				Notify({
 					type: 'error',
 					id: crypto.randomUUID(),
@@ -327,7 +327,7 @@
 				},
 				body: JSON.stringify({ ids })
 			}).then((res) => {
-				if (res.status == 403) {
+				if (res.status == 403 || res.status == 405) {
 					Notify({
 						type: 'error',
 						id: crypto.randomUUID(),
