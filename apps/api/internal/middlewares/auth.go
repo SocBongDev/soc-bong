@@ -84,6 +84,8 @@ func ValidatePermissions(expectedClaims []string) fiber.Handler {
 			}
 			return nil
 		}
+		c.Locals("role", token.RegisteredClaims.Role)
+		c.Locals("userId", token.RegisteredClaims.Subject)
 		return c.Next()
 	}
 }
