@@ -435,7 +435,8 @@
 			</a>
 			<button class="btn join-item">Trang {data.students.page}</button>
 			<a
-				class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
+				class={data.students.data.length < (data.students.pageSize || 15) ||
+				data.students.data.length === 0
 					? 'pointer-events-none cursor-default opacity-40'
 					: ''}
 				href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
