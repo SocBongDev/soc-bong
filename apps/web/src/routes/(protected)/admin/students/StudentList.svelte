@@ -7,11 +7,15 @@
 	import type { PageData } from './$types'
 	import { invalidate } from '$app/navigation'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
+	import { classIdStore } from '$lib/store'
+	import { onMount } from 'svelte'
+	import { get } from 'svelte/store'
 
 	export let data: PageData
 	let isChecked: string[] = []
-	let classId = 1
+	let classId = get(classIdStore) || 1;
 	let isCheckedAll = false
+	let loading = false
 	let studentList = {
 		data: data.students.data,
 		page: data.students.page,
