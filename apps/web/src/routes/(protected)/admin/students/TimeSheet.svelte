@@ -270,9 +270,6 @@
 			loadStudentData(classId)
 			loadAttendancesData(classId, datePicked)
 		}
-		statusChange.set([])
-		statusArray = []
-		fetchData()
 	}
 </script>
 
