@@ -159,7 +159,6 @@
 
 	async function batchUpdate() {
 		if (statusArray.length > 0) {
-			console.log('check statusArray: ', statusArray)
 			const updatePromises = statusArray.map((status) => {
 				if (status?.id) {
 					return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
