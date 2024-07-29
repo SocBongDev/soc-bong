@@ -133,7 +133,7 @@
 					})
 				}
 			})
-			refreshData()
+			refreshStudentList()
 			clearSelected()
 		} catch (e) {
 			console.error('Batch Delete error', e)
