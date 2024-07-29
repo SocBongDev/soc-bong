@@ -163,17 +163,25 @@
 	}
 
 	async function handleSelectClassId(event: any) {
+		loading = true
 		classId = parseInt((event.target as HTMLSelectElement).value)
-		const studentsList = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-		})
+		$classIdStore = classId
+		await loadStudentData(classId)
+	}
 
-		const studentData = await studentsList.json()
-		studentList = { ...studentList, data: studentData.data }
+	onMount(() => {
+		loading = true
+		if ($classIdStore) {
+			classId = $classIdStore
+			loadStudentData(classId)
+		}
+	})
+
+	export function refreshStudentList() {
+		loading = true
+		if (classId) {
+			loadStudentData(classId)
+		}
 	}
 </script>
 
