@@ -1,6 +1,6 @@
 // import type { Registration, Agency } from '$lib'
 import type { PageLoad } from './$types'
-import type { AgencyProps, RegistrationProps } from '../type'
+import type { AgencyProps, RegistrationProps } from '$lib/common/type'
 import { PUBLIC_API_SERVER_URL } from "$env/static/public"
 
 export const load: PageLoad = async ({ fetch, url, depends }) => {
