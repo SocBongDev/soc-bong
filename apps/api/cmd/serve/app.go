@@ -16,6 +16,7 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/registrations"
 	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
 	"github.com/SocBongDev/soc-bong/internal/students"
+	"github.com/SocBongDev/soc-bong/internal/users"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pocketbase/dbx"
 
@@ -47,7 +48,7 @@ func (a *App) RegisterAPIHandlers(router fiber.Router, handlers []common.APIHand
 
 func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	v1 := api.Group("/v1")
-	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo := agencies.NewRepo(
+	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo, userRepo := agencies.NewRepo(
 		db,
 	), attendances.NewRepo(
 		db,
@@ -57,10 +58,14 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 		db,
 	), students.NewRepo(
 		db,
+	), users.NewRepo(
+		db,
 	)
 	spreadsheet := spreadsheet.New()
 
-	publicHandlers := []common.APIHandler{}
+	publicHandlers := []common.APIHandler{
+		users.New(userRepo, a.config, a.config.ClientId, a.config.Secret),
+	}
 	a.RegisterAPIHandlers(v1, publicHandlers)
 
 	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
