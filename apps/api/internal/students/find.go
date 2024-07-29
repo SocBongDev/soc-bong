@@ -34,7 +34,7 @@ func (h *StudentHandler) Find(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	resp := FindStudentResp{Data: data, Page: query.GetPage()}
+	resp := FindStudentResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
 	log.Printf("FindStudents success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
