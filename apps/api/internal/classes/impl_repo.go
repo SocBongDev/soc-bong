@@ -11,8 +11,8 @@ type classRepo struct {
 
 var _ ClassRepository = (*classRepo)(nil)
 
-func (r *classRepo) Find(query *ClassQuery) ([]Class, error) {
-	resp := make([]Class, 0, query.GetPageSize())
+func (r *classRepo) Find(query *ClassQuery) ([]*Class, error) {
+	resp := make([]*Class, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("classes").
 		Offset(query.GetOffset()).
