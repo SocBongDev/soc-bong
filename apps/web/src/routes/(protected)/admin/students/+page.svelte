@@ -14,10 +14,10 @@
 	import { blur } from 'svelte/transition'
 	import TrashIcon from '~icons/fa-solid/trash-alt'
 	import TimesIcon from '~icons/uil/times'
-	import { invalidate } from '$app/navigation'
-	import type { StudentProps } from '../type'
+	import type { StudentProps } from '$lib/common/type'
 	import dayjs from 'dayjs'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
+	import { invalidate } from '$app/navigation'
 	export let data: PageData
 
 	let drawerToggleRef: HTMLInputElement
