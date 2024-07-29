@@ -109,10 +109,12 @@
 	}
 
 	function refreshData() {
+		loading = true
 		invalidate('app:students')
 	}
 
 	async function batchDelete() {
+		loading = true;
 		try {
 			const ids = isChecked.map((el) => Number(el))
 			await fetch('/api/students', {
