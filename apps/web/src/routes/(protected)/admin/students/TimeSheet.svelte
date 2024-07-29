@@ -218,12 +218,57 @@
 				id: crypto.randomUUID(),
 				description: 'Lỗi không thể thực hiện chức năng này'
 			})
+		}
+	}
+
+	async function handleExportAttendances() {
+		const response = await fetch(
+			`${PUBLIC_API_SERVER_URL}/attendances/${classId}/export-excel?period=${`0${monthPicked}-${yearPicked}`}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+				}
+			}
+		)
+		if (response.ok) {
+			const blob = await response.blob()
+			// Handle the blob, e.g., download the file or process it further
+			const url = window.URL.createObjectURL(blob)
+			const a = document.createElement('a')
+			a.style.display = 'none'
+			a.href = url
+			a.download = `Workbook-${classId}-.xlsx` // Specify the file name you want to save as
+			document.body.appendChild(a)
+			a.click()
+			window.URL.revokeObjectURL(url)
 		} else {
 			Notify({
 				type: 'error',
 				id: crypto.randomUUID(),
-				description: 'Lỗi không thể thực hiện chức năng này'
+				description: 'Đã có lỗi xảy ra khi thực hiện tải xuống!'
 			})
+			console.error('Failed to fetch the .xlsx file:', response.statusText)
+		}
+	}
+
+	onMount(() => {
+		loading = true
+		let datePicked = dayjs(inputValue).format('MM-YYYY')
+		if ($classIdStore) {
+			classId = $classIdStore
+			loadStudentData(classId)
+			loadAttendancesData(classId, datePicked)
+		}
+	})
+
+	export function refreshStudentAttendances() {
+		loading = true
+		let datePicked = dayjs(inputValue).format('MM-YYYY')
+		if (classId) {
+			loadStudentData(classId)
+			loadAttendancesData(classId, datePicked)
 		}
 		statusChange.set([])
 		statusArray = []
