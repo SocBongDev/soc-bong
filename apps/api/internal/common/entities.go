@@ -13,8 +13,9 @@ type BaseEntity struct {
 }
 
 type FindResponse[T any] struct {
-	Data []T   `json:"data"`
-	Page int64 `json:"page"`
+	Data     []T   `json:"data"`
+	Page     int64 `json:"page"`
+	PageSize int64 `json:"pageSize"`
 }
 
 type Pagination struct {

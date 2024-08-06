@@ -1,14 +1,14 @@
 export type RegistrationProps = {
-        createdAt?: string,
-        id?: number,
-        isProcessed?: boolean,
-        note?: string,
-        parentName: string,
-        phoneNumber: string,
-        studentClass: string,
-        studentDob: string,
-        studentName: string,
-        updatedAt?: string
+    createdAt?: string,
+    id?: number,
+    isProcessed?: boolean,
+    note?: string,
+    parentName: string,
+    phoneNumber: string,
+    studentClass: string,
+    studentDob: string,
+    studentName: string,
+    updatedAt?: string
 }
 
 
@@ -77,11 +77,27 @@ export type ParentProps = {
 }
 
 export type ClassesProps = {
-    agency_id: number,
+    agencyId: number,
     createdAt?: string,
     grade: string,
     id?: number,
     name: string,
-    teacher_id: string,
+    teacherId: string,
     updatedAt?: string
+}
+
+export type UserProps = {
+    id?: number,
+    createdAt?: string,
+    updatedAt?: string,
+    email: string,
+    firstName: string,
+    lastName: string,
+    password: string,
+    connection: string,
+    phoneNumber: string,
+    birthDate: string,
+    agencyId: number,
+    isActive?: boolean,
+    verifyEmail?: boolean,
 }

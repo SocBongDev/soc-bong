@@ -11,8 +11,8 @@ type classRepo struct {
 
 var _ ClassRepository = (*classRepo)(nil)
 
-func (r *classRepo) Find(query *ClassQuery) ([]Class, error) {
-	resp := make([]Class, 0, query.GetPageSize())
+func (r *classRepo) Find(query *ClassQuery) ([]*Class, error) {
+	resp := make([]*Class, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("classes").
 		Offset(query.GetOffset()).
@@ -30,6 +30,10 @@ func (r *classRepo) Find(query *ClassQuery) ([]Class, error) {
 
 	if query.Search != "" {
 		q = q.AndWhere(dbx.Or(dbx.Like("name", query.Search), dbx.Like("grade", query.Search)))
+	}
+
+	if query.TeacherId != "" {
+		q = q.AndWhere(dbx.NewExp("teacher_id = {:teacher_id}", dbx.Params{"teacher_id": query.TeacherId}))
 	}
 
 	if err := q.All(&resp); err != nil {

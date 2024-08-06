@@ -1,6 +1,13 @@
 <script lang="ts">
-	import dayjs from 'dayjs'
 	import type { PageData } from './$types'
+	import type { ClassesProps } from '$lib/common/type'
+	import { createForm } from 'felte'
+	import { validator } from '@felte/validator-zod'
+	import { CreateClassesSchema as schema } from './validate'
+	import { dialogProps, Notify, openDialog } from '$lib/store'
+	import dayjs from 'dayjs'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
+	import { invalidate } from '$app/navigation'
 	import PlusIcon from '~icons/ic/round-add'
 	import EllipsisIcon from '~icons/fa6-solid/ellipsis'
 	import ArrowRightIcon from '~icons/formkit/arrowright'
@@ -8,56 +15,78 @@
 	import TimesIcon from '~icons/uil/times'
 	import TrashIcon from '~icons/lucide/trash'
 	import TextField from '$lib/components/TextField.svelte'
-	import DateField from '$lib/components/DateField.svelte'
 	import SelectField from '$lib/components/SelectField.svelte'
-	import { createForm } from 'felte'
-	import { CreateRegistrationSchema as schema } from './validate'
-	import { validator } from '@felte/validator-zod'
-	import { invalidate } from '$app/navigation'
-	import { dialogProps, Notify, openDialog } from '$lib/store'
+	import DateField from '$lib/components/DateField.svelte'
 	import { blur, fade } from 'svelte/transition'
-	import type { RegistrationProps } from '$lib/common/type'
-	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	export let data: PageData
 	let drawerToggleRef: HTMLInputElement
 	let isChecked: string[] = []
 	let scrollClass = ''
 	let isCheckedAll = false
 	let isNew = true
-	let recordData: RegistrationProps | null = null
+	let recordData: ClassesProps | null = null
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
+	const token = localStorage.getItem('access_token')
+
 	$: isNew = !recordData
 	$: if (recordData !== null) {
-		const { id, isProcessed, createdAt, ...initialValues } = recordData
+		const { id, createdAt, updatedAt, ...initialValues } = recordData
+		console.log('check recordData: ', recordData)
 		setInitialValues(initialValues)
 		reset()
 	}
 
-	const token = localStorage.getItem('access_token')
-
 	const defaultFormValues = {
-		studentClass: 'seed',
-		studentName: '',
-		phoneNumber: '',
-		studentDob: '',
-		parentName: '',
-		note: undefined
+		name: '',
+		grade: 'seed',
+		teacherId: '',
+		agencyId: 1,
+		createdAt: dayjs().format('dd/MM/YYYY'),
+		updatedAt: dayjs().format('dd/MM/YYYY')
+		// address: '',
+		// phone: '',
+		// email: '',
+		// createdAt: dayjs().format('dd/MM/YYYY'),
+		// updatedAt: dayjs().format('dd/MM/YYYY')
 	}
-	const registrationSchema: {
+
+	var agencyOptions = data?.agencies?.data?.map((el) => ({
+		label: el.name,
+		value: el.id ? el.id.toString() : '1'
+	}))
+
+	function formatAgencyName(agencyId: number) {
+		const agency = data.agencies.data.find(
+			(el) => (el.id && parseInt(el.id?.toString())) === agencyId
+		)
+		return agency?.name || 'N/A'
+	}
+
+	const { form, errors, setInitialValues, reset } = createForm({
+		debounced: { timeout: 500 },
+		extend: validator({ schema }),
+		transform: (values: any) => ({
+			...values,
+			agencyId: parseInt(values.agencyId, 10),
+		}),
+		onSubmit: save
+	})
+
+	const classesSchema: {
 		name: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
 		options?: { label: string; value: string }[]
 	}[] = [
 		{
-			name: 'studentName',
+			name: 'name',
 			type: 'text',
 			required: true
 		},
 		{
-			name: 'studentClass',
+			name: 'grade',
 			type: 'select',
 			required: true,
 			options: [
@@ -68,57 +97,83 @@
 			]
 		},
 		{
-			name: 'studentDob',
-			type: 'date',
-			required: true
-		},
-		{
-			name: 'parentName',
+			name: 'teacherId',
 			type: 'text',
 			required: true
 		},
 		{
-			name: 'phoneNumber',
-			type: 'text',
-			required: true
-		},
-		{
-			name: 'note',
-			type: 'text',
-			required: false
+			name: 'agencyId',
+			type: 'select',
+			required: true,
+			options: agencyOptions
 		}
-		// {
-		// 	name: 'agencyId',
-		// 	type: 'select',
-		// 	required: true,
-		// 	options: agencyOptions
-		// }
 	]
-	const studentClassMap = {
+
+	const ClassesMap = {
 		seed: 'Lớp mầm',
 		buds: 'Lớp chồi',
 		leaf: 'Lớp lá',
 		toddler: 'Trẻ ( 18 - 24 tháng tuổi )'
 	}
-	const { form, errors, setInitialValues, reset } = createForm({
-		debounced: { timeout: 500 },
-		extend: validator({ schema }),
-		transform: (values: any) => ({
-			...values,
-			agencyId: parseInt(values.agencyId, 10)
-		}),
-		onSubmit: save
-	})
 
-	function formatStudentClass(studentClass: string) {
-		switch (studentClass) {
+	function formatClasses(classes: string) {
+		switch (classes) {
 			case 'seed':
 			case 'buds':
 			case 'leaf':
 			case 'toddler':
-				return studentClassMap[studentClass as keyof typeof studentClassMap]
+				return ClassesMap[classes as keyof typeof ClassesMap]
 			default:
 				return 'N/A'
+		}
+	}
+
+	function clearSelected() {
+		isChecked = []
+	}
+
+	function handleCheck(e: any) {
+		const { id, checked } = e.currentTarget
+
+		if (!checked) {
+			const isValidCheckAll = isChecked.length === data?.classes?.data.length
+			if (isValidCheckAll) {
+				isCheckedAll = false
+			}
+
+			isChecked = isChecked.filter((item) => item !== id)
+			return
+		}
+
+		isChecked = [...isChecked, id]
+		const isValidCheckAll = isChecked.length === data?.classes?.data.length
+		if (isValidCheckAll) {
+			isCheckedAll = true
+		}
+	}
+
+	function handleCheckAll() {
+		isCheckedAll = !isCheckedAll
+		if (!isCheckedAll) {
+			isChecked = []
+			return
+		}
+
+		isChecked = data.classes?.data?.map((el: any) => el?.id.toString())
+	}
+
+	function handleContentScroll(panel: HTMLElement) {
+		const heightDiff = panel.scrollHeight - panel.offsetHeight
+		if (heightDiff > 0) {
+			scrollClass = 'scrolled'
+		}
+
+		if (panel.scrollTop === 0) {
+			scrollClass = 'scroll-reached-top'
+		}
+
+		if (panel.scrollTop + panel.offsetHeight === panel.scrollHeight) {
+			scrollClass = 'scroll-reached-bottom'
 		}
 	}
 
@@ -140,69 +195,14 @@
 		}
 	}
 
-	function resetDefaultForm() {
-		setInitialValues(defaultFormValues)
-		reset()
-	}
-
-	function hide() {
-		checked = false
-		drawerToggleRef.checked = false
-		resetDefaultForm()
-	}
-
-	function handleCheck(e: any) {
-		const { id, checked } = e.currentTarget
-
-		if (!checked) {
-			const isValidCheckAll = isChecked.length === data.registrations.data.length
-			if (isValidCheckAll) {
-				isCheckedAll = false
-			}
-
-			isChecked = isChecked.filter((item) => item !== id)
-			return
-		}
-
-		isChecked = [...isChecked, id]
-		const isValidCheckAll = isChecked.length === data?.registrations?.data.length
-		if (isValidCheckAll) {
-			isCheckedAll = true
-		}
-	}
-
-	function handleCheckAll() {
-		isCheckedAll = !isCheckedAll
-		if (!isCheckedAll) {
-			isChecked = []
-			return
-		}
-
-		isChecked = data.registrations?.data?.map((el: any) => el?.id.toString())
-	}
-
-	function handleContentScroll(panel: HTMLElement) {
-		const heightDiff = panel.scrollHeight - panel.offsetHeight
-		if (heightDiff > 0) {
-			scrollClass = 'scrolled'
-		}
-
-		if (panel.scrollTop === 0) {
-			scrollClass = 'scroll-reached-top'
-		}
-
-		if (panel.scrollTop + panel.offsetHeight === panel.scrollHeight) {
-			scrollClass = 'scroll-reached-bottom'
-		}
-	}
-
-	async function save(req: RegistrationProps) {
+	async function save(req: ClassesProps) {
+		console.log('check body', req)
 		loading = true
 		const body = JSON.stringify(req)
 		const method = isNew ? 'POST' : 'PUT'
 		const url = isNew
-			? `${PUBLIC_API_SERVER_URL}/registrations`
-			: `${PUBLIC_API_SERVER_URL}/registrations/${recordData?.id}`
+			? `${PUBLIC_API_SERVER_URL}/classes`
+			: `${PUBLIC_API_SERVER_URL}/classes/${recordData?.id}`
 		const request = fetch(url, {
 			method,
 			headers: {
@@ -218,7 +218,7 @@
 					id: crypto.randomUUID(),
 					description: 'phía server đã tồn tại dữ liệu này!'
 				})
-			} else if (res.status == 403 || res.status == 405) {
+			} else if (res.status == 403) {
 				Notify({
 					type: 'error',
 					id: crypto.randomUUID(),
@@ -226,7 +226,7 @@
 				})
 			}
 		})
-
+		// note: all 4 fields need to be unique when insert
 		try {
 			const res = await request
 			refreshData()
@@ -240,29 +240,31 @@
 		loading = false
 	}
 
+	function hide() {
+		checked = false
+		drawerToggleRef.checked = false
+		resetDefaultForm()
+	}
+
 	function refreshData() {
-		invalidate('app:registrations')
+		invalidate('app:classes')
 	}
 
 	async function loadData(id: number, signal: AbortSignal) {
 		loading = true
 
 		try {
-			const res = await fetch(
-				`${PUBLIC_API_SERVER_URL}/registrations/${id}`,
-
-				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-						'Content-Type': 'application/json',
-						accept: 'application/json'
-					},
-					signal
-				}
-			).then((res) => res.json())
-			res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/classes/${id}`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				},
+				signal
+			}).then((res) => res.json())
 			recordData = res
-		} catch (e) {
+		} catch (e: any) {
 			console.error('LoadData: ', e)
 			if (e.name !== undefined && e.name === 'AbortError') {
 				return
@@ -274,6 +276,11 @@
 		}
 	}
 
+	function resetDefaultForm() {
+		setInitialValues(defaultFormValues)
+		reset()
+	}
+
 	async function handleDelete() {
 		if (recordData === undefined || recordData?.id === undefined) {
 			return
@@ -282,7 +289,7 @@
 		loading = true
 
 		try {
-			const res = await fetch(`${PUBLIC_API_SERVER_URL}/registrations`, {
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/classes`, {
 				method: 'DELETE',
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -311,14 +318,10 @@
 		}
 	}
 
-	function clearSelected() {
-		isChecked = []
-	}
-
 	async function batchDelete() {
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch(`${PUBLIC_API_SERVER_URL}/registrations`, {
+			await fetch(`${PUBLIC_API_SERVER_URL}/classes`, {
 				method: 'DELETE',
 				headers: {
 					Authorization: `Bearer ${token}`,
@@ -360,13 +363,14 @@
 			}
 		}}
 	/>
+
 	<div class="drawer-content">
 		<header class="mb-5 flex items-center justify-between">
 			<div class="flex items-center gap-5">
 				<div class="breadcrumbs text-sm">
 					<ul>
 						<li>Admin</li>
-						<li>Danh sách đăng ký</li>
+						<li>Danh sách lớp học</li>
 					</ul>
 				</div>
 				<button class="btn btn-circle btn-ghost btn-sm active:!rotate-180" on:click={refreshData}>
@@ -398,12 +402,10 @@
 								/>
 							</label>
 						</th>
-						<th>Tên học sinh</th>
-						<th>Lớp hiện tại</th>
-						<th>Ngày sinh</th>
-						<th>Tên phụ huynh</th>
-						<th>Số điện thoại</th>
-						<th>Ghi chú</th>
+						<th>Tên lớp</th>
+						<th>Cấp lớp</th>
+						<th>Giáo viên phụ trách</th>
+						<th>Cơ sở</th>
 						<th>
 							<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
 								<EllipsisIcon />
@@ -412,35 +414,26 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each data.registrations.data as registration (registration.id)}
-						{#if registration.id}
+					{#each data.classes.data as classroom (classroom.id)}
+						{#if classroom.id}
 							<tr class="hover cursor-pointer">
 								<th>
 									<label>
 										<input
-											id={registration.id?.toString()}
+											id={classroom.id?.toString()}
 											type="checkbox"
 											class="checkbox checkbox-sm rounded"
 											on:click={handleCheck}
-											checked={isChecked.includes(registration.id?.toString())}
+											checked={isChecked.includes(classroom.id?.toString())}
 										/>
 									</label>
 								</th>
-								<th on:click={() => show(registration.id)}>{registration.studentName}</th>
-								<td on:click={() => show(registration.id)}
-									>{formatStudentClass(registration.studentClass || '')}</td
-								>
-								<td on:click={() => show(registration.id)}
-									>{dayjs(registration.studentDob).format('DD/MM/YYYY')}</td
-								>
-								<td on:click={() => show(registration.id)}>{registration.parentName}</td>
-								<td on:click={() => show(registration.id)}>{registration.phoneNumber}</td>
-								{#if registration.note === null}
-									<td on:click={() => show(registration.id)} />
-								{:else}
-									<td on:click={() => show(registration.id)}>{registration.note}</td>
-								{/if}
-								<td on:click={() => show(registration.id)}>
+								<th on:click={() => show(classroom.id)}>{classroom.name}</th>
+								<td on:click={() => show(classroom.id)}>{formatClasses(classroom.grade || '')}</td>
+								<td on:click={() => show(classroom.id)}>{classroom.teacherId}</td>
+								<td on:click={() => show(classroom.id)}>{formatAgencyName(classroom.agencyId)}</td>
+
+								<td on:click={() => show(classroom.id)}>
 									<div class="px-2">
 										<ArrowRightIcon />
 									</div>
@@ -453,33 +446,28 @@
 
 			<div class="join mt-auto self-center">
 				<a
-					class={data.registrations.page === 1
-						? 'pointer-events-none cursor-default opacity-40'
-						: ''}
-					href={`/admin?page=${data.registrations.page - 1}&pageSize=${
-						data.registrations.pageSize
-					}`}
+					class={data.classes.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
+					href={`/admin?page=${data.classes.page - 1}&pageSize=${data.classes.pageSize}`}
 				>
 					<button class="btn join-item">«</button>
 				</a>
-				<button class="btn join-item">Trang {data.registrations.page}</button>
+				<button class="btn join-item">Trang {data.classes.page}</button>
 				<a
-					class={data.registrations.data.length < data.registrations.pageSize ||
-					data.registrations.data.length === 0
+					class={data.classes.data.length < data.classes.pageSize || data.classes.data.length === 0
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin?page=${data.registrations.page + 1}&pageSize=${
-						data.registrations.pageSize
-					}`}
+					href={`/admin?page=${data.classes.page + 1}&pageSize=${data.classes.pageSize}`}
 				>
 					<button class="btn join-item">»</button>
 				</a>
 			</div>
 			{#if isChecked.length > 0}
-				<div class="absolute bottom-20 left-1/2 w-1/2 -translate-x-1/2" transition:fade>
+				<div class="absolute bottom-20 left-1/2 min-w-fit w-1/2 -translate-x-1/2" transition:fade>
 					<div class="alert flex justify-between rounded-full bg-white py-2.5 text-sm shadow">
 						<div class="flex w-1/2 items-center gap-3">
-							<span>Đã chọn <strong>{isChecked.length}</strong> dòng</span>
+							<div class="w-full"> 
+								<span class="w-fit">Đã chọn <strong class="w-fit">{isChecked.length}</strong> dòng</span>
+							</div>
 							<button
 								class="btn btn-outline btn-sm rounded border-2 bg-white normal-case"
 								on:click={clearSelected}>Bỏ chọn</button
@@ -542,7 +530,7 @@
 				on:scroll={(e) => handleContentScroll(e.currentTarget)}
 			>
 				<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
-					{#each registrationSchema as { type, name, required, options } (name)}
+					{#each classesSchema as { type, name, required, options } (name)}
 						{#if type === 'text'}
 							<TextField error={$errors[name]} {name} {required} />
 						{:else if type === 'select'}

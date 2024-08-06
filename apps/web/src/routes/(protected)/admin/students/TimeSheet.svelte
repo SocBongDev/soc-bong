@@ -5,15 +5,16 @@
 	import dayjs from 'dayjs'
 	import { onDestroy, onMount } from 'svelte'
 	import { fade } from 'svelte/transition'
-	import { Notify, dialogProps, openDialog } from '$lib/store'
+	import { Notify, classIdStore, dialogProps, openDialog } from '$lib/store'
 	import { statusChange } from '$lib/store'
+	import type { PageData } from './$types'
 	import type { AttendedStatus } from '$lib/store'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
-	let inputValue: string = dayjs().format('YYYY-MM') || '2023-05'
+	import { get } from 'svelte/store'
+	let inputValue: string = dayjs().format('YYYY-MM') || '07-2024'
 	let yearPicked: number = parseInt(inputValue.split('-')[0], 10)
 	let monthPicked: number = parseInt(inputValue.split('-')[1], 10)
 	let statusArray: AttendedStatus[] = []
-
 	const token = localStorage.getItem('access_token')
 
 	const unsubscribe = statusChange.subscribe((value) => {
@@ -24,11 +25,14 @@
 		unsubscribe()
 	})
 
-	export let data
-	let classId = 1
-	let attendances: any = {}
-	let studentList: any = []
-	let loading = true
+	export let data: PageData
+	let classId = get(classIdStore) || 1
+	let studentList: any = data.students.data ?? []
+	let attendances: any = data.attendances ?? []
+	const studentIds =
+		studentList && studentList.map((student: any) => student.id).sort((a: any, b: any) => b - a)
+	attendances = studentIds && studentIds?.map((id: any) => attendances[id])
+	let loading = false
 	$: isReset = false
 
 	const status = [
@@ -60,16 +64,54 @@
 		}
 	}
 
-	async function getClassId() {
-		const res = await fetch(`${PUBLIC_API_SERVER_URL}/classes`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		const data = await res.json()
-		return data
+	async function refreshData() {
+		loading = true
+		let datePicked = dayjs(inputValue).format('MM-YYYY')
+		loadAttendancesData(classId, datePicked)
+	}
+
+	async function loadStudentData(classId: number) {
+		loading = true
+		try {
+			const response = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			const studentData = await response.json()
+			studentList = studentData.data
+		} catch (err) {
+			console.error('Error load student data: ', err)
+		} finally {
+			loading = false
+		}
+	}
+
+	async function loadAttendancesData(classId: number, datePicked: string) {
+		loading = true
+		try {
+			const response = await fetch(
+				`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
+				{
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					}
+				}
+			)
+			attendances = await response.json()
+			const studentIds = studentList
+				.map((student: any) => student.id)
+				.sort((a: any, b: any) => b - a)
+			attendances = studentIds.map((id: any) => attendances[id])
+		} catch (err) {
+			console.error('Error load student attendances data: ', err)
+		} finally {
+			loading = false
+		}
 	}
 
 	async function handleInput(event: any) {
@@ -78,17 +120,7 @@
 		yearPicked = parseInt(value.split('-')[0], 10)
 		monthPicked = parseInt(value.split('-')[1], 10)
 		let datePicked = dayjs(value).format('MM-YYYY')
-		const res = await fetch(
-			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
-			}
-		)
-		attendances = await res.json()
+		loadAttendancesData(classId, datePicked)
 	}
 
 	function generateCalendar(year: number, month: number) {
@@ -104,64 +136,21 @@
 		return thRow
 	}
 
-	async function fetchData() {
-		const getStudent = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		const studentData = await getStudent.json()
-		studentList = studentData.data
-		const res = await fetch(
-			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`,
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
-			}
-		)
-		attendances = await res.json()
-		loading = false
-	}
-
-	onMount(() => {
-		fetchData()
-	})
-
 	async function handleSelectClassId(event: any) {
 		classId = parseInt((event.target as HTMLSelectElement).value)
+		$classIdStore = classId
 		const datePicked = dayjs(inputValue).format('MM-YYYY')
+		loadStudentData(classId)
+		loadAttendancesData(classId, datePicked)
+	}
 
-		const studentsList = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}`, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json'
-			}
-		})
-		const attendancesList = await fetch(
-			`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${datePicked}`,
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				}
-			}
-		)
-		const studentData = await studentsList.json()
-
-		studentList = studentData.data
-		attendances = await attendancesList.json()
+	function resetStatusArray() {
+		statusChange.set([])
+		statusArray = []
 	}
 
 	function clearStatusChanges() {
-		statusChange.set([])
-		statusArray = []
+		resetStatusArray()
 		isReset = true
 		setTimeout(() => {
 			isReset = false
@@ -170,9 +159,9 @@
 
 	async function batchUpdate() {
 		if (statusArray.length > 0) {
-			statusArray.forEach(async (status) => {
+			const updatePromises = statusArray.map((status) => {
 				if (status?.id) {
-					const res = await fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
+					return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
 						method: 'PATCH',
 						headers: {
 							Authorization: `Bearer ${token}`,
@@ -186,7 +175,7 @@
 						])
 					})
 				} else {
-					const res = await fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
+					return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
 						method: 'POST',
 						headers: {
 							Authorization: `Bearer ${token}`,
@@ -203,21 +192,83 @@
 					})
 				}
 			})
-			Notify({
-				type: 'success',
-				id: crypto.randomUUID(),
-				description: `Đã cập nhật điểm danh thành công cho ${statusArray.length} ngày`
-			})
+
+			try {
+				await Promise.all(updatePromises)
+				Notify({
+					type: 'success',
+					id: crypto.randomUUID(),
+					description: `Đã cập nhật điểm danh thành công cho ${statusArray.length} ngày`
+				})
+			} catch (error) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Lỗi không thể thực hiện chức năng này'
+				})
+			}
+			resetStatusArray()
+			await refreshData()
 		} else {
+			resetStatusArray()
+			refreshData()
 			Notify({
 				type: 'error',
 				id: crypto.randomUUID(),
 				description: 'Lỗi không thể thực hiện chức năng này'
 			})
 		}
-		statusChange.set([])
-		statusArray = []
-		fetchData()
+	}
+
+	async function handleExportAttendances() {
+		const response = await fetch(
+			`${PUBLIC_API_SERVER_URL}/attendances/${classId}/export-excel?period=${`0${monthPicked}-${yearPicked}`}`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+				}
+			}
+		)
+		if (response.ok) {
+			const blob = await response.blob()
+			// Handle the blob, e.g., download the file or process it further
+			const url = window.URL.createObjectURL(blob)
+			const a = document.createElement('a')
+			a.style.display = 'none'
+			a.href = url
+			a.download = `Workbook-${classId}-.xlsx` // Specify the file name you want to save as
+			document.body.appendChild(a)
+			a.click()
+			window.URL.revokeObjectURL(url)
+		} else {
+			Notify({
+				type: 'error',
+				id: crypto.randomUUID(),
+				description: 'Đã có lỗi xảy ra khi thực hiện tải xuống!'
+			})
+			console.error('Failed to fetch the .xlsx file:', response.statusText)
+		}
+	}
+
+	onMount(() => {
+		loading = true
+		let datePicked = dayjs(inputValue).format('MM-YYYY')
+		if ($classIdStore) {
+			classId = $classIdStore
+			loadStudentData(classId)
+			loadAttendancesData(classId, datePicked)
+		}
+	})
+
+	export function refreshStudentAttendances() {
+		loading = true
+		let datePicked = dayjs(inputValue).format('MM-YYYY')
+		if (classId) {
+			loadStudentData(classId)
+			loadAttendancesData(classId, datePicked)
+		}
 	}
 </script>
 
@@ -233,23 +284,23 @@
 	</div>
 	<div class="mt-2 flex justify-between">
 		<div class="flex items-center justify-start">
-			<select
-				on:change={handleSelectClassId}
-				id="classId"
-				class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold"
-			>
-				{#await getClassId()}
-					Loading Classroom...
-				{:then classes}
-					{#if classes.data.length > 0}
-						{#each classes?.data as classroom, index}
-							<option value={`${classroom?.id}`}>{classroom?.name}</option>
-						{/each}
-					{/if}
-				{:catch error}
-					System error: {error.message}
-				{/await}
-			</select>
+			{#if data.classes?.data.length > 0}
+				<select
+					on:change={handleSelectClassId}
+					id="classId"
+					class="select select-ghost h-fit min-h-0 w-fit max-w-xs font-bold"
+				>
+					{#each data.classes?.data as classroom, index}
+						<option value={`${classroom?.id}`} selected={classroom?.id === classId}
+							>{classroom?.name}</option
+						>
+					{/each}
+				</select>
+			{:else}
+				<select class="select select-ghost disabled h-fit min-h-0 w-fit max-w-xs font-bold">
+					<option value="1">Không tồn tại lớp nào</option>
+				</select>
+			{/if}
 			<div class="dropdown-calendar text-sm">
 				<input
 					type="month"
@@ -263,36 +314,10 @@
 		</div>
 
 		<div class="flex items-center justify-end gap-2">
-			<select class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold">
-				<option value="1" disabled>All tracked hours</option>
-				<option value="2">All tracked hours</option>
-				<option value="3">All tracked hours</option>
-				<option value="4">All tracked hours 2</option>
-			</select>
-
-			<select class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold">
-				<option value="1" disabled>All Group</option>
-				<option value="2">All Group</option>
-				<option value="3">All Group</option>
-				<option value="4">All Group</option>
-			</select>
-
-			<select class="select select-ghost h-fit min-h-0 w-fit max-w-xs pl-2 font-bold">
-				<option value="1" disabled>All Schedules</option>
-				<option value="2">All Schedules</option>
-				<option value="3">All Schedules</option>
-				<option value="4">All Schedules</option>
-			</select>
-
 			<div class="group-button flex w-fit items-center gap-2">
 				<button
-					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-bold"
-				>
-					<LegendIcon class="h-4 w-4" />
-					Legend
-				</button>
-				<button
-					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-bold"
+					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-semibold"
+					on:click={handleExportAttendances}
 				>
 					<ExportIcon class="h-4 w-4" />
 					Export
@@ -301,7 +326,9 @@
 		</div>
 	</div>
 	{#if loading}
-		<p>Loading...</p>
+		<div class="my-4 w-full h-full flex justify-center items-center">
+			<span class="loading loading-infinity loading-lg"></span>
+		</div>
 	{:else}
 		<table class="table">
 			<thead class="text-center">
@@ -353,12 +380,12 @@
 							</th>
 
 							{#each generateCalendar(yearPicked, monthPicked) as date, index (index)}
-								{#if attendances[`${id + 1}`]?.attendances.some((attendance) => {
+								{#if attendances[`${id}`]?.attendances.some((attendance) => {
 									const attendedDate = dayjs(String(Object(attendance).attendedAt))
 									return attendedDate.date() === date.day && attendedDate.month() + 1 === monthPicked
 								})}
 									<td class="w-fit p-0.5">
-										{#each attendances[`${id + 1}`]?.attendances as attendance}
+										{#each attendances[`${id}`]?.attendances as attendance}
 											{#if dayjs(String(Object(attendance).attendedAt)).date() === date.day && dayjs(String(Object(attendance).attendedAt)).month() + 1 === monthPicked}
 												{#key isReset}
 													<ClickDropdown
@@ -388,7 +415,11 @@
 									</td>
 								{/if}
 							{/each}
-							<td class="min-w-[4rem] px-1">30 buổi</td>
+							<td class="min-w-[4rem] px-1"
+								>{attendances[`${id}`]?.attendances?.filter(
+									(att) => att.attendedStatus === 'attended'
+								).length || `0`} buổi</td
+							>
 						</tr>
 					{/each}
 				{/if}
@@ -404,7 +435,8 @@
 			</a>
 			<button class="btn join-item">Trang {data.students.page}</button>
 			<a
-				class={data.students.data.length < data.students.pageSize || data.students.data.length === 0
+				class={data.students.data.length < (data.students.pageSize || 15) ||
+				data.students.data.length === 0
 					? 'pointer-events-none cursor-default opacity-40'
 					: ''}
 				href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}

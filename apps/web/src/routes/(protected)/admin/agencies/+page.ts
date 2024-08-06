@@ -1,9 +1,6 @@
-import type { AgencyProps } from '../type'
+import type { AgencyProps } from '$lib/common/type'
 import type { PageLoad } from './$types'
 import { PUBLIC_API_SERVER_URL } from "$env/static/public"
-
-const API_URL = 'http://127.0.0.1:5000/api/v1'
-
 
 export const load: PageLoad = async ({ fetch, url, depends }) => {
 	const page = Number(url.searchParams.get('page') || '1')

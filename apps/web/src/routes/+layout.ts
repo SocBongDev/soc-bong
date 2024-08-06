@@ -15,7 +15,7 @@ export async function load({ params, parent, url }) {
 		responseType: "token",
 		audience: PUBLIC_AUTH0_AUDIENCE,
 		redirectUri: PUBLIC_AUTH0_CALLBACK_URL,
-		scope: "openid profile email read:registrations update:registrations create:registrations delete:registrations",
+		scope: "openid profile email",
 	};
 	const webAuthClient = new auth0.WebAuth(options);
 	const authenticationClient = new auth0.Authentication(options);

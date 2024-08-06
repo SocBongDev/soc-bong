@@ -14,10 +14,10 @@
 	import { blur } from 'svelte/transition'
 	import TrashIcon from '~icons/fa-solid/trash-alt'
 	import TimesIcon from '~icons/uil/times'
-	import { invalidate } from '$app/navigation'
-	import type { StudentProps } from '../type'
+	import type { StudentProps } from '$lib/common/type'
 	import dayjs from 'dayjs'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
+	import { invalidate } from '$app/navigation'
 	export let data: PageData
 
 	let drawerToggleRef: HTMLInputElement
@@ -28,6 +28,8 @@
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
+	let studentListComponent: StudentList;
+	let attendancesComponent: TimeSheet;
 	const token = localStorage.getItem('access_token')
 	$: isNew = !recordData
 	$: if (recordData !== null) {
@@ -349,7 +351,7 @@
 
 		try {
 			const res = await request
-			refreshData()
+			await refreshData()
 			resetDefaultForm()
 			hide()
 		} catch (e) {
@@ -365,8 +367,13 @@
 		{ name: 'Danh sách học sinh', section: 'studentlist', value: 1 }
 	]
 
-	function refreshData() {
-		invalidate('app:students')
+	async function refreshData() {
+		invalidate("app:students")
+		if (studentListComponent) {
+			studentListComponent.refreshStudentList();
+		} else if (attendancesComponent) {
+			attendancesComponent.refreshStudentAttendances();
+		}
 	}
 
 	let prevPromise: Promise<void>
@@ -417,7 +424,8 @@
 					motherName: studentData.mother_name,
 
 					parentLandLord: studentData.land_lord,
-					parentPhoneNumber: studentData.parent_phone_number,
+					fatherPhoneNumber: studentData.father_phone_number,
+					motherPhoneNumber: studentData.mother_phone_number,
 					parentResRegistration: studentData.parent_res_registration,
 					parentRoi: studentData.parent_roi,
 					parentZalo: studentData.parent_zalo
@@ -464,7 +472,7 @@
 					'Content-Type': 'application/json'
 				}
 			}).then((res) => res.json())
-			refreshData()
+			await refreshData()
 			resetDefaultForm()
 			hide()
 			recordData = null
@@ -539,9 +547,9 @@
 
 		<div class="mt-4">
 			{#if activeTabValue === 0}
-				<TimeSheet data={data} />
+				<TimeSheet {data} bind:this={attendancesComponent}/>
 			{:else if activeTabValue === 1}
-				<StudentList data={data} onClick={(id) => show(id)} />
+				<StudentList {data} onClick={(id) => show(id)} bind:this={studentListComponent}/>
 			{/if}
 		</div>
 	</div>

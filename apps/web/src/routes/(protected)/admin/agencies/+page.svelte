@@ -15,8 +15,7 @@
 	import { invalidate } from '$app/navigation'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import { blur, fade } from 'svelte/transition'
-	import { onMount } from 'svelte'
-	import type { AgencyProps } from '../type'
+	import type { AgencyProps } from '$lib/common/type'
 	import dayjs from 'dayjs'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 

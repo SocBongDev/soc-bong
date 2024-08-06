@@ -15,6 +15,10 @@ export interface AttendedStatus {
 	studentId?: string,
 }
 
+export const classIdStore = writable<number | null>(1);
+
+export const userRoleStore = writable<string | null>("");
+
 export const notifications = writable<Array<NotificationMessage>>([])
 
 export function Notify(notification: NotificationMessage) {
