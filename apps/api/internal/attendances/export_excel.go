@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,7 +23,7 @@ import (
 func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("classId")
 	if err != nil {
-		log.Println("ExportExcel.ParamsInt err: ", err)
+		logger.ErrorContext(c.Context(), "ExportExcel.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
@@ -30,7 +31,7 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 
 	query := &AttendanceQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindAttendances.QueryParser err: ", err)
+		logger.ErrorContext(c.Context(), "FindAttendances.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 	query.ClassId = id
@@ -44,7 +45,7 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 
 	buf, err := h.spreadsheet.ExportClassAttendances(attendanceResp)
 	if err != nil {
-		log.Println("f.WriteToBuffer err: ", err)
+		logger.ErrorContext(c.Context(), "f.WriteToBuffer err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 

@@ -22,13 +22,6 @@ type LoggerType int
 
 const (
 	Default LoggerType = iota
+	File
+	FileAndCentralized
 )
-
-func LoggerFactory(loggerType LoggerType) Logger {
-	switch loggerType {
-	case Default:
-		return NewSlogLogger()
-	default:
-		return NewSlogLogger()
-	}
-}
