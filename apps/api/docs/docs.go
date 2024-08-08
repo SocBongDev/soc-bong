@@ -432,42 +432,51 @@ const docTemplate = `{
                 "summary": "Get list class details api",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "name": "agencyId",
+                        "in": "query"
+                    },
+                    {
                         "type": "array",
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
-                        "description": "Ids",
+                        "collectionFormat": "multi",
                         "name": "ids",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Page",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Page Size",
                         "name": "pageSize",
                         "in": "query"
                     },
                     {
-                        "enum": [
-                            "asc",
-                            "desc"
-                        ],
                         "type": "string",
-                        "default": "desc",
-                        "description": "Sort direction",
-                        "name": "sort",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "name": "sortBy",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Search term",
-                        "name": "search",
+                        "name": "sortOrder",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "teacherId",
                         "in": "query"
                     }
                 ],
@@ -759,7 +768,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Registration IDs",
                         "name": "ids",
                         "in": "query",
@@ -1028,7 +1037,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Student IDs",
                         "name": "ids",
                         "in": "query",
