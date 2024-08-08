@@ -97,7 +97,7 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 
 	// Set value of a cell
 	rowIdx := 3
-	isHandleFirstFormula := false
+	isHandleFirstFormula, isProcessedDate := false, false
 	for _, v := range classAttendances {
 		if err := f.SetCellValue(WORKSHEET, fmt.Sprintf("A%d", rowIdx), v.Student.Class.Grade); err != nil {
 			log.Println("ExportClassAttendances.SetStudentGrade err: ", err)
@@ -222,37 +222,46 @@ func (s *spreadSheetExcelize) ExportClassAttendances(
 		/* f.SetCellValue(WORKSHEET, fmt.Sprintf("Y%d", rowIdx),v.Student.)
 		f.SetCellValue(WORKSHEET, fmt.Sprintf("Z%d", rowIdx), "N/A") */
 
+		/* // Generate all days in the specified month
+		startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+		endDate := startDate.AddDate(0, 1, -1)
+		totalDays := endDate.Day() */
+
 		// Handle attendances data here
 		dateColIdx := 29 // Attendance data start here
-		for _, d := range v.Attendances {
-			// Write day number to row 0 idx, date to row 1
-			cell, err := excelize.CoordinatesToCellName(dateColIdx, 1)
-			if err != nil {
-				log.Println("excelize.CoordinatesToCellName err: ", err)
-			}
+		if !isProcessedDate {
+			for _, d := range v.Attendances {
+				// Write day number to row 0 idx, date to row 1
+				cell, err := excelize.CoordinatesToCellName(dateColIdx, 1)
+				if err != nil {
+					log.Println("excelize.CoordinatesToCellName err: ", err)
+					return f.WriteToBuffer()
+				}
 
-			if err := f.SetCellValue(WORKSHEET, cell, d.AttendedAt.Time().Day()); err != nil {
-				log.Println("ExportClassAttendances. err: ", err)
-				return f.WriteToBuffer()
-			}
+				if err := f.SetCellValue(WORKSHEET, cell, d.AttendedAt.Time().Day()); err != nil {
+					log.Println("ExportClassAttendances. err: ", err)
+					return f.WriteToBuffer()
+				}
 
-			cell, err = excelize.CoordinatesToCellName(dateColIdx, 2)
-			if err != nil {
-				log.Println("excelize.CoordinatesToCellName err: ", err)
-				return f.WriteToBuffer()
-			}
+				cell, err = excelize.CoordinatesToCellName(dateColIdx, 2)
+				if err != nil {
+					log.Println("excelize.CoordinatesToCellName err: ", err)
+					return f.WriteToBuffer()
+				}
 
-			vietnameseWeekday, ok := VietnameseWeekdayMap[d.AttendedAt.Time().Weekday()]
-			if !ok {
-				return f.WriteToBuffer()
-			}
+				vietnameseWeekday, ok := VietnameseWeekdayMap[d.AttendedAt.Time().Weekday()]
+				if !ok {
+					return f.WriteToBuffer()
+				}
 
-			if err := f.SetCellValue(WORKSHEET, cell, vietnameseWeekday); err != nil {
-				log.Println("ExportClassAttendances. err: ", err)
-				return f.WriteToBuffer()
+				if err := f.SetCellValue(WORKSHEET, cell, vietnameseWeekday); err != nil {
+					log.Println("ExportClassAttendances. err: ", err)
+					return f.WriteToBuffer()
+				}
+				dateColIdx++
 			}
-			dateColIdx++
 		}
+		isProcessedDate = true
 
 		colIdx := 29
 		for _, d := range v.Attendances {

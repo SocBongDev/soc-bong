@@ -19,7 +19,11 @@ func (h *ClassHandler) RegisterRoute(group fiber.Router) {
 		// middlewares.ValidatePermissions([]string{"read:classes"}),
 		h.Find,
 	)
-	r.Get("/:id<int,min(1)>", middlewares.ValidatePermissions([]string{"read:classes"}), h.FindOne)
+	r.Get(
+		"/:id<int,min(1)>",
+		// middlewares.ValidatePermissions([]string{"read:classes"}),
+		h.FindOne,
+	)
 	r.Post(
 		"/",
 		// middlewares.ValidatePermissions([]string{"create:classes"}),

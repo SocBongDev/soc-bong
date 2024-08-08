@@ -17,7 +17,7 @@ func (r *classRepo) Find(query *ClassQuery) ([]Class, error) {
 		From("classes").
 		Offset(query.GetOffset()).
 		Limit(query.GetPageSize()).
-		OrderBy("created_at desc")
+		OrderBy(query.GetOrderBy())
 
 	if len(query.Ids) > 0 {
 		ids := make([]any, len(query.Ids))

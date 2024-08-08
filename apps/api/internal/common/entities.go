@@ -44,28 +44,29 @@ func (p *Pagination) GetOffset() int64 {
 	return (p.GetPage() - 1) * p.GetPageSize()
 }
 
+// SortField represents a field to sort by and its order
+type SortField struct {
+	// @Description The field name to sort by
+	// @Example name
+	Field string `json:"field"`
+
+	// @Description The sort order (asc or desc)
+	// @Enum asc,ASC,desc,DESC
+	// @Example ASC
+	Order string `json:"order" validate:"oneof=asc ASC desc DESC"`
+}
+
 type Sorter struct {
-	Sort   string `query:"sort"   validate:"oneof=asc ASC desc DESC"`
-	SortBy string `query:"sortBy"`
-}
-
-func (s *Sorter) GetSort() string {
-	if s.Sort == "" {
-		s.Sort = "DESC"
-	}
-
-	return s.Sort
-}
-
-func (s *Sorter) GetSortBy() string {
-	if s.SortBy == "" {
-		s.SortBy = "created_at"
-	}
-
-	return s.SortBy
+	// @Description List of fields to sort by
+	SortFields []SortField `json:"sortFields"`
 }
 
 var BaseExcludeFields []string = []string{"Id", "CreatedAt", "UpdatedAt"}
+
+var (
+	DefaultSortVal   = "created_at DESC"
+	DefaultSortOrder = "DESC"
+)
 
 type APIHandler interface {
 	RegisterRoute(fiber.Router)
