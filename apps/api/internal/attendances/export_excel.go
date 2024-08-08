@@ -3,6 +3,7 @@ package attendances
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
@@ -43,7 +44,22 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 		return err
 	}
 
-	buf, err := h.spreadsheet.ExportClassAttendances(attendanceResp)
+	// buf, err := h.spreadsheet.ExportClassAttendances(attendanceResp)
+	month, err := strconv.Atoi(query.month)
+	if err != nil {
+		logger.ErrorContext(c.Context(), "ExportExcel.Atoi err", "err", err)
+		return err
+	}
+
+	year, err := strconv.Atoi(query.year)
+	if err != nil {
+		logger.ErrorContext(c.Context(), "ExportExcel.Atoi err", "err", err)
+		return err
+	}
+
+	logger.Info("LmaoBefore", "test", *h.excelGenerator)
+	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp)
+	logger.Info("Lmao")
 	if err != nil {
 		logger.ErrorContext(c.Context(), "f.WriteToBuffer err", "err", err)
 		return fiber.ErrInternalServerError

@@ -58,11 +58,11 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	), students.NewRepo(
 		db,
 	)
-	spreadsheet := spreadsheet.New()
+	excel := spreadsheet.New()
 
 	publicHandlers := []common.APIHandler{
 		agencies.New(agencyRepo),
-		attendances.New(attendanceRepo, classRepo, spreadsheet, studentRepo),
+		attendances.New(attendanceRepo, classRepo, excel, studentRepo, spreadsheet.NewExcelGenerator()),
 		classes.New(classRepo),
 		registrations.New(registrationRepo),
 		students.New(studentRepo),
