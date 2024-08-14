@@ -325,6 +325,91 @@ definitions:
       studentName:
         type: string
     type: object
+  roles.FindRoleResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/roles.Role'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  roles.Role:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  roles.WriteRoleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  signup.User:
+    properties:
+      agencyId:
+        type: integer
+      auth0_user_id:
+        type: string
+      connection:
+        type: string
+      createdAt:
+        type: string
+      dob:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      password:
+        description: Plaintext password for input
+        type: string
+      phone_number:
+        type: string
+      updatedAt:
+        type: string
+      verify_email:
+        type: boolean
+    type: object
+  signup.UserInput:
+    properties:
+      agencyId:
+        type: integer
+      auth0_user_id:
+        type: string
+      connection:
+        type: string
+      dob:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      password:
+        description: Plaintext password for input
+        type: string
+      phone_number:
+        type: string
+      verify_email:
+        type: boolean
+    type: object
   students.FindStudentResp:
     properties:
       data:
@@ -473,6 +558,8 @@ definitions:
     properties:
       agencyId:
         type: integer
+      auth0_user_id:
+        type: string
       connection:
         type: string
       createdAt:
@@ -503,6 +590,8 @@ definitions:
     properties:
       agencyId:
         type: integer
+      auth0_user_id:
+        type: string
       connection:
         type: string
       dob:
@@ -1097,6 +1186,158 @@ paths:
       summary: Update registration api
       tags:
       - Registration
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: Get list role
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/roles.FindRoleResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list role details api
+      tags:
+      - Role
+    post:
+      consumes:
+      - application/json
+      description: Insert role
+      parameters:
+      - description: Create role body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/roles.WriteRoleRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/roles.Role'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create role api
+      tags:
+      - Role
+  /roles/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/roles.Role'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get role details api
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      description: Update role
+      parameters:
+      - description: Update role body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/roles.WriteRoleRequest'
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/roles.Role'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update role api
+      tags:
+      - Role
+  /sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Insert user by sign up
+      parameters:
+      - description: Create user sign up body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/signup.UserInput'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/signup.User'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create user by sign up api
+      tags:
+      - SignUp
   /students:
     delete:
       consumes:
@@ -1321,6 +1562,61 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create user api
+      tags:
+      - User
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get user details api
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update user
+      parameters:
+      - description: Update user body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserInput'
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update user api
       tags:
       - User
 securityDefinitions:
