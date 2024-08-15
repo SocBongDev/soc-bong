@@ -462,7 +462,7 @@
 					class={data.registrations.page === 1
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin?page=${data.registrations.page - 1}&pageSize=${
+					href={`/admin?registrations?page=${data.registrations.page - 1}&pageSize=${
 						data.registrations.pageSize
 					}`}
 				>
@@ -474,7 +474,7 @@
 					data.registrations.data.length === 0
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin?page=${data.registrations.page + 1}&pageSize=${
+					href={`/admin/registrations?page=${data.registrations.page + 1}&pageSize=${
 						data.registrations.pageSize
 					}`}
 				>
