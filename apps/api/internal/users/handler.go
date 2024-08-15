@@ -3,6 +3,7 @@ package users
 import (
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/config"
+	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,17 +18,26 @@ func (h *UserHandler) RegisterRoute(router fiber.Router) {
 
 	r.Get(
 		"/",
+		middlewares.ValidatePermissions([]string{"read:users"}),
 		h.Find,
 	)
 
 	r.Get(
 		"/:id<int,min(1)>",
+		middlewares.ValidatePermissions([]string{"read:users"}),
 		h.FindOne,
 	)
 
 	r.Post(
 		"/",
+		middlewares.ValidatePermissions([]string{"create:users"}),
 		h.Insert,
+	)
+
+	r.Put(
+		"/:id<int,min(1)>",
+		middlewares.ValidatePermissions([]string{"update:users"}),
+		h.Update,
 	)
 }
 
