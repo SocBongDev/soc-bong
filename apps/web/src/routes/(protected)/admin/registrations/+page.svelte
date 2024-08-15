@@ -231,6 +231,11 @@
 			const res = await request
 			refreshData()
 			resetDefaultForm()
+			Notify({
+				type: "success",
+				id: crypto.randomUUID(),
+				description: isNew ? 'Tạo đăng kí thành công!' : 'Cập nhật đăng kí thành công!'
+			})
 			hide()
 		} catch (e) {
 			console.error('Save error', e)
