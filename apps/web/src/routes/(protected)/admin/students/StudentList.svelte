@@ -295,7 +295,7 @@
 	<div class="join mt-auto self-center">
 		<a
 			class={studentList.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-			href={`/admin?page=${studentList.page - 1}&pageSize=${studentList.pageSize}`}
+			href={`/admin/students/?page=${studentList.page - 1}&pageSize=${studentList.pageSize}`}
 		>
 			<button class="btn join-item">«</button>
 		</a>
@@ -304,7 +304,7 @@
 			class={studentList.data.length < studentList.pageSize || studentList.data.length === 0
 				? 'pointer-events-none cursor-default opacity-40'
 				: ''}
-			href={`/admin?page=${studentList.page + 1}&pageSize=${studentList.pageSize}`}
+			href={`/admin/students?page=${studentList.page + 1}&pageSize=${studentList.pageSize}`}
 		>
 			<button class="btn join-item">»</button>
 		</a>
