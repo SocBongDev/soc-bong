@@ -91,13 +91,20 @@ export type UserProps = {
     createdAt?: string,
     updatedAt?: string,
     email: string,
-    firstName: string,
-    lastName: string,
+    first_name: string,
+    last_name: string,
     password: string,
     connection: string,
-    phoneNumber: string,
-    birthDate: string,
+    phone_number: string,
+    dob: string,
     agencyId: number,
-    isActive?: boolean,
-    verifyEmail?: boolean,
+    auth0_user_id: string,
+    is_active?: boolean,
+    verify_email?: boolean,
+}
+
+export type RoleProps = {
+    id?: string,
+    name: string,
+    description: string,
 }
