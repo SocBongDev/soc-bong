@@ -463,7 +463,7 @@
 			<div class="join mt-auto self-center">
 				<a
 					class={data.classes.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-					href={`/admin?page=${data.classes.page - 1}&pageSize=${data.classes.pageSize}`}
+					href={`/admin/classes?page=${data.classes.page - 1}&pageSize=${data.classes.pageSize}`}
 				>
 					<button class="btn join-item">«</button>
 				</a>
@@ -472,7 +472,7 @@
 					class={data.classes.data.length < data.classes.pageSize || data.classes.data.length === 0
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin?page=${data.classes.page + 1}&pageSize=${data.classes.pageSize}`}
+					href={`/admin/classes?page=${data.classes.page + 1}&pageSize=${data.classes.pageSize}`}
 				>
 					<button class="btn join-item">»</button>
 				</a>
