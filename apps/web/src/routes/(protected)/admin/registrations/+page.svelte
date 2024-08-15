@@ -267,7 +267,7 @@
 			).then((res) => res.json())
 			res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
 			recordData = res
-		} catch (e) {
+		} catch (e: any) {
 			console.error('LoadData: ', e)
 			if (e.name !== undefined && e.name === 'AbortError') {
 				return
@@ -317,6 +317,7 @@
 	}
 
 	function clearSelected() {
+		isCheckedAll = false
 		isChecked = []
 	}
 
