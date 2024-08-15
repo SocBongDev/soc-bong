@@ -65,36 +65,38 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	if err := h.repo.Insert(req); err != nil {
-		log.Println("User insertion error: ", err)
-		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			return fiber.ErrUnprocessableEntity
-		}
-		return fiber.ErrInternalServerError
-	}
-
 	//Create user in Auth0
 
 	auth0User, err := h.createAuth0User(req, input.Password)
 	if err != nil {
 		log.Println("Auth0 user creation error: ", err)
 		//delete user in database if createAuth0User error
-		return fiber.ErrInternalServerError
+		return fiber.ErrConflict
 	}
 
 	auth0UserID, ok := auth0User["user_id"].(string)
+	log.Printf("auth0UserID: %+v\n", auth0UserID)
 
 	if !ok {
 		log.Println("Failed to get Auth0 user ID from response")
-		return fiber.ErrInternalServerError
+		return fiber.ErrBadRequest
+	} else {
+		req.Auth0UserId = auth0UserID
+		log.Printf("check this req Insert: %+v\n", req)
+		if err := h.repo.Insert(req); err != nil {
+			log.Println("User insertion error: ", err)
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+				return fiber.ErrUnprocessableEntity
+			}
+			return fiber.ErrInternalServerError
+		}
+
+		//Respond with success
+		return c.JSON(fiber.Map{
+			"user":          auth0User,
+			"auth0_user_id": auth0UserID,
+		})
 	}
-
-	//Respond with success
-	return c.JSON(fiber.Map{
-		"user":          auth0User,
-		"auth0_user_id": auth0UserID,
-	})
-
 }
 
 func (h *UserHandler) createAuth0User(user *User, password string) (map[string]interface{}, error) {
