@@ -347,6 +347,86 @@ func (a *App) RunHttpServer() {
 		},
 	)
 
+	app.Get(
+		"/api/v1/users",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:users"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read a list of users"})
+		},
+	)
+
+	app.Get(
+		"/api/v1/users/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:users"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read a user"})
+		},
+	)
+
+	app.Post(
+		"/api/v1/users",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"create:users"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "create a user"})
+		},
+	)
+
+	app.Put(
+		"/api/v1/users/:id<int,min(1)>",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"update:users"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "update a user"})
+		},
+	)
+
+	app.Get(
+		"/api/v1/roles",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:roles"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read a list of roles"})
+		},
+	)
+
+	app.Get(
+		"/api/v1/roles/:id",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"read:roles"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "read a role"})
+		},
+	)
+
+	app.Post(
+		"/api/v1/roles",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"create:roles"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "create a role"})
+		},
+	)
+
+	app.Put(
+		"/api/v1/roles/:id",
+		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
+		middlewares.ValidatePermissions([]string{"update:roles"}),
+		func(c *fiber.Ctx) error {
+			log.Print("err", err)
+			return c.JSON(map[string]string{"message": "update a role"})
+		},
+	)
+
 	go func() {
 		if err := app.Listen(":5000"); err != nil {
 			log.Panicln("App.Listen err: ", err)
