@@ -34,7 +34,7 @@ func (h *RegistrationHandler) Find(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	resp := FindRegistrationResp{Data: data, Page: query.GetPage()}
+	resp := FindRegistrationResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
 	log.Printf("FindRegistrations success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
