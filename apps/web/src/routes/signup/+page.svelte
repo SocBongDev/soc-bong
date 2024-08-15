@@ -19,6 +19,7 @@
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 
 	let scrollClass = ''
+	let loading = false
 	export let data: PageData
 
 	function handleContentScroll(panel: HTMLElement) {
@@ -42,19 +43,20 @@
 	}
 
 	const defaultFormValues = {
-		lastName: '',
-		firstName: '',
-		phoneNumber: '',
+		last_name: '',
+		first_name: '',
+		phone_number: '',
 		email: '',
 		createdAt: dayjs().format('dd/MM/YYYY'),
 		updatedAt: dayjs().format('dd/MM/YYYY'),
-		birthDate: dayjs().format('dd/MM/YYYY'),
+		dob: dayjs().format('dd/MM/YYYY'),
 		password: '',
 		confirmPassword: '',
 		connection: 'Username-Password-Authentication',
 		agencyId: 1,
-		isActive: true,
-		verifyEmail: true
+		is_active: true,
+		verify_email: true,
+		auth0_user_id: ''
 	}
 
 	function resetDefaultForm() {
@@ -75,22 +77,22 @@
 		options?: { label: string; value: string }[]
 	}[] = [
 		{
-			name: 'firstName',
+			name: 'first_name',
 			type: 'text',
 			required: true
 		},
 		{
-			name: 'lastName',
+			name: 'last_name',
 			type: 'text',
 			required: true
 		},
 		{
-			name: 'birthDate',
+			name: 'dob',
 			type: 'date',
 			required: true
 		},
 		{
-			name: 'phoneNumber',
+			name: 'phone_number',
 			type: 'text',
 			required: true
 		},
@@ -128,53 +130,72 @@
 	}
 
 	async function save(req: UserProps) {
-		// loading = true
-		const body = {
-			email: req.email,
-			first_name: req.firstName,
-			last_name: req.lastName,
-			is_active: true,
-			verify_email: false,
-			birth_date: req.birthDate,
-			password: req.password,
-			phone_number: req.phoneNumber,
-			connection: 'Username-Password-Authentication',
-			agencyId: 1
-		}
+		loading = true
+		try {
+			const body = {
+				email: req.email,
+				first_name: req.first_name,
+				last_name: req.last_name,
+				is_active: true,
+				verify_email: false,
+				dob: req.dob,
+				password: req.password,
+				phone_number: req.phone_number,
+				connection: 'Username-Password-Authentication',
+				agencyId: 1,
+				auth0_user_id: ''
+			}
 
-		const bodyReq = JSON.stringify(body)
+			const bodyReq = JSON.stringify(body)
 
-		const request = fetch(`${PUBLIC_API_SERVER_URL}/users`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				accept: 'application/json'
-			},
-			body: bodyReq
-		}).then((res) => {
-			if (res.status == 422) {
+			const request = fetch(`${PUBLIC_API_SERVER_URL}/sign-up`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				},
+				body: bodyReq
+			})
+
+			const response = await request
+
+			if (response.status === 422) {
 				Notify({
 					type: 'error',
 					id: crypto.randomUUID(),
 					description: 'phía server đã tồn tại dữ liệu này!'
 				})
-			} else if (res.status == 500) {
+				loading = false
+				return
+			}
+
+			if (response.status === 500) {
 				Notify({
 					type: 'error',
 					id: crypto.randomUUID(),
-					description: 'Lỗi từ phía server!'
+					description: 'phía server đã tồn tại dữ liệu này!'
 				})
+				loading = false
+				return
 			}
-		})
 
-		try {
-			const res = await request
+			if (response.status === 409) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Máy chủ đã tồn tại tài khoản email này!'
+				})
+				loading = false
+				return
+			}
+
 			resetDefaultForm()
 			Notify({
-				type: "success",
+				type: 'success',
 				id: crypto.randomUUID(),
 				description: 'Đã tạo tài khoản thành công vui lòng liên hệ Quản lý để phê duyệt tài khoản!'
 			})
+			loading = false
 			goto('/')
 		} catch (e) {
 			console.error('Save error: ', e)
@@ -225,8 +246,14 @@
 				<button
 					class="btn rounded px-10 normal-case active:!translate-y-1"
 					type="submit"
-					form="signupForm">Đăng Ký</button
+					form="signupForm"
 				>
+					{#if loading}
+						<span class="loading loading-spinner" />
+					{:else}
+						Đăng Ký
+					{/if}
+				</button>
 			</div>
 		</footer>
 	</section>
