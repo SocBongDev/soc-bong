@@ -56,6 +56,11 @@
 		value: el.id ? el.id.toString() : '1'
 	}))
 
+	var teacherOptions = data?.users.data?.map((el) => ({
+		label: el.first_name + " " + el.last_name,
+		value: el.auth0_user_id ? el.auth0_user_id : " "
+	}))
+
 	function formatAgencyName(agencyId: number) {
 		const agency = data.agencies.data.find(
 			(el) => (el.id && parseInt(el.id?.toString())) === agencyId
@@ -97,8 +102,9 @@
 		},
 		{
 			name: 'teacherId',
-			type: 'text',
-			required: true
+			type: 'select',
+			required: true,
+			options: teacherOptions
 		},
 		{
 			name: 'agencyId',
