@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
     phone_number TEXT NOT NULL,
     connection TEXT NOT NULL,
     password_hash TEXT NOT NULL,
+
+    auth0_user_id TEXT NOT NULL,
     
     agency_id INTEGER DEFAULT 1 NOT NULL,
 
