@@ -68,6 +68,13 @@
 		return agency?.name || 'N/A'
 	}
 
+	function formatTeacherName(auth0_user_id: string) {
+		const teacher = data.users.data.find( 
+			(el) => (el.auth0_user_id) === auth0_user_id
+		)
+		return teacher ? (teacher?.first_name + " " + teacher?.last_name) : "N/A" 
+	}
+
 	const { form, errors, setInitialValues, reset } = createForm({
 		debounced: { timeout: 500 },
 		extend: validator({ schema }),
@@ -434,7 +441,7 @@
 								</th>
 								<th on:click={() => show(classroom.id)}>{classroom.name}</th>
 								<td on:click={() => show(classroom.id)}>{formatClasses(classroom.grade || '')}</td>
-								<td on:click={() => show(classroom.id)}>{classroom.teacherId}</td>
+								<td on:click={() => show(classroom.id)}>{formatTeacherName(classroom.teacherId)}</td>
 								<td on:click={() => show(classroom.id)}>{formatAgencyName(classroom.agencyId)}</td>
 
 								<td on:click={() => show(classroom.id)}>
