@@ -387,7 +387,7 @@
 			<div class="join mt-auto self-center">
 				<a
 					class={data?.agencies?.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-					href={`/admin?page=${data?.agencies?.page - 1}&pageSize=${data?.agencies?.pageSize}`}
+					href={`/admin/agencies?page=${data?.agencies?.page - 1}&pageSize=${data?.agencies?.pageSize}`}
 				>
 					<button class="btn join-item">«</button>
 				</a>
@@ -397,7 +397,7 @@
 					data?.agencies?.data.length === 0
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin?page=${data?.agencies?.page + 1}&pageSize=${data?.agencies?.pageSize}`}
+					href={`/admin/agencies?page=${data?.agencies?.page + 1}&pageSize=${data?.agencies?.pageSize}`}
 				>
 					<button class="btn join-item">»</button>
 				</a>
