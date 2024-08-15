@@ -5,8 +5,10 @@
     import { invalidate } from '$app/navigation'
 	import RolesList from './RolesList.svelte'
 	import AddRole from './AddRole.svelte'
+	import type { PageData } from './$types'
     let drawerToggleRef: HTMLInputElement
 
+	export let data: PageData
     function refreshData() {
 		invalidate('app:students')
 	}
