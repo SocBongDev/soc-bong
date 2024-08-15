@@ -264,6 +264,7 @@
 	}
 
 	function clearSelected() {
+		isCheckedAll = false
 		isChecked = []
 	}
 
