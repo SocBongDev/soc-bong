@@ -59,7 +59,7 @@ func (e *ExcelGenerator) setupTemplate() error {
 
 func (e *ExcelGenerator) writeStudentData(classAttendances map[int]entities.AttendanceResponse) error {
 	for idx, v := range classAttendances {
-		rowIdx := idx + 3
+		rowIdx := idx + 2
 		student := v.Student
 
 		studentData := []struct {
@@ -280,6 +280,133 @@ func (e *ExcelGenerator) writeFormulas(classAttendances map[int]entities.Attenda
 	}
 
 	// Additional formulas (sum, collected, remaining) can be added here following the same pattern
+	for i := 3; i < 3+rowCount; i++ {
+		cell, _ := cellName(colIdx+1, i)
+		hourCell, _ := cellName(colIdx-3, i)
+		dinnerCell, _ := cellName(colIdx-2, i)
+		formula := fmt.Sprintf(`%s*10+%s*10`, hourCell, dinnerCell)
+		if err := e.setCellFormula(cell, formula); err != nil {
+			return apperr.New(fmt.Errorf("failed to set overtime formula: %w", err))
+		}
+	}
+
+	// Third formula: Trừ tiền ăn (Subtracting food costs)
+	minusEatMoneyIdx := colIdx + 10
+	minusEatMoneyCell, _ := cellName(minusEatMoneyIdx, 1)
+	bottomRightCell, _ = cellName(minusEatMoneyIdx+1, 2)
+
+	if err := e.mergeCell(minusEatMoneyCell, bottomRightCell); err != nil {
+		return apperr.New(fmt.Errorf("failed to merge cells for food cost subtraction: %w", err))
+	}
+
+	if err := e.file.SetCellValue(WORKSHEET, minusEatMoneyCell, "Trừ tiền ăn"); err != nil {
+		return apperr.New(fmt.Errorf("failed to set food cost subtraction cell value: %w", err))
+	}
+
+	foodCostStyle := &excelize.Style{
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "middle"},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"FFA500"}},
+	}
+	if err := e.applyStyle(minusEatMoneyCell, foodCostStyle); err != nil {
+		return apperr.New(fmt.Errorf("failed to apply food cost style: %w", err))
+	}
+
+	for i := 3; i < 3+rowCount; i++ {
+		cell, _ := cellName(minusEatMoneyIdx, i)
+		excuseCell, _ := cellName(excuseColIdx, i)
+		formula := fmt.Sprintf(`%s*30`, excuseCell)
+		if err := e.setCellFormula(cell, formula); err != nil {
+			return apperr.New(fmt.Errorf("failed to set food cost subtraction formula: %w", err))
+		}
+	}
+
+	// Fourth formula: TỔNG (Total)
+	sumCellIdx := minusEatMoneyIdx + 2
+	sumCell, _ := cellName(sumCellIdx, 1)
+	collectCell, _ := cellName(sumCellIdx, 2)
+
+	if err := e.file.SetCellValue(WORKSHEET, sumCell, "TỔNG"); err != nil {
+		return apperr.New(fmt.Errorf("failed to set total cell value: %w", err))
+	}
+
+	if err := e.file.SetCellValue(WORKSHEET, collectCell, fmt.Sprintf("THU T%02d", time.Now().Month())); err != nil {
+		return apperr.New(fmt.Errorf("failed to set collection month cell value: %w", err))
+	}
+
+	sumCellStyle := &excelize.Style{
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "middle"},
+		Font:      &excelize.Font{Bold: true},
+		Fill:      excelize.Fill{Type: "pattern", Pattern: 1, Color: []string{"8842a6"}},
+	}
+	if err := e.applyStyle(sumCell, sumCellStyle); err != nil {
+		return apperr.New(fmt.Errorf("failed to apply sum cell style: %w", err))
+	}
+
+	for i := 3; i < 3+rowCount; i++ {
+		cell, _ := cellName(sumCellIdx, i)
+		startCell, _ := cellName(colIdx, i)
+		endCell, _ := cellName(colIdx+9, i)
+		minusEatMoneyCell, _ := cellName(minusEatMoneyIdx, i)
+		formula := fmt.Sprintf(`SUM(%s:%s)-%s`, startCell, endCell, minusEatMoneyCell)
+		if err := e.setCellFormula(cell, formula); err != nil {
+			return apperr.New(fmt.Errorf("failed to set total formula: %w", err))
+		}
+	}
+
+	// Fifth formula: ĐÃ THU (Collected)
+	collectedIdx := sumCellIdx + 1
+	collectedCell, _ := cellName(collectedIdx, 2)
+	if err := e.file.SetCellValue(WORKSHEET, collectedCell, "ĐÃ THU"); err != nil {
+		return apperr.New(fmt.Errorf("failed to set collected cell value: %w", err))
+	}
+
+	collectedStyle := &excelize.Style{
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"a64258"}},
+	}
+	if err := e.applyStyle(collectedCell, collectedStyle); err != nil {
+		return apperr.New(fmt.Errorf("failed to apply collected style: %w", err))
+	}
+
+	// Sixth formula: CÒN NỢ (Remaining balance)
+	remainingIdx := collectedIdx + 1
+	remainingCell, _ := cellName(remainingIdx, 2)
+	if err := e.file.SetCellValue(WORKSHEET, remainingCell, "CÒN NỢ"); err != nil {
+		return apperr.New(fmt.Errorf("failed to set remaining balance cell value: %w", err))
+	}
+
+	remainingStyle := &excelize.Style{
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"ffa500"}},
+	}
+	if err := e.applyStyle(remainingCell, remainingStyle); err != nil {
+		return apperr.New(fmt.Errorf("failed to apply remaining balance style: %w", err))
+	}
+
+	for i := 3; i < 3+rowCount; i++ {
+		cell, _ := cellName(remainingIdx, i)
+		sumCell, _ := cellName(sumCellIdx, i)
+		collectedCell, _ := cellName(collectedIdx, i)
+		formula := fmt.Sprintf(`%s-%s`, sumCell, collectedCell)
+		if err := e.setCellFormula(cell, formula); err != nil {
+			return apperr.New(fmt.Errorf("failed to set remaining balance formula: %w", err))
+		}
+	}
+
+	// Add "GHI CHÚ" (Note) column
+	noteIdx := remainingIdx + 1
+	noteCell, _ := cellName(noteIdx, 2)
+	if err := e.file.SetCellValue(WORKSHEET, noteCell, "GHI CHÚ"); err != nil {
+		return apperr.New(fmt.Errorf("failed to set note cell value: %w", err))
+	}
+
+	noteStyle := &excelize.Style{
+		Alignment: &excelize.Alignment{Horizontal: "center"},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"46a642"}},
+	}
+	if err := e.applyStyle(noteCell, noteStyle); err != nil {
+		return apperr.New(fmt.Errorf("failed to apply note style: %w", err))
+	}
 
 	return nil
 }
