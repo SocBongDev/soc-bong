@@ -18,6 +18,7 @@ type WriteUserRequest struct {
 	Connection  string          `json:"connection"`
 	PhoneNumber string          `json:"phone_number"`
 	BirthDate   common.DateTime `json:"dob" db:"dob" swaggertype:"string"`
+	Auth0UserId string          `json:"auth0_user_id" db:"auth0_user_id"`
 	AgencyId    int             `json:"agencyId" db:"agency_id"`
 }
 
@@ -31,6 +32,7 @@ type UserInput struct {
 	Connection  string          `json:"connection"`
 	PhoneNumber string          `json:"phone_number"`
 	BirthDate   common.DateTime `json:"dob" db:"dob" swaggertype:"string"`
+	Auth0UserId string          `json:"auth0_user_id" db:"auth0_user_id"`
 	AgencyId    int             `json:"agencyId" db:"agency_id"`
 }
 
