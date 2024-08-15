@@ -33,7 +33,6 @@
 	$: isNew = !recordData
 	$: if (recordData !== null) {
 		const { id, createdAt, updatedAt, ...initialValues } = recordData
-		console.log('check recordData: ', recordData)
 		setInitialValues(initialValues)
 		reset()
 	}
@@ -196,7 +195,6 @@
 	}
 
 	async function save(req: ClassesProps) {
-		console.log('check body', req)
 		loading = true
 		const body = JSON.stringify(req)
 		const method = isNew ? 'POST' : 'PUT'
