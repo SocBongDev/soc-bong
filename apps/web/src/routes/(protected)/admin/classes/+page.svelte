@@ -242,6 +242,11 @@
 			const res = await request
 			refreshData()
 			resetDefaultForm()
+			Notify({
+				type: "success",
+				id: crypto.randomUUID(),
+				description: isNew ? 'Tạo lớp học thành công!' : 'Cập nhật lớp học thành công!'
+			})
 			hide()
 		} catch (e) {
 			console.error('Save error', e)
