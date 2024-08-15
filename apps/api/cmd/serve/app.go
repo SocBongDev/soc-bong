@@ -14,6 +14,8 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/database"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/SocBongDev/soc-bong/internal/registrations"
+	"github.com/SocBongDev/soc-bong/internal/roles"
+	"github.com/SocBongDev/soc-bong/internal/signup"
 	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
 	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/SocBongDev/soc-bong/internal/users"
@@ -48,7 +50,7 @@ func (a *App) RegisterAPIHandlers(router fiber.Router, handlers []common.APIHand
 
 func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	v1 := api.Group("/v1")
-	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo, userRepo := agencies.NewRepo(
+	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo, userRepo, roleRepo, userSignUpRepo := agencies.NewRepo(
 		db,
 	), attendances.NewRepo(
 		db,
@@ -60,11 +62,15 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 		db,
 	), users.NewRepo(
 		db,
+	), roles.NewRepo(
+		db,
+	), signup.NewRepo(
+		db,
 	)
 	spreadsheet := spreadsheet.New()
 
 	publicHandlers := []common.APIHandler{
-		users.New(userRepo, a.config, a.config.ClientId, a.config.Secret),
+		signup.New(userSignUpRepo, a.config, a.config.ClientId, a.config.Secret),
 	}
 	a.RegisterAPIHandlers(v1, publicHandlers)
 
@@ -76,6 +82,8 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 		classes.New(classRepo),
 		registrations.New(registrationRepo),
 		students.New(studentRepo),
+		users.New(userRepo, a.config, a.config.ClientId, a.config.Secret),
+		roles.New(roleRepo, a.config, a.config.ClientId, a.config.Secret),
 	}
 	a.RegisterAPIHandlers(v1, privateHandlers)
 }
