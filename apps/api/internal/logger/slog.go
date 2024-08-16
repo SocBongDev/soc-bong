@@ -10,16 +10,23 @@ var _ Logger = (*SlogLogger)(nil)
 
 type SlogLogger struct{}
 
-func NewSlogLogger() *SlogLogger {
-	level := slog.LevelDebug
-	/* if config.GetConfig().Env == config.PROD {
-		level = slog.LevelInfo
-	} */
+type Option func(*slog.HandlerOptions)
 
-	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+func WithLevel(level slog.Level) Option {
+	return func(otps *slog.HandlerOptions) {
+		otps.Level = level
+	}
+}
+
+func NewSlogLogger(options ...Option) *SlogLogger {
+	defaultOptions := &slog.HandlerOptions{
 		ReplaceAttr: replaceAttr,
-		Level:       level,
-	})
+	}
+	for _, opt := range options {
+		opt(defaultOptions)
+	}
+
+	h := slog.NewJSONHandler(os.Stdout, defaultOptions)
 	slog.SetDefault(slog.New(h))
 	return &SlogLogger{}
 }

@@ -3,23 +3,18 @@ package logger
 import (
 	"context"
 	"log/slog"
-	"sync"
+	"os"
 	"sync/atomic"
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
 )
 
-var (
-	globalLogger atomic.Value
-	once         sync.Once
-)
+var globalLogger atomic.Value
 
 // init automatically initializes the global logger when the package is imported
 func init() {
-	once.Do(func() {
-		SetGlobalLogger(Default)
-	})
+	SetGlobalLogger(Default)
 }
 
 // GetGlobalLogger returns the global logger instance
@@ -28,14 +23,25 @@ func GetGlobalLogger() Logger {
 }
 
 // SetGlobalLogger allows changing the global logger after initialization if needed
-func SetGlobalLogger(loggerType LoggerType) {
+func SetGlobalLogger(loggerType LoggerType, options ...Option) {
 	var (
 		logger Logger
 		err    error
 	)
+
+	env, ok := os.LookupEnv("ENV")
+	if !ok {
+		env = "dev"
+	}
+
 	switch loggerType {
 	case Default:
-		logger = NewSlogLogger()
+		logLevel := slog.LevelDebug
+		if env == "prod" {
+			logLevel = slog.LevelInfo
+		}
+
+		logger = NewSlogLogger(WithLevel(logLevel))
 	case File:
 		logger, err = NewFileLogger("app.log")
 		if err != nil {
