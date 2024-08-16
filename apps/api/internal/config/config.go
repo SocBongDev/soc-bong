@@ -5,7 +5,6 @@ import (
 	"log"
 	"log/slog"
 	"strings"
-	"sync"
 
 	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/ilyakaznacheev/cleanenv"
@@ -17,7 +16,15 @@ func generateMaskedString(input string) string {
 	return masked
 }
 
-var _ slog.LogValuer = (*Config)(nil)
+const (
+	DEV  = "dev"
+	PROD = "prod"
+)
+
+var (
+	_      slog.LogValuer = (*Config)(nil)
+	config *Config
+)
 
 type Config struct {
 	Auth0Secret
@@ -56,21 +63,14 @@ func New() (*Config, error) {
 	return config, nil
 }
 
-var (
-	config *Config
-	once   sync.Once
-)
-
 func init() {
-	once.Do(func() {
-		var err error
-		config, err = loadConfig()
-		if err != nil {
-			logger.Error("Failed to load config: ", err)
-		}
+	var err error
+	config, err = loadConfig()
+	if err != nil {
+		logger.Error("Failed to load config: ", err)
+	}
 
-		logger.Info("Init config success", "config", config)
-	})
+	logger.Info("Init config success", "config", config)
 }
 
 // GetConfig returns the singleton instance of Config
