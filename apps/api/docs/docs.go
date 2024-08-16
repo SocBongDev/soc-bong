@@ -328,6 +328,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Patch attendance",
                 "consumes": [
                     "application/json"
@@ -1149,6 +1154,120 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get list user",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get list user details api",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page Size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "Sort direction",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Email term",
+                        "name": "email",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/users.FindUserResp"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Insert user",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Create user api",
+                "parameters": [
+                    {
+                        "description": "Create user body",
+                        "name": "post",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/users.UserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/users.User"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1188,6 +1307,9 @@ const docTemplate = `{
                     }
                 },
                 "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
                     "type": "integer"
                 }
             }
@@ -1304,12 +1426,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "grade": {
-                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.\n* toddler - Children who is lower than 2 yo.",
                     "type": "string",
                     "enum": [
                         "buds",
                         "seed",
-                        "leaf"
+                        "leaf",
+                        " toddler"
                     ]
                 },
                 "id": {
@@ -1337,6 +1460,9 @@ const docTemplate = `{
                 },
                 "page": {
                     "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
                 }
             }
         },
@@ -1347,12 +1473,13 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "grade": {
-                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.\n* toddler - Children who is lower than 2 yo.",
                     "type": "string",
                     "enum": [
                         "buds",
                         "seed",
-                        "leaf"
+                        "leaf",
+                        " toddler"
                     ]
                 },
                 "name": {
@@ -1373,12 +1500,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "grade": {
-                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "description": "Grade type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.\n* toddler - Children who are lower than 2 yo.",
                     "type": "string",
                     "enum": [
                         "buds",
                         "seed",
-                        "leaf"
+                        "leaf",
+                        " toddler"
                     ]
                 },
                 "id": {
@@ -1504,6 +1632,9 @@ const docTemplate = `{
                 },
                 "page": {
                     "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
                 }
             }
         },
@@ -1529,12 +1660,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "studentClass": {
-                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.\n* toddler - Children who is 1 - 3 yo.",
                     "type": "string",
                     "enum": [
                         "buds",
                         "seed",
-                        "leaf"
+                        "leaf",
+                        " toddler"
                     ]
                 },
                 "studentDob": {
@@ -1561,12 +1693,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "studentClass": {
-                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.",
+                    "description": "Class type:\n* buds - Children who is 3 yo.\n* seed - Children who is 4 yo.\n* leaf - Children who is 5 yo.\n* toddler - Children who is 1 - 3 yo.",
                     "type": "string",
                     "enum": [
                         "buds",
                         "seed",
-                        "leaf"
+                        "leaf",
+                        " toddler"
                     ]
                 },
                 "studentDob": {
@@ -1587,6 +1720,9 @@ const docTemplate = `{
                     }
                 },
                 "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
                     "type": "integer"
                 }
             }
@@ -1772,6 +1908,104 @@ const docTemplate = `{
                 },
                 "tempAddress": {
                     "type": "string"
+                }
+            }
+        },
+        "users.FindUserResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/users.User"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                }
+            }
+        },
+        "users.User": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "connection": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Plaintext password for input",
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "verify_email": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "users.UserInput": {
+            "type": "object",
+            "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
+                "connection": {
+                    "type": "string"
+                },
+                "dob": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "description": "Plaintext password for input",
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "verify_email": {
+                    "type": "boolean"
                 }
             }
         }

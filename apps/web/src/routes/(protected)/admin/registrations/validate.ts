@@ -8,7 +8,6 @@ export const CreateRegistrationSchema = z.object({
 		.regex(/^\d+$/, { message: 'Số điện thoại không được chứ ký tự khác ngoài chữ số' })
 		.length(10, { message: 'Số điện thoại phải đúng 10 chữ số' }),
 	studentDob: z.string().nonempty({ message: 'Ngày sinh của bé không được bỏ trống' }),
-	studentClass: z.enum(['seed', 'buds', 'leaf', 'toddlers']),
+	studentClass: z.enum(['seed', 'buds', 'leaf', 'toddler']),
 	note: z.string(),
-	// agencyId: z.number().int().positive({ message: 'Đơn vị không hợp lệ' }),
 })

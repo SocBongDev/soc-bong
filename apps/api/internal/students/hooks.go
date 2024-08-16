@@ -9,7 +9,7 @@ import (
 func mapStudents(dbResult []DbStudentResult) []Student {
 	studentsMap := make(map[int]*Student)
 	for _, v := range dbResult {
-		if _, ok := studentsMap[v.Id]; ok {
+		if _, ok := studentsMap[v.Id]; !ok {
 			studentsMap[v.Id] = &Student{
 				BaseEntity: common.BaseEntity{
 					Id:        v.Id,

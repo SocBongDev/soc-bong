@@ -13,13 +13,13 @@ type RegistrationHandler struct {
 func (h *RegistrationHandler) RegisterRoute(group fiber.Router) {
 	r := group.Group("/registrations")
 	r.Delete(
-		"/:id<int,min(1)>",
+		"/",
 		middlewares.ValidatePermissions([]string{"delete:registrations"}),
 		h.Delete,
 	)
 	r.Get(
 		"/",
-		// middlewares.ValidatePermissions([]string{"read:registrations"}),
+		middlewares.ValidatePermissions([]string{"read:registrations"}),
 		h.Find,
 	)
 	r.Get(

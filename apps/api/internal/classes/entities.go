@@ -22,7 +22,8 @@ type WriteClassRequest struct {
 	// * buds - Children who is 3 yo.
 	// * seed - Children who is 4 yo.
 	// * leaf - Children who is 5 yo.
-	Grade     string `json:"grade"     enums:"buds,seed,leaf"`
+	// * toddler - Children who is lower than 2 yo.
+	Grade     string `json:"grade"     enums:"buds,seed,leaf, toddler"`
 	AgencyId  int    `json:"agencyId" db:"agency_id"`
 	TeacherId string `json:"teacherId" db:"teacher_id"`
 }
@@ -62,7 +63,7 @@ func (q *ClassQuery) GetOrderBy() string {
 	return strings.Join(orderByParts, ",")
 }
 
-type FindClassResp common.FindResponse[Class]
+type FindClassResp common.FindResponse[*Class]
 
 type Class struct {
 	common.BaseEntity

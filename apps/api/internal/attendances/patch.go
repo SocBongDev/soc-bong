@@ -15,6 +15,7 @@ import (
 // @Param post body []UpdateAttendanceRequest true "Patch attendance body"
 // @Success 200 {object} Attendance
 // @Failure 500 {string} string
+// @Security ApiKeyAuth
 // @Router /attendances [patch]
 func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
 	body := []UpdateAttendanceRequest{}

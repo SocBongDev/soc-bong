@@ -1,16 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-	import { isAuthError } from '@supabase/supabase-js'
-	import type { PageData } from './$types'
 	import Sidebar from './Sidebar.svelte'
 	import LogoutIcon from '~icons/ri/logout-circle-line'
 	import ProfileIcon from '~icons/gg/profile'
-	import { dialogProps, openDialog } from '$lib/store'
+	import { dialogProps, Notify, openDialog } from '$lib/store'
 
-	export let data: PageData
-	let { supabase } = data
 	let modalRef: HTMLDialogElement | undefined
-	$: ({ supabase } = data)
 	$: if ($openDialog) {
 		showModal()
 	} else {
@@ -18,12 +13,18 @@
 	}
 
 	async function handleSignOut() {
-		const err = await supabase.auth.signOut()
-		if (err === null && isAuthError(err)) {
-			return console.error("Can't logout user")
+		if (localStorage.getItem("access_token")) {
+			localStorage.removeItem("access_token");
+			localStorage.removeItem("id_token");
+			localStorage.removeItem("expires_at")
+			return goto('/')
+		} else {
+			Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Chưa thể thực hiện đăng xuất lúc này, vui lòng thử lại sau!'
+				})
 		}
-
-		return goto('/')
 	}
 
 	function showModal() {

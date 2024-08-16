@@ -29,8 +29,14 @@ type ErrorMessage struct {
 	Message string `json:"message"`
 }
 
+type EnhancedValidatedClaims struct {
+	*validator.ValidatedClaims
+	Role []string `json:"user/roles,omitempty"`
+}
+
 type CustomClaims struct {
 	Permissions []string `json:"permissions"`
+	UserRoles   []string `json:"user/roles,omitempty"`
 }
 
 func (c CustomClaims) Validate(ctx context.Context) error {
@@ -74,8 +80,26 @@ func ServerError(rw http.ResponseWriter, err error) {
 }
 
 func ValidatePermissions(expectedClaims []string) fiber.Handler {
+	// return func(c *fiber.Ctx) error {
+	// 	token := c.Locals(jwtmiddleware.ContextKey{}).(*validator.ValidatedClaims)
+	// 	claims := token.CustomClaims.(*CustomClaims)
+	// 	if !claims.HasPermissions(expectedClaims) {
+	// 		errorMessage := ErrorMessage{Message: permissionDeniedErrorMessage}
+	// 		if err := c.Status(http.StatusForbidden).JSON(errorMessage); err != nil {
+	// 			log.Printf("Failed to write error message: %v", err)
+	// 		}
+	// 		return nil
+	// 	}
+	// 	c.Locals("role", token.RegisteredClaims.Role)
+	// 	c.Locals("userId", token.RegisteredClaims.Subject)
+	// 	return c.Next()
+	// }
+
 	return func(c *fiber.Ctx) error {
-		token := c.Locals(jwtmiddleware.ContextKey{}).(*validator.ValidatedClaims)
+		token, ok := c.Locals(jwtmiddleware.ContextKey{}).(*EnhancedValidatedClaims)
+		if !ok {
+			return c.Status(http.StatusUnauthorized).JSON(ErrorMessage{Message: "Invalid token"})
+		}
 		claims := token.CustomClaims.(*CustomClaims)
 		if !claims.HasPermissions(expectedClaims) {
 			errorMessage := ErrorMessage{Message: permissionDeniedErrorMessage}
@@ -84,6 +108,8 @@ func ValidatePermissions(expectedClaims []string) fiber.Handler {
 			}
 			return nil
 		}
+		c.Locals("role", token.Role)
+		c.Locals("userId", token.RegisteredClaims.Subject)
 		return c.Next()
 	}
 }
@@ -141,7 +167,28 @@ func validateJWT(audience, domain string, next http.Handler) http.Handler {
 		}
 
 		middleware := jwtmiddleware.New(
-			jwtValidator.ValidateToken,
+			func(ctx context.Context, tokenString string) (interface{}, error) {
+				token, err := jwtValidator.ValidateToken(ctx, tokenString)
+				if err != nil {
+					return nil, err
+				}
+
+				validatedClaims, ok := token.(*validator.ValidatedClaims)
+
+				if !ok {
+					return nil, errors.New("invalid token claims")
+				}
+
+				enhancedClaims := &EnhancedValidatedClaims{
+					ValidatedClaims: validatedClaims,
+				}
+
+				//Extract role from token code
+				if customClaims, ok := validatedClaims.CustomClaims.(*CustomClaims); ok {
+					enhancedClaims.Role = customClaims.UserRoles
+				}
+				return enhancedClaims, nil
+			},
 			jwtmiddleware.WithErrorHandler(errorHandler),
 		)
 

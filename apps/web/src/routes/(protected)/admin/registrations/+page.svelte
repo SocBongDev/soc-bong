@@ -9,17 +9,16 @@
 	import TrashIcon from '~icons/lucide/trash'
 	import TextField from '$lib/components/TextField.svelte'
 	import DateField from '$lib/components/DateField.svelte'
+	import SelectField from '$lib/components/SelectField.svelte'
 	import { createForm } from 'felte'
 	import { CreateRegistrationSchema as schema } from './validate'
 	import { validator } from '@felte/validator-zod'
-	import SelectField from '$lib/components/SelectField.svelte'
 	import { invalidate } from '$app/navigation'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
 	import { blur, fade } from 'svelte/transition'
-	import type { RegistrationProps } from '../type'
-
+	import type { RegistrationProps } from '$lib/common/type'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	export let data: PageData
-	const API_URL = 'http://127.0.0.1:5000/api/v1'
 	let drawerToggleRef: HTMLInputElement
 	let isChecked: string[] = []
 	let scrollClass = ''
@@ -35,10 +34,9 @@
 		setInitialValues(initialValues)
 		reset()
 	}
-	// var agencyOptions = data?.agencies?.data?.map((el) => ({
-	// 	label: el.agencyName,
-	// 	value: el.id.toString()
-	// }))
+
+	const token = localStorage.getItem('access_token')
+
 	const defaultFormValues = {
 		studentClass: 'seed',
 		studentName: '',
@@ -46,7 +44,6 @@
 		studentDob: '',
 		parentName: '',
 		note: undefined
-		// agencyId: parseInt(agencyOptions[0]?.value)
 	}
 	const registrationSchema: {
 		name: string
@@ -67,7 +64,7 @@
 				{ label: 'Lớp mầm', value: 'seed' },
 				{ label: 'Lớp chồi', value: 'buds' },
 				{ label: 'Lớp lá', value: 'leaf' },
-				{ label: 'trẻ ( 18 - 24 tháng tuổi )', value: 'toddlers' }
+				{ label: 'Trẻ ( 18 - 24 tháng tuổi )', value: 'toddler' }
 			]
 		},
 		{
@@ -100,7 +97,8 @@
 	const studentClassMap = {
 		seed: 'Lớp mầm',
 		buds: 'Lớp chồi',
-		leaf: 'Lớp lá'
+		leaf: 'Lớp lá',
+		toddler: 'Trẻ ( 18 - 24 tháng tuổi )'
 	}
 	const { form, errors, setInitialValues, reset } = createForm({
 		debounced: { timeout: 500 },
@@ -117,16 +115,12 @@
 			case 'seed':
 			case 'buds':
 			case 'leaf':
+			case 'toddler':
 				return studentClassMap[studentClass as keyof typeof studentClassMap]
 			default:
 				return 'N/A'
 		}
 	}
-
-	// function formatAgencyName(agencyId: number) {
-	// 	const agency = data.agencies.data.find((el) => parseInt(el.id.toString()) === agencyId)
-	// 	return agency?.agencyName || 'N/A'
-	// }
 
 	let prevPromise: Promise<void>
 	async function show(id?: number) {
@@ -206,10 +200,13 @@
 		loading = true
 		const body = JSON.stringify(req)
 		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew ? `${API_URL}/registrations` : `${API_URL}/registrations/${recordData?.id}`
+		const url = isNew
+			? `${PUBLIC_API_SERVER_URL}/registrations`
+			: `${PUBLIC_API_SERVER_URL}/registrations/${recordData?.id}`
 		const request = fetch(url, {
 			method,
 			headers: {
+				Authorization: `Bearer ${token}`,
 				'Content-Type': 'application/json',
 				accept: 'application/json'
 			},
@@ -220,6 +217,12 @@
 					type: 'error',
 					id: crypto.randomUUID(),
 					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			} else if (res.status == 403 || res.status == 405) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Người dùng hiện không có quyền thực hiện này!'
 				})
 			}
 		})
@@ -245,9 +248,18 @@
 		loading = true
 
 		try {
-			const res = await fetch(`${API_URL}/registrations/${id}`, {
-				signal
-			}).then((res) => res.json())
+			const res = await fetch(
+				`${PUBLIC_API_SERVER_URL}/registrations/${id}`,
+
+				{
+					headers: {
+						Authorization: `Bearer ${token}`,
+						'Content-Type': 'application/json',
+						accept: 'application/json'
+					},
+					signal
+				}
+			).then((res) => res.json())
 			res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
 			recordData = res
 		} catch (e) {
@@ -270,14 +282,23 @@
 		loading = true
 
 		try {
-			const res = await fetch(`${API_URL}/registrations`, {
-				body: JSON.stringify({ ids: [Number(recordData.id)] }),
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/registrations`, {
 				method: 'DELETE',
 				headers: {
+					Authorization: `Bearer ${token}`,
 					'Content-Type': 'application/json',
 					accept: 'application/json'
+				},
+				body: JSON.stringify({ ids: [Number(recordData.id)] })
+			}).then((res) => {
+				if (res.status === 403) {
+					Notify({
+						type: 'error',
+						id: crypto.randomUUID(),
+						description: 'Người dùng hiện không có quyền thực hiện này!'
+					})
 				}
-			}).then((res) => res.json())
+			})
 			refreshData()
 			resetDefaultForm()
 			hide()
@@ -297,7 +318,23 @@
 	async function batchDelete() {
 		try {
 			const ids = isChecked.map((el) => Number(el))
-			await fetch(`${API_URL}/registrations`, { body: JSON.stringify({ ids }), method: 'DELETE' })
+			await fetch(`${PUBLIC_API_SERVER_URL}/registrations`, {
+				method: 'DELETE',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				},
+				body: JSON.stringify({ ids })
+			}).then((res) => {
+				if (res.status == 403 || res.status == 405) {
+					Notify({
+						type: 'error',
+						id: crypto.randomUUID(),
+						description: 'Người dùng hiện không có quyền thực hiện này!'
+					})
+				}
+			})
 			refreshData()
 			clearSelected()
 		} catch (e) {
@@ -366,7 +403,6 @@
 						<th>Ngày sinh</th>
 						<th>Tên phụ huynh</th>
 						<th>Số điện thoại</th>
-						<!-- <th>Cơ Sở Nhà Trẻ</th> -->
 						<th>Ghi chú</th>
 						<th>
 							<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
@@ -399,17 +435,11 @@
 								>
 								<td on:click={() => show(registration.id)}>{registration.parentName}</td>
 								<td on:click={() => show(registration.id)}>{registration.phoneNumber}</td>
-								<!-- <td on:click={() => show(registration.id)}
-								>{formatAgencyName(registration.agencyId)}</td
-							> -->
 								{#if registration.note === null}
 									<td on:click={() => show(registration.id)} />
 								{:else}
 									<td on:click={() => show(registration.id)}>{registration.note}</td>
 								{/if}
-								<!-- <td on:click={() => show(registration.id)}
-								>{registration.note === null ? '' : registration.note}</td
-							> -->
 								<td on:click={() => show(registration.id)}>
 									<div class="px-2">
 										<ArrowRightIcon />

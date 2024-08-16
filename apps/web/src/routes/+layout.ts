@@ -1,21 +1,24 @@
-import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public'
-import { createSupabaseLoadClient } from '@supabase/auth-helpers-sveltekit'
-import type { Load } from '@sveltejs/kit'
-import type { Database } from '../DatabaseDefinitions'
+import auth0 from "auth0-js";
+import {
+	PUBLIC_AUTH0_CLIENT_ID,
+	PUBLIC_AUTH0_DOMAIN,
+	PUBLIC_AUTH0_AUDIENCE,
+	PUBLIC_AUTH0_CALLBACK_URL,
+} from "$env/static/public";
+export const ssr = false;
+export const prerender = true;
 
-export const load: Load = async ({ fetch, data, depends }) => {
-	depends('supabase:auth')
+export async function load({ params, parent, url }) {
+	const options = {
+		clientID: PUBLIC_AUTH0_CLIENT_ID,
+		domain: PUBLIC_AUTH0_DOMAIN,
+		responseType: "token",
+		audience: PUBLIC_AUTH0_AUDIENCE,
+		redirectUri: PUBLIC_AUTH0_CALLBACK_URL,
+		scope: "openid profile email",
+	};
+	const webAuthClient = new auth0.WebAuth(options);
+	const authenticationClient = new auth0.Authentication(options);
 
-	const supabase = createSupabaseLoadClient<Database>({
-		supabaseUrl: PUBLIC_SUPABASE_URL,
-		supabaseKey: PUBLIC_SUPABASE_ANON_KEY,
-		event: { fetch },
-		serverSession: data?.session
-	})
-
-	const {
-		data: { session }
-	} = await supabase.auth.getSession()
-
-	return { supabase, session }
+	return { webAuthClient, authenticationClient };
 }

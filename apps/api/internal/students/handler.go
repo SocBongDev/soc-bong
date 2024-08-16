@@ -2,6 +2,7 @@ package students
 
 import (
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -11,10 +12,31 @@ type StudentHandler struct {
 
 func (h *StudentHandler) RegisterRoute(router fiber.Router) {
 	r := router.Group("/students")
-	r.Get("/", h.Find)
-	r.Get("/:id<int,min(1)>", h.FindOne)
-	r.Post("/", h.Insert)
-	r.Put("/:id<int,min(1)>", h.Update)
+	r.Delete(
+		"/",
+		middlewares.ValidatePermissions([]string{"delete:students"}),
+		h.Delete,
+	)
+	r.Get(
+		"/",
+		middlewares.ValidatePermissions([]string{"read:students"}),
+		h.Find,
+	)
+	r.Get(
+		"/:id<int,min(1)>",
+		middlewares.ValidatePermissions([]string{"read:students"}),
+		h.FindOne,
+	)
+	r.Post(
+		"/",
+		middlewares.ValidatePermissions([]string{"create:students"}),
+		h.Insert,
+	)
+	r.Put(
+		"/:id<int,min(1)>",
+		middlewares.ValidatePermissions([]string{"update:students"}),
+		h.Update,
+	)
 }
 
 func New(repo StudentRepository) common.APIHandler {

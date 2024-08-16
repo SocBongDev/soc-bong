@@ -17,15 +17,43 @@ import (
 // @Security ApiKeyAuth
 // @Router /classes [get]
 func (h *ClassHandler) Find(c *fiber.Ctx) error {
+	roles, ok := c.Locals("role").([]string)
+	userId, _ := c.Locals("userId").(string)
 	query := &ClassQuery{}
 	if err := c.QueryParser(query); err != nil {
 		log.Println("FindClasses.QueryParser err: ", err)
 		return fiber.ErrBadRequest
 	}
-
 	log.Printf("FindClasses request: %+v\n", query)
 
-	data, err := h.repo.Find(query)
+	isAdmin := false
+	isTeacher := false
+
+	if ok {
+		for _, role := range roles {
+			if role == "admin" {
+				isAdmin = true
+				break
+			}
+
+			if role == "teacher" {
+				isTeacher = true
+			}
+		}
+	}
+
+	var data []*Class
+	var err error
+
+	if isAdmin {
+		data, err = h.repo.Find(query)
+	} else if isTeacher {
+		query.TeacherId = userId
+		data, err = h.repo.Find(query)
+	} else {
+		return fiber.ErrForbidden
+	}
+
 	if err != nil {
 		log.Println("FindClasses.All err: ", err)
 		return fiber.ErrInternalServerError

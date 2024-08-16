@@ -108,17 +108,15 @@
 		on:click={handleDropdownClick}
 	>
 		{#if active == '' && data && data.attendedStatus == 'attended'}
-			<span class="max-h-full w-fit">{status[2].letter}</span>
-		{:else if active == '' && data && data.attendedStatus == 'absented'}
 			<span class="max-h-full w-fit">{status[1].letter}</span>
+		{:else if active == '' && data && data.attendedStatus == 'absented'}
+			<span class="max-h-full w-fit">{status[0].letter}</span>
 		{:else if active == '' && data && data.attendedStatus == 'excused'}
-			<span class="max-h-full w-fit">{status[3].letter}</span>
+			<span class="max-h-full w-fit">{status[2].letter}</span>
 		{:else if active == '' && data && data.attendedStatus == 'dayoff'}
-			<span class="max-h-full w-fit">{status[4].letter}</span>
+			<span class="max-h-full w-fit">{status[3].letter}</span>
 		{:else if active == '' && data && data.attendedStatus == 'holiday'}
-			<span class="max-h-full w-fit">{status[5].letter}</span>
-			<!-- {:else if active == '' && data && data.attendedStatus == 'unknown'}
-			<span class="max-h-full w-fit">{status[0].letter}</span> -->
+			<span class="max-h-full w-fit">{status[4].letter}</span>
 		{:else if active == ''}
 			<svg class="w-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
 				><path

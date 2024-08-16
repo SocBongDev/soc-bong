@@ -8,7 +8,8 @@ type WriteClassRequest struct {
 	// * buds - Children who is 3 yo.
 	// * seed - Children who is 4 yo.
 	// * leaf - Children who is 5 yo.
-	Grade     string `json:"grade"     enums:"buds,seed,leaf"`
+	// * toddler - Children who are lower than 2 yo.
+	Grade     string `json:"grade"     enums:"buds,seed,leaf, toddler"`
 	AgencyId  int    `json:"agencyId" db:"agency_id"`
 	TeacherId string `json:"teacherId" db:"teacher_id"`
 }
