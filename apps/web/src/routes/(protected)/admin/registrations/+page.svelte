@@ -350,6 +350,11 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Sóc Bông Admin</title>
+	<meta name="description" content="Sóc Bông Kindergarten" />
+</svelte:head>
+
 <div class="drawer drawer-end h-full">
 	<input
 		id="my-drawer"
