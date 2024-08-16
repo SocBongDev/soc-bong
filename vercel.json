@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "(.*)",
-      "destination": "apps/api/api/index.go"
-    }
-  ]
-}
