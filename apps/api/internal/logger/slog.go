@@ -11,8 +11,14 @@ var _ Logger = (*SlogLogger)(nil)
 type SlogLogger struct{}
 
 func NewSlogLogger() *SlogLogger {
+	level := slog.LevelDebug
+	/* if config.GetConfig().Env == config.PROD {
+		level = slog.LevelInfo
+	} */
+
 	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		ReplaceAttr: replaceAttr,
+		Level:       level,
 	})
 	slog.SetDefault(slog.New(h))
 	return &SlogLogger{}
