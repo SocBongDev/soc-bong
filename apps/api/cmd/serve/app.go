@@ -70,6 +70,8 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	spreadsheet := spreadsheet.New()
 
 	publicHandlers := []common.APIHandler{
+		registrations.New(registrationRepo),
+		agencies.New(agencyRepo),
 		signup.New(userSignUpRepo, a.config, a.config.ClientId, a.config.Secret),
 	}
 	a.RegisterAPIHandlers(v1, publicHandlers)
