@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/SocBongDev/soc-bong/cmd/serve"
-	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/adaptor/v2"
 )
 
@@ -19,8 +18,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 func handler() http.HandlerFunc {
 	serverApp, err := serve.NewServerlessApp()
 	if err != nil {
-		logger.Error("NewApp err", "err", err)
-		panic(fmt.Sprintln("NewApp err: ", err))
+		log.Panic("NewApp err: ", err)
 	}
 
 	app := serverApp.App()
