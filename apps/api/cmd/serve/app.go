@@ -96,7 +96,7 @@ func (a *App) AttachMiddlewares() {
 }
 
 func (a *App) SetupRoutes() {
-	a.app.Get("/docs/", swagger.HandlerDefault)
+	a.app.Get("/docs/*", swagger.HandlerDefault)
 	a.app.Get("/healthz", healthz)
 	a.app.Get("/", index)
 
