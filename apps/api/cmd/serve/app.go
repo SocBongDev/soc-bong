@@ -8,6 +8,7 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/SocBongDev/soc-bong/internal/registrations"
 	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
@@ -15,7 +16,7 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/users"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	mdwlogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
 	"github.com/pocketbase/dbx"
@@ -90,7 +91,7 @@ func (a *App) ApiV1(api fiber.Router) {
 
 func (a *App) AttachMiddlewares() {
 	a.app.Use(recover.New())
-	a.app.Use(logger.New())
+	a.app.Use(mdwlogger.New())
 	a.app.Use(cors.New())
 }
 
@@ -101,4 +102,14 @@ func (a *App) SetupRoutes() {
 
 	api := a.app.Group("/api")
 	a.ApiV1(api)
+}
+
+func (a *App) App() *fiber.App {
+	return a.app
+}
+
+func (a *App) Cleanup() {
+	if err := a.db.Close(); err != nil {
+		logger.Error("App.Cleanup err: ", err)
+	}
 }
