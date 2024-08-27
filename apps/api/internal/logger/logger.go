@@ -5,9 +5,6 @@ import (
 	"log/slog"
 	"os"
 	"sync/atomic"
-	"time"
-
-	"github.com/SocBongDev/soc-bong/internal/apperr"
 )
 
 var globalLogger atomic.Value
@@ -24,10 +21,8 @@ func GetGlobalLogger() Logger {
 
 // SetGlobalLogger allows changing the global logger after initialization if needed
 func SetGlobalLogger(loggerType LoggerType, options ...Option) {
-	var (
-		logger Logger
-		err    error
-	)
+	var logger Logger
+	// _err   error
 
 	env, ok := os.LookupEnv("ENV")
 	if !ok {
@@ -42,7 +37,7 @@ func SetGlobalLogger(loggerType LoggerType, options ...Option) {
 		}
 
 		logger = NewSlogLogger(WithLevel(logLevel))
-	case File:
+	/* case File:
 		logger, err = NewFileLogger("app.log")
 		if err != nil {
 			Error("SetFileLogger err", "err", apperr.New(err))
@@ -53,7 +48,7 @@ func SetGlobalLogger(loggerType LoggerType, options ...Option) {
 		if err != nil {
 			Error("SetCompositeLogger err", "err", apperr.New(err))
 			return
-		}
+		} */
 	default:
 		logger = NewSlogLogger()
 	}
