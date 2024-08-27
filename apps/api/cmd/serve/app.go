@@ -1,6 +1,7 @@
 package serve
 
 import (
+	_ "github.com/SocBongDev/soc-bong/docs"
 	"github.com/SocBongDev/soc-bong/internal/agencies"
 	"github.com/SocBongDev/soc-bong/internal/attendances"
 	"github.com/SocBongDev/soc-bong/internal/classes"
@@ -13,14 +14,11 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/SocBongDev/soc-bong/internal/users"
 	"github.com/gofiber/fiber/v2"
-	"github.com/pocketbase/dbx"
-
-	_ "github.com/SocBongDev/soc-bong/docs"
-
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
+	"github.com/pocketbase/dbx"
 )
 
 type App struct {
