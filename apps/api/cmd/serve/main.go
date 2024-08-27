@@ -1,7 +1,11 @@
 package serve
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/spf13/cobra"
@@ -20,8 +24,35 @@ func New() *cobra.Command {
 				log.Panicln("config.New err: ", err)
 			}
 
-			app := NewApp(config)
-			app.RunHttpServer()
+			serverApp, err := NewApp(config)
+			if err != nil {
+				log.Panic("NewApp err: ", err)
+			}
+			app := serverApp.app
+
+			go func() {
+				if err := app.Listen(fmt.Sprintf(":%d", 5000)); err != nil {
+					log.Panicln("App.Listen err: ", err)
+				}
+			}()
+
+			c := make(chan os.Signal, 1)
+			signal.Notify(
+				c,
+				os.Interrupt,
+				syscall.SIGTERM,
+			)
+
+			_ = <-c
+			log.Println("Gracefully shutting down...")
+			_ = app.Shutdown()
+
+			log.Println("Running cleanup tasks...")
+
+			// Your cleanup tasks go here
+			serverApp.db.Close()
+			// redisConn.Close()
+			log.Println("Fiber was successful shutdown.")
 		},
 	}
 
