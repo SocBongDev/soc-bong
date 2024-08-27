@@ -113,3 +113,19 @@ func (a *App) Cleanup() {
 		logger.Error("App.Cleanup err: ", err)
 	}
 }
+
+func NewServerlessApp() (*App, error) {
+	config, err := config.New()
+	if err != nil {
+		logger.Error("config.New err", "err", err)
+		return nil, err
+	}
+
+	app, err := NewApp(config)
+	if err != nil {
+		logger.Error("NewApp err", "err", err)
+		return nil, err
+	}
+
+	return app, nil
+}
