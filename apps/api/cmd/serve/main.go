@@ -31,7 +31,7 @@ func New() *cobra.Command {
 			app := serverApp.app
 
 			go func() {
-				if err := app.Listen(fmt.Sprintf(":%d", 5000)); err != nil {
+				if err := app.Listen(fmt.Sprintf(":%d", config.Port)); err != nil {
 					log.Panicln("App.Listen err: ", err)
 				}
 			}()

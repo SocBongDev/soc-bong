@@ -3,9 +3,6 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/SocBongDev/soc-bong/cmd/serve"
 	"github.com/SocBongDev/soc-bong/internal/config"
@@ -33,30 +30,6 @@ func handler() http.HandlerFunc {
 		panic(fmt.Sprintln("NewApp err: ", err))
 	}
 	app := serverApp.App()
-
-	go func() {
-		if err := app.Listen(fmt.Sprintf(":%d", 5000)); err != nil {
-			logger.Error("App.Listen err", "err", err)
-			panic(fmt.Sprintln("App.Listen err: ", err))
-		}
-	}()
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(
-		c,
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
-
-	_ = <-c
-	logger.Info("Gracefully shutting down...")
-	_ = app.Shutdown()
-
-	logger.Info("Running cleanup tasks...")
-
-	// Your cleanup tasks go here
-	// redisConn.Close()
-	logger.Info("Fiber was successful shutdown.")
 
 	return adaptor.FiberApp(app)
 }
