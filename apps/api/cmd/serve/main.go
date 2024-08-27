@@ -2,12 +2,12 @@ package serve
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/SocBongDev/soc-bong/internal/config"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -17,22 +17,25 @@ func New() *cobra.Command {
 		Args:  cobra.ArbitraryArgs,
 		Short: "",
 		Run: func(cmd *cobra.Command, args []string) {
-			log.Println("Serving dinner...")
+			logger.Info("Serving dinner...")
 
 			config, err := config.New()
 			if err != nil {
-				log.Panicln("config.New err: ", err)
+				logger.Error("config.New err", "err", err)
+				panic(err)
 			}
 
 			serverApp, err := NewApp(config)
 			if err != nil {
-				log.Panic("NewApp err: ", err)
+				logger.Error("NewApp err", "err", err)
+				panic(err)
 			}
 			app := serverApp.app
 
 			go func() {
 				if err := app.Listen(fmt.Sprintf(":%d", config.Port)); err != nil {
-					log.Panicln("App.Listen err: ", err)
+					logger.Error("app.Listen err", "err", err)
+					panic(err)
 				}
 			}()
 
@@ -44,15 +47,15 @@ func New() *cobra.Command {
 			)
 
 			_ = <-c
-			log.Println("Gracefully shutting down...")
+			logger.Info("Gracefully shutting down...")
 			_ = app.Shutdown()
 
-			log.Println("Running cleanup tasks...")
+			logger.Info("Running cleanup tasks...")
 
 			// Your cleanup tasks go here
 			serverApp.db.Close()
 			// redisConn.Close()
-			log.Println("Fiber was successful shutdown.")
+			logger.Info("Fiber was successful shutdown.")
 		},
 	}
 

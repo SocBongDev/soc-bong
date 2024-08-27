@@ -1,11 +1,11 @@
 package migrate
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -24,22 +24,23 @@ func ForceCmd() *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			log.Println("Migrating force", version)
+			logger.Info("Migrating force", version)
 			cfg, err := config.New()
 			if err != nil {
-				log.Fatalln("config.New err:", err)
+				logger.Error("config.New err", "err", err)
+				panic(err)
 			}
 
 			m, err := database.NewMigrator(&cfg.DatabaseSecret)
 			if err != nil {
-				log.Fatalln("database.NewMigrator err: ", err)
+				logger.Error("database.NewMigrator err", "err", err)
 			}
 
 			if err := m.Force(version); err != nil {
-				log.Fatal("Force failed: ", err)
+				logger.Error("Force failed", "err", err)
 			}
 
-			log.Println("Migrate force success!")
+			logger.Info("Migrate force success!")
 		},
 	}
 
