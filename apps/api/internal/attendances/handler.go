@@ -10,10 +10,11 @@ import (
 )
 
 type AttendanceHandler struct {
-	classRepo   classes.ClassRepository
-	repo        AttendanceRepository
-	spreadsheet spreadsheet.SpreadSheet
-	studentRepo students.StudentRepository
+	classRepo      classes.ClassRepository
+	repo           AttendanceRepository
+	spreadsheet    spreadsheet.SpreadSheet
+	excelGenerator *spreadsheet.ExcelGenerator
+	studentRepo    students.StudentRepository
 }
 
 func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
@@ -40,6 +41,6 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 	)
 }
 
-func New(repo AttendanceRepository, classRepo classes.ClassRepository, spreadsheet spreadsheet.SpreadSheet, studentRepo students.StudentRepository) common.APIHandler {
-	return &AttendanceHandler{repo: repo, classRepo: classRepo, spreadsheet: spreadsheet, studentRepo: studentRepo}
+func New(repo AttendanceRepository, classRepo classes.ClassRepository, spreadsheet spreadsheet.SpreadSheet, studentRepo students.StudentRepository, eg *spreadsheet.ExcelGenerator) common.APIHandler {
+	return &AttendanceHandler{repo: repo, classRepo: classRepo, spreadsheet: spreadsheet, studentRepo: studentRepo, excelGenerator: eg}
 }

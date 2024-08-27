@@ -11,11 +11,7 @@ import (
 // @Description Get list class
 // @Tags Class
 // @Accept json
-// @Param  ids query []int false "Ids"
-// @Param  page query int false "Page"
-// @Param  pageSize query int false "Page Size"
-// @Param  sort query string false "Sort direction" Enums(asc, desc) default(desc)
-// @Param  search query string false "Search term"
+// @Param  query query ClassQuery false "Query parameters"
 // @Success 200 {object} FindClassResp
 // @Failure 500 {string} string
 // @Security ApiKeyAuth

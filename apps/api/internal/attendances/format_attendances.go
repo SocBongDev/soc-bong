@@ -1,9 +1,8 @@
 package attendances
 
 import (
-	"log"
-
 	"github.com/SocBongDev/soc-bong/internal/entities"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/gofiber/fiber/v2"
 )
@@ -11,13 +10,13 @@ import (
 func (h *AttendanceHandler) formatAttendances(query *AttendanceQuery) (map[int]entities.AttendanceResponse, error) {
 	data, err := h.repo.Find(query)
 	if err != nil {
-		log.Println("FindAttendances.All err: ", err)
+		logger.Error("FindAttendances.All err", "err", err)
 		return nil, fiber.ErrInternalServerError
 	}
 
 	resp, studentIds := make(map[int]entities.AttendanceResponse), make([]int, 0)
 	if len(data) == 0 {
-		log.Printf("FindAttendances response is empty. Data: %+v\n", data)
+		logger.Error("FindAttendances response is empty", "data", data)
 		return resp, nil
 	}
 
@@ -34,14 +33,18 @@ func (h *AttendanceHandler) formatAttendances(query *AttendanceQuery) (map[int]e
 	}
 	students, err := h.studentRepo.Find(&students.StudentQuery{Ids: studentIds})
 	if err != nil {
-		log.Println("FindAttendances.studentRepo.Find err: ", err)
+		logger.Error("FindAttendances.studentRepo.Find err", "err", err)
 		return nil, fiber.ErrInternalServerError
 	}
 
 	for _, student := range students {
 		attendanceResp, ok := resp[student.Id]
 		if !ok {
-			log.Printf("Something wrong. studentId: %d doesn't exists in response map: %+v\n", student.Id, resp)
+			logger.Error(
+				"Something wrong. studentId doesn't exists in response map",
+				"studentId", student.Id,
+				"respMap", resp,
+			)
 			return nil, fiber.ErrInternalServerError
 		}
 
