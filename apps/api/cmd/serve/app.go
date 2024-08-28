@@ -12,7 +12,6 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/SocBongDev/soc-bong/internal/registrations"
 	"github.com/SocBongDev/soc-bong/internal/roles"
-	"github.com/SocBongDev/soc-bong/internal/signup"
 	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
 	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/SocBongDev/soc-bong/internal/users"
