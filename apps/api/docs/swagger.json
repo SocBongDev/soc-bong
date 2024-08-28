@@ -430,42 +430,51 @@
                 "summary": "Get list class details api",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "name": "agencyId",
+                        "in": "query"
+                    },
+                    {
                         "type": "array",
                         "items": {
                             "type": "integer"
                         },
                         "collectionFormat": "csv",
-                        "description": "Ids",
                         "name": "ids",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Page",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
-                        "description": "Page Size",
                         "name": "pageSize",
                         "in": "query"
                     },
                     {
-                        "enum": [
-                            "asc",
-                            "desc"
-                        ],
                         "type": "string",
-                        "default": "desc",
-                        "description": "Sort direction",
-                        "name": "sort",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "sortBy",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Search term",
-                        "name": "search",
+                        "name": "sortOrder",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "teacherId",
                         "in": "query"
                     }
                 ],
@@ -1101,7 +1110,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "SignUp"
+                    "SignUpInTheUserRoute"
                 ],
                 "summary": "Create user by sign up api",
                 "parameters": [
@@ -1111,7 +1120,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/signup.UserInput"
+                            "$ref": "#/definitions/users.UserInput"
                         }
                     }
                 ],
@@ -1119,7 +1128,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/signup.User"
+                            "$ref": "#/definitions/users.User"
                         }
                     },
                     "422": {

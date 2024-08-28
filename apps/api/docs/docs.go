@@ -446,7 +446,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "multi",
+                        "collectionFormat": "csv",
                         "name": "ids",
                         "in": "query"
                     },
@@ -470,7 +470,7 @@ const docTemplate = `{
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "multi",
+                        "collectionFormat": "csv",
                         "name": "sortBy",
                         "in": "query"
                     },
@@ -773,7 +773,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "multi",
+                        "collectionFormat": "csv",
                         "description": "Registration IDs",
                         "name": "ids",
                         "in": "query",
@@ -1117,7 +1117,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "SignUp"
+                    "SignUpInTheUserRoute"
                 ],
                 "summary": "Create user by sign up api",
                 "parameters": [
@@ -1127,7 +1127,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/signup.UserInput"
+                            "$ref": "#/definitions/users.UserInput"
                         }
                     }
                 ],
@@ -1135,7 +1135,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/signup.User"
+                            "$ref": "#/definitions/users.User"
                         }
                     },
                     "422": {
@@ -1280,7 +1280,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "multi",
+                        "collectionFormat": "csv",
                         "description": "Student IDs",
                         "name": "ids",
                         "in": "query",
