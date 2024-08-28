@@ -14,7 +14,7 @@ func (h *AgencyHandler) RegisterRoute(router fiber.Router) {
 	r := router.Group("/agencies")
 	r.Get(
 		"/",
-		middlewares.ValidatePermissions([]string{"read:agencies"}),
+		// middlewares.ValidatePermissions([]string{"read:agencies"}),
 		h.Find,
 	)
 	r.Get(

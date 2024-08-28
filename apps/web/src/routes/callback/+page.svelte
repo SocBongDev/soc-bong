@@ -13,6 +13,8 @@
 			console.log('check decodedToken: ', decodedToken)
 			const permissions = decodedToken.permissions || []
 			const roles = decodedToken['user/roles']
+			localStorage.setItem("role", roles[0])
+			localStorage.setItem("user_id", decodedToken.sub)
 			userRoleStore.set(roles[0])
 			//define the minimum required permissions here:
 			const requiredPermission = ['read:registrations']
@@ -136,13 +138,6 @@
 	.loading-container {
 		text-align: center;
 	}
-
-	/* .loading-text {
-		font-size: 24px;
-		font-weight: bold;
-		color: #333;
-		margin-bottom: 20px;
-	} */
 
 	.loading-animation {
 		display: flex;

@@ -33,7 +33,7 @@ func (h *AgencyHandler) Find(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	resp := FindAgencyResp{Data: data, Page: query.GetPage()}
+	resp := FindAgencyResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
 	logger.DebugContext(c.Context(), "FindAgencies success", "resp", resp)
 
 	return c.JSON(resp)

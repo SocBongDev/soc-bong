@@ -5,8 +5,10 @@
 	export let required = false
 	export let value: string | undefined = undefined
 	export let error: string[] | null = null
+    export let disabled: boolean = false
 	let isPasswordField = name === 'password' || name === 'confirmPassword'
 	let isShow = false
+
 	function handleInput(e: Event) {
 		const target = e.target as HTMLInputElement
 		value = target.value
@@ -22,10 +24,11 @@
         <input
             {name}
             type={isShow ? 'text' : 'password'}
-            class="peer w-full bg-neutral-100 px-4 pb-2.5 pt-1 font-normal text-black focus:bg-neutral-200 focus:outline-none"
+            class="peer w-full bg-neutral-100 px-4 pb-2.5 pt-1 font-normal text-black focus:bg-neutral-200 focus:outline-none disabled:hover:cursor-not-allowed disabled:select-none"
             value={value ?? ''}
             on:input={handleInput}
             id={name}
+	        disabled={disabled}
         />
         <label
             class="label bg-neutral-100 px-4 py-1 text-neutral-500 peer-focus:bg-neutral-200 peer-focus:text-black"

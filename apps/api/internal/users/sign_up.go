@@ -14,18 +14,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// @InsertUser godoc
-// @Summary Create user api
-// @Description Insert user
-// @Tags User
+// @InsertUserBySignUp godoc
+// @Summary Create user by sign up api
+// @Description Insert user by sign up
+// @Tags SignUpInTheUserRoute
 // @Accept json
-// @Param post body UserInput true "Create user body"
+// @Param post body UserInput true "Create user sign up body"
 // @Success 200 {object} User
 // @Failure 422 {string} string
 // @Failure 500 {string} string
-// @Security ApiKeyAuth
-// @Router /users [post]
-func (h *UserHandler) Insert(c *fiber.Ctx) error {
+// @Router /sign-up [post]
+func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 	//expected data from the user
 	input := new(UserInput)
 
@@ -46,10 +45,11 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 	log.Printf("User password hash: %+v\n", hash)
 
 	req := &User{UserInput: UserInput{
-		Email:       input.Email,
-		FirstName:   input.FirstName,
-		LastName:    input.LastName,
-		Password:    hash,
+		Email:     input.Email,
+		FirstName: input.FirstName,
+		LastName:  input.LastName,
+		Password:  hash,
+
 		IsActive:    input.IsActive,
 		VerifyEmail: input.VerifyEmail,
 		Connection:  input.Connection,
@@ -67,7 +67,7 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 
 	//Create user in Auth0
 
-	auth0User, err := h.createAuth0User(req, input.Password)
+	auth0User, err := h.createSignUpAuth0User(req, input.Password)
 	if err != nil {
 		log.Println("Auth0 user creation error: ", err)
 		//delete user in database if createAuth0User error
@@ -99,7 +99,7 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 	}
 }
 
-func (h *UserHandler) createAuth0User(user *User, password string) (map[string]interface{}, error) {
+func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[string]interface{}, error) {
 	auth0User := map[string]interface{}{
 		"email":       user.Email,
 		"given_name":  user.FirstName,

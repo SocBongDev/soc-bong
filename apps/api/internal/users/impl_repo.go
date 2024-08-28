@@ -49,6 +49,10 @@ func (r *userRepo) Insert(req *User) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
+func (r *userRepo) Update(req *User) error {
+	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
+}
+
 func NewRepo(db *dbx.DB) *userRepo {
 	return &userRepo{db}
 }

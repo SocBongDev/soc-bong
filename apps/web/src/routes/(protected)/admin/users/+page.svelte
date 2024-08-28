@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { createForm } from 'felte'
+	import type { UserProps } from '$lib/common/type'
+	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
+	import dayjs from 'dayjs'
 	import type { PageData } from './$types'
-	import { validator } from '@felte/validator-zod'
-	import { CreateAgencySchema as schema } from './validate'
 	import PlusIcon from '~icons/ic/round-add'
 	import EllipsisIcon from '~icons/fa6-solid/ellipsis'
 	import ArrowRightIcon from '~icons/formkit/arrowright'
@@ -12,51 +12,69 @@
 	import TextField from '$lib/components/TextField.svelte'
 	import DateField from '$lib/components/DateField.svelte'
 	import SelectField from '$lib/components/SelectField.svelte'
-	import { invalidate } from '$app/navigation'
+	import { createForm } from 'felte'
+	import { CreateUserSchema as schema } from './validate'
+	import { validator } from '@felte/validator-zod'
 	import { dialogProps, Notify, openDialog } from '$lib/store'
+	import { invalidate } from '$app/navigation'
 	import { blur, fade } from 'svelte/transition'
-	import type { AgencyProps } from '$lib/common/type'
-	import dayjs from 'dayjs'
-	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
-
+	import PasswordField from '$lib/components/PasswordField.svelte'
 	export let data: PageData
 	let drawerToggleRef: HTMLInputElement
 	let isChecked: string[] = []
 	let scrollClass = ''
 	let isCheckedAll = false
 	let isNew = true
-	let recordData: AgencyProps | null = null
+
+	let recordData: UserProps | null = null
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
-	const token = localStorage.getItem('access_token')
-
 	$: isNew = !recordData
 	$: if (recordData !== null) {
-		const { id, createdAt, updatedAt, ...initialValues } = recordData
+		const { id, createdAt, ...initialValues } = recordData
 		setInitialValues(initialValues)
 		reset()
 	}
 
-	const defaultFormValues = {
-		name: '',
-		address: '',
-		phone: '',
+	const token = localStorage.getItem('access_token')
+
+	var agencyOptions = data?.agencies?.data?.map((el) => ({
+		label: el.name,
+		value: el.id ? el.id.toString() : '1'
+	}))
+
+	const defaultFormValues: UserProps = {
 		email: '',
-		createdAt: dayjs().format('dd/MM/YYYY'),
-		updatedAt: dayjs().format('dd/MM/YYYY')
+		first_name: '',
+		last_name: '',
+		password: '',
+		connection: 'Username-Password-Authentication',
+		phone_number: '',
+		dob: dayjs().format('DD-MM-YYYY'),
+		agencyId: parseInt(agencyOptions[0]?.value || '1'),
+		auth0_user_id: ''
 	}
 
-	function resetDefaultForm() {
-		setInitialValues(defaultFormValues)
-		reset()
+	let formData: Record<string, string> = {}
+	$: userSchema.forEach((field) => {
+		if (!(field.name in formData)) {
+			formData[field.name] = ''
+		}
+	})
+
+	function formatAgencyName(agencyId: number) {
+		const agency = data.agencies.data.find(
+			(el) => (el.id && parseInt(el.id?.toString())) === agencyId
+		)
+		return agency?.name || 'N/A'
 	}
 
 	function handleCheck(e: any) {
 		const { id, checked } = e.currentTarget
 
 		if (!checked) {
-			const isValidCheckAll = isChecked.length === data?.agencies?.data.length
+			const isValidCheckAll = isChecked.length === data.users.data.length
 			if (isValidCheckAll) {
 				isCheckedAll = false
 			}
@@ -66,7 +84,7 @@
 		}
 
 		isChecked = [...isChecked, id]
-		const isValidCheckAll = isChecked.length === data?.agencies?.data.length
+		const isValidCheckAll = isChecked.length === data?.users?.data.length
 		if (isValidCheckAll) {
 			isCheckedAll = true
 		}
@@ -78,29 +96,114 @@
 			isChecked = []
 			return
 		}
-
-		isChecked = data.agencies?.data?.map((el: any) => el?.id.toString())
+		isChecked = data.users?.data?.map((el: any) => el?.id.toString())
 	}
 
-	function handleContentScroll(panel: HTMLElement) {
-		const heightDiff = panel.scrollHeight - panel.offsetHeight
-		if (heightDiff > 0) {
-			scrollClass = 'scrolled'
-		}
+	function resetDefaultForm() {
+		setInitialValues(defaultFormValues)
+		reset()
+	}
 
-		if (panel.scrollTop === 0) {
-			scrollClass = 'scroll-reached-top'
-		}
+	const { form, errors, setInitialValues, reset } = createForm({
+		debounced: { timeout: 500 },
+		extend: validator({ schema }),
+		transform: (values: any) => ({
+			...values,
+			agencyId: parseInt(values.agencyId, 10)
+		}),
+		onSubmit: save
+	})
 
-		if (panel.scrollTop + panel.offsetHeight === panel.scrollHeight) {
-			scrollClass = 'scroll-reached-bottom'
+	async function save(req: UserProps) {
+		loading = true
+		const body = {
+			...req,
+			agencyId: req.agencyId,
+			first_name: req.first_name,
+			last_name: req.last_name,
+			phone_number: req.phone_number,
+			dob: req.dob,
+			connection: 'Username-Password-Authentication',
+		}
+		const bodyFormated = JSON.stringify(body)
+		const method = isNew ? 'POST' : 'PUT'
+		const url = isNew
+			? `${PUBLIC_API_SERVER_URL}/users`
+			: `${PUBLIC_API_SERVER_URL}/users/${recordData?.id}`
+
+		const request = fetch(url, {
+			method,
+			headers: {
+				'Content-Type': 'application/json',
+				accept: 'application/json',
+				Authorization: `Bearer ${token}`
+			},
+			body: bodyFormated
+		}).then((res) => {
+			if (res.status == 422) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'phía server đã tồn tại dữ liệu này!'
+				})
+			} else if (res.status == 403 || res.status == 401) {
+				Notify({
+					type: 'error',
+					id: crypto.randomUUID(),
+					description: 'Người dùng hiện không có quyền thực hiện này!'
+				})
+			}
+		})
+
+		try {
+			const res = await request
+			refreshData()
+			resetDefaultForm()
+			Notify({
+				type: "success",
+				id: crypto.randomUUID(),
+				description: isNew ? 'Tạo người dùng thành công!' : 'Cập nhật thành công!'
+			})
+			hide()
+		} catch (e) {
+			console.error('Save Error: ', e)
+			Notify({
+				type: 'error',
+				id: crypto.randomUUID(),
+				description: 'Lỗi từ phía server'
+			})
+		}
+		loading = false
+	}
+
+	async function loadData(id: number, signal: AbortSignal) {
+		loading = true
+
+		try {
+			const res = await fetch(`${PUBLIC_API_SERVER_URL}/users/${id}`, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json',
+					accept: 'application/json'
+				},
+				signal
+			}).then((res) => res.json())
+			res.dob = dayjs(res?.dob).format('YYYY-MM-DD')
+			recordData = res
+		} catch (e: any) {
+			console.error('LoadData: ', e)
+			if (e.name !== undefined && e.name === 'AbortError') {
+				return
+			}
+
+			Notify({ description: 'Lỗi từ phía server', id: crypto.randomUUID(), type: 'error' })
+		} finally {
+			loading = false
 		}
 	}
 
-	function hide() {
-		checked = false
-		drawerToggleRef.checked = false
-		resetDefaultForm()
+	function refreshData() {
+		invalidate('app:users')
 	}
 
 	let prevPromise: Promise<void>
@@ -121,171 +224,79 @@
 		}
 	}
 
-	async function save(req: AgencyProps) {
-		loading = true
-		const body = JSON.stringify(req)
-		const method = isNew ? 'POST' : 'PUT'
-		const url = isNew
-			? `${PUBLIC_API_SERVER_URL}/agencies`
-			: `${PUBLIC_API_SERVER_URL}/agencies/${recordData?.id}`
-		const request = fetch(url, {
-			method,
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json',
-				accept: 'application/json'
-			},
-			body
-		}).then((res) => {
-			if (res.status == 422) {
-				Notify({
-					type: 'error',
-					id: crypto.randomUUID(),
-					description: 'phía server đã tồn tại dữ liệu này!'
-				})
-			} else if (res.status == 403) {
-				Notify({
-					type: 'error',
-					id: crypto.randomUUID(),
-					description: 'Người dùng hiện không có quyền thực hiện này!'
-				})
-			}
-		})
-		// note: all 4 fields need to be unique when insert
-		try {
-			const res = await request
-			refreshData()
-			resetDefaultForm()
-			Notify({
-				type: "success",
-				id: crypto.randomUUID(),
-				description: isNew ? 'Tạo cơ sở thành công!' : 'Cập nhật cơ sở thành công!'
-			})
-			hide()
-		} catch (e) {
-			console.error('Save error', e)
-			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
+	function clearSelected() {
+		isChecked = []
+		isCheckedAll = false
+	}
+
+	async function batchDelete() {}
+
+	function handleContentScroll(panel: HTMLElement) {
+		const heightDiff = panel.scrollHeight - panel.offsetHeight
+		if (heightDiff > 0) {
+			scrollClass = 'scrolled'
 		}
 
-		loading = false
-	}
+		if (panel.scrollTop === 0) {
+			scrollClass = 'scroll-reached-top'
+		}
 
-	function refreshData() {
-		invalidate('app:agencies')
-	}
-
-	async function loadData(id: number, signal: AbortSignal) {
-		loading = true
-
-		try {
-			const res = await fetch(`${PUBLIC_API_SERVER_URL}/agencies/${id}`, {
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json',
-					accept: 'application/json'
-				},
-				signal
-			}).then((res) => res.json())
-			recordData = res
-		} catch (e: any) {
-			console.error('LoadData: ', e)
-			if (e.name !== undefined && e.name === 'AbortError') {
-				return
-			}
-
-			Notify({ description: 'Lỗi từ phía server', id: crypto.randomUUID(), type: 'error' })
-		} finally {
-			loading = false
+		if (panel.scrollTop + panel.offsetHeight === panel.scrollHeight) {
+			scrollClass = 'scroll-reached-bottom'
 		}
 	}
 
-	const { form, errors, setInitialValues, reset } = createForm({
-		debounced: { timeout: 500 },
-		extend: validator({ schema }),
-		onSubmit: save
-	})
-
-	const agencySchema: {
+	const userSchema: {
 		name: string
-		type: 'text' | 'date' | 'select'
+		type: 'text' | 'date' | 'select' | 'password'
 		required: boolean
 		options?: { label: string; value: string }[]
+		disabled?: boolean
 	}[] = [
-		{
-			name: 'name',
-			type: 'text',
-			required: true
-		},
-		{
-			name: 'address',
-			type: 'text',
-			required: true
-		},
-		{
-			name: 'phone',
-			type: 'text',
-			required: true
-		},
 		{
 			name: 'email',
 			type: 'text',
+			required: false,
+			disabled: true
+		},
+		{
+			name: 'first_name',
+			type: 'text',
 			required: true
+		},
+		{
+			name: 'last_name',
+			type: 'text',
+			required: true
+		},
+		{
+			name: 'dob',
+			type: 'date',
+			required: true
+		},
+		{
+			name: 'phone_number',
+			type: 'text',
+			required: true
+		},
+		{
+			name: 'password',
+			type: 'text' || 'password',
+			required: true,
+			disabled: true,
+		},
+		{
+			name: 'agencyId',
+			type: 'select',
+			required: true,
+			options: agencyOptions
 		}
 	]
 
-	async function handleDelete() {
-		if (recordData === undefined || recordData?.id === undefined) {
-			return
-		}
-
-		loading = true
-
-		try {
-			const res = await fetch(`${PUBLIC_API_SERVER_URL}/agencies`, {
-				body: JSON.stringify({ ids: [Number(recordData.id)] }),
-				method: 'DELETE',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json',
-					accept: 'application/json'
-				}
-			}).then((res) => res.json())
-			refreshData()
-			resetDefaultForm()
-			hide()
-			recordData = null
-		} catch (e) {
-			console.error(e)
-			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
-		} finally {
-			loading = false
-		}
-	}
-
-	function clearSelected() {
-		isCheckedAll = false
-		isChecked = []
-	}
-
-	async function batchDelete() {
-		try {
-			const ids = isChecked.map((el) => Number(el))
-			await fetch(`${PUBLIC_API_SERVER_URL}/agencies`, {
-				body: JSON.stringify({ ids }),
-				method: 'DELETE',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					'Content-Type': 'application/json',
-					accept: 'application/json'
-				}
-			})
-			refreshData()
-			clearSelected()
-		} catch (e) {
-			console.error('Batch Delete error', e)
-			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
-		}
+	function hide() {
+		checked = false
+		drawerToggleRef.checked = false
+		resetDefaultForm()
 	}
 </script>
 
@@ -311,13 +322,14 @@
 				<div class="breadcrumbs text-sm">
 					<ul>
 						<li>Admin</li>
-						<li>Quản Lí Cơ Sở</li>
+						<li>Danh sách người dùng</li>
 					</ul>
 				</div>
 				<button class="btn btn-circle btn-ghost btn-sm active:!rotate-180" on:click={refreshData}>
 					<RefreshIcon />
 				</button>
 			</div>
+
 			<button
 				class="btn btn-primary btn-sm rounded normal-case active:!translate-y-1"
 				on:click={() => {
@@ -329,6 +341,7 @@
 				Thêm mới
 			</button>
 		</header>
+
 		<div class="relative flex h-full flex-col gap-10 overflow-x-auto">
 			<table class="table">
 				<thead>
@@ -343,10 +356,12 @@
 								/>
 							</label>
 						</th>
-						<th>Tên Cơ Sở</th>
-						<th>Địa chỉ Cơ Sở</th>
-						<th>Số Điện Thoại</th>
-						<th>Địa chỉ Mail</th>
+						<th>Email người dùng </th>
+						<th>Tên người dùng</th>
+						<th>Ngày sinh</th>
+						<th>Số điện thoại</th>
+						<th>Cơ sở hiện tại</th>
+						<th>User Id </th>
 						<th>
 							<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
 								<EllipsisIcon />
@@ -355,25 +370,27 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each data?.agencies?.data as agency (agency.id)}
-						{#if agency.id}
+					{#each data.users.data as user (user.id)}
+						{#if user.id}
 							<tr class="hover cursor-pointer">
 								<th>
 									<label>
 										<input
-											id={agency.id?.toString()}
+											id={user.id?.toString()}
 											type="checkbox"
 											class="checkbox checkbox-sm rounded"
 											on:click={handleCheck}
-											checked={isChecked.includes(agency.id?.toString())}
+											checked={isChecked.includes(user.id?.toString())}
 										/>
 									</label>
 								</th>
-								<th on:click={() => show(agency.id)}>{agency.name}</th>
-								<td on:click={() => show(agency.id)}>{agency.address}</td>
-								<td on:click={() => show(agency.id)}>{agency.phone}</td>
-								<td on:click={() => show(agency.id)}>{agency.email}</td>
-								<td on:click={() => show(agency.id)}>
+								<th on:click={() => show(user.id)}>{user.email}</th>
+								<th on:click={() => show(user.id)}>{user.first_name + ' ' + user.last_name}</th>
+								<td on:click={() => show(user.id)}>{dayjs(user.dob).format('DD/MM/YYYY')}</td>
+								<td on:click={() => show(user.id)}>{user.phone_number}</td>
+								<td on:click={() => show(user.id)}>{formatAgencyName(user.agencyId)}</td>
+								<td on:click={() => show(user.id)}>{user.auth0_user_id}</td>
+								<td on:click={() => show(user.id)}>
 									<div class="px-2">
 										<ArrowRightIcon />
 									</div>
@@ -386,18 +403,17 @@
 
 			<div class="join mt-auto self-center">
 				<a
-					class={data?.agencies?.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-					href={`/admin/agencies?page=${data?.agencies?.page - 1}&pageSize=${data?.agencies?.pageSize}`}
+					class={data.users.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
+					href={`/admin/users?page=${data.users.page - 1}&pageSize=${data.users.pageSize}`}
 				>
 					<button class="btn join-item">«</button>
 				</a>
-				<button class="btn join-item">Trang {data?.agencies?.page}</button>
+				<button class="btn join-item">Trang {data.users.page}</button>
 				<a
-					class={data?.agencies?.data.length < data?.agencies?.pageSize ||
-					data?.agencies?.data.length === 0
+					class={data.users.data.length < data.users.pageSize || data.users.data.length === 0
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin/agencies?page=${data?.agencies?.page + 1}&pageSize=${data?.agencies?.pageSize}`}
+					href={`/admin/users?page=${data.users.page + 1}&pageSize=${data.users.pageSize}`}
 				>
 					<button class="btn join-item">»</button>
 				</a>
@@ -428,6 +444,7 @@
 			{/if}
 		</div>
 	</div>
+
 	<div class="drawer-side z-10 place-items-center">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
@@ -448,8 +465,8 @@
 						on:click={() => {
 							dialogProps.set({
 								description: 'Hành vi này không thể hoàn tác. Bạn có muốn tiếp tục?',
-								title: 'Yêu cầu xác nhận!',
-								onContinue: handleDelete
+								title: 'Yêu cầu xác nhận!'
+								// onContinue: handleDelete
 							})
 							openDialog.set(true)
 						}}
@@ -468,17 +485,27 @@
 				class="flex-1 overflow-scroll px-7 py-6 {scrollClass}"
 				on:scroll={(e) => handleContentScroll(e.currentTarget)}
 			>
-				<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
-					{#each agencySchema as { type, name, required, options } (name)}
-						{#if type === 'text'}
-							<TextField error={$errors[name]} {name} {required} />
-						{:else if type === 'select'}
-							<SelectField error={$errors[name]} {name} {options} {required} />
-						{:else if type === 'date'}
-							<DateField error={$errors[name]} {name} {required} />
-						{/if}
-					{/each}
-				</form>
+					<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
+						{#each userSchema as { type, name, required, options, disabled } (name)}
+							{#if type === 'text' || type === 'password'}
+								{#if name == 'password' || name == 'confirmPassword'}
+									<PasswordField
+										error={$errors[name]}
+										{name}
+										{required}
+										{disabled}
+										bind:value={formData[name]}
+									/>
+								{:else}
+									<TextField error={$errors[name]} {name} {required} {disabled}/>
+								{/if}
+							{:else if type === 'select'}
+								<SelectField error={$errors[name]} {name} {options} {required} />
+							{:else if type === 'date'}
+								<DateField error={$errors[name]} {name} {required} />
+							{/if}
+						{/each}
+					</form>
 			</section>
 			<footer class="flex flex-shrink-0 items-center justify-end px-7 py-6">
 				<div class="flex items-center gap-5">
