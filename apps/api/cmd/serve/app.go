@@ -58,7 +58,7 @@ func (a *App) RegisterAPIHandlers(router fiber.Router, handlers []common.APIHand
 
 func (a *App) ApiV1(api fiber.Router) {
 	v1, db := api.Group("/v1"), a.db
-	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo, userRepo := agencies.NewRepo(
+	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo, userRepo, roleRepo := agencies.NewRepo(
 		db,
 	), attendances.NewRepo(
 		db,
