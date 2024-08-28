@@ -1,4 +1,4 @@
-package signup
+package users
 
 import (
 	"bytes"
@@ -17,14 +17,14 @@ import (
 // @InsertUserBySignUp godoc
 // @Summary Create user by sign up api
 // @Description Insert user by sign up
-// @Tags SignUp
+// @Tags SignUpInTheUserRoute
 // @Accept json
 // @Param post body UserInput true "Create user sign up body"
 // @Success 200 {object} User
 // @Failure 422 {string} string
 // @Failure 500 {string} string
 // @Router /sign-up [post]
-func (h *UserHandler) Insert(c *fiber.Ctx) error {
+func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 	//expected data from the user
 	input := new(UserInput)
 
@@ -67,7 +67,7 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 
 	//Create user in Auth0
 
-	auth0User, err := h.createAuth0User(req, input.Password)
+	auth0User, err := h.createSignUpAuth0User(req, input.Password)
 	if err != nil {
 		log.Println("Auth0 user creation error: ", err)
 		//delete user in database if createAuth0User error
@@ -99,7 +99,7 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 	}
 }
 
-func (h *UserHandler) createAuth0User(user *User, password string) (map[string]interface{}, error) {
+func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[string]interface{}, error) {
 	auth0User := map[string]interface{}{
 		"email":       user.Email,
 		"given_name":  user.FirstName,

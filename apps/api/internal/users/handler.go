@@ -39,6 +39,12 @@ func (h *UserHandler) RegisterRoute(router fiber.Router) {
 		middlewares.ValidatePermissions([]string{"update:users"}),
 		h.Update,
 	)
+
+	route := router.Group("/sign-up")
+	route.Post(
+		"/",
+		h.SignUp,
+	)
 }
 
 func New(repo UserRepository, config *config.Config, clientID, clientSecret string) common.APIHandler {
