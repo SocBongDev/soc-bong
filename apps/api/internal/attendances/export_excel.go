@@ -3,7 +3,9 @@ package attendances
 import (
 	"fmt"
 	"log"
+	"strconv"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,7 +24,7 @@ import (
 func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("classId")
 	if err != nil {
-		log.Println("ExportExcel.ParamsInt err: ", err)
+		logger.ErrorContext(c.Context(), "ExportExcel.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
@@ -30,7 +32,7 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 
 	query := &AttendanceQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindAttendances.QueryParser err: ", err)
+		logger.ErrorContext(c.Context(), "FindAttendances.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 	query.ClassId = id
@@ -42,9 +44,24 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 		return err
 	}
 
-	buf, err := h.spreadsheet.ExportClassAttendances(attendanceResp)
+	// buf, err := h.spreadsheet.ExportClassAttendances(attendanceResp)
+	month, err := strconv.Atoi(query.month)
 	if err != nil {
-		log.Println("f.WriteToBuffer err: ", err)
+		logger.ErrorContext(c.Context(), "ExportExcel.Atoi err", "err", err)
+		return err
+	}
+
+	year, err := strconv.Atoi(query.year)
+	if err != nil {
+		logger.ErrorContext(c.Context(), "ExportExcel.Atoi err", "err", err)
+		return err
+	}
+
+	logger.Info("LmaoBefore", "test", *h.excelGenerator)
+	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp)
+	logger.Info("Lmao")
+	if err != nil {
+		logger.ErrorContext(c.Context(), "f.WriteToBuffer err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 

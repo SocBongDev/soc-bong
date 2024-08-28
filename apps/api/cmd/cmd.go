@@ -9,7 +9,7 @@ import (
 )
 
 func new() *cobra.Command {
-	cmd := &cobra.Command{Use: "server"}
+	cmd := &cobra.Command{Use: "serve"}
 	cmd.AddCommand(serve.New())
 	cmd.AddCommand(migrate.New())
 

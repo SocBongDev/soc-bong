@@ -1,8 +1,7 @@
 package agencies
 
 import (
-	"log"
-
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,20 +21,20 @@ import (
 func (h *AgencyHandler) Find(c *fiber.Ctx) error {
 	query := &AgencyQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindAgencies.QueryParser err: ", err)
+		logger.ErrorContext(c.Context(), "FindAgencies.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindAgencies request: %+v\n", query)
+	logger.InfoContext(c.Context(), "FindAgencies request", "req", query)
 
 	data, err := h.repo.Find(query)
 	if err != nil {
-		log.Println("FindAgencies.All err: ", err)
+		logger.ErrorContext(c.Context(), "FindAgencies.All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
-	resp := FindAgencyResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
-	log.Printf("FindAgencies success. Response: %+v\n", resp)
+	resp := FindAgencyResp{Data: data, Page: query.GetPage()}
+	logger.DebugContext(c.Context(), "FindAgencies success", "resp", resp)
 
 	return c.JSON(resp)
 }

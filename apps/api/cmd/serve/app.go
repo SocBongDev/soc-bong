@@ -1,17 +1,14 @@
 package serve
 
 import (
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-
+	_ "github.com/SocBongDev/soc-bong/docs"
 	"github.com/SocBongDev/soc-bong/internal/agencies"
 	"github.com/SocBongDev/soc-bong/internal/attendances"
 	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/SocBongDev/soc-bong/internal/registrations"
 	"github.com/SocBongDev/soc-bong/internal/roles"
@@ -20,18 +17,30 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/SocBongDev/soc-bong/internal/users"
 	"github.com/gofiber/fiber/v2"
-	"github.com/pocketbase/dbx"
-
-	_ "github.com/SocBongDev/soc-bong/docs"
-
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	mdwlogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
+	"github.com/pocketbase/dbx"
 )
 
 type App struct {
+	app    *fiber.App
 	config *config.Config
+	db     *dbx.DB
+}
+
+func NewApp(cfg *config.Config) (*App, error) {
+	db, err := database.New(&cfg.DatabaseSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	app := &App{fiber.New(), cfg, db}
+	app.AttachMiddlewares()
+	app.SetupRoutes()
+
+	return app, nil
 }
 
 func healthz(c *fiber.Ctx) error {
@@ -48,9 +57,9 @@ func (a *App) RegisterAPIHandlers(router fiber.Router, handlers []common.APIHand
 	}
 }
 
-func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
-	v1 := api.Group("/v1")
-	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo, userRepo, roleRepo, userSignUpRepo := agencies.NewRepo(
+func (a *App) ApiV1(api fiber.Router) {
+	v1, db := api.Group("/v1"), a.db
+	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo, userRepo := agencies.NewRepo(
 		db,
 	), attendances.NewRepo(
 		db,
@@ -67,12 +76,10 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	), signup.NewRepo(
 		db,
 	)
-	spreadsheet := spreadsheet.New()
+	excel := spreadsheet.New()
 
 	publicHandlers := []common.APIHandler{
-		registrations.New(registrationRepo),
-		agencies.New(agencyRepo),
-		signup.New(userSignUpRepo, a.config, a.config.ClientId, a.config.Secret),
+		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 	}
 	a.RegisterAPIHandlers(v1, publicHandlers)
 
@@ -80,7 +87,7 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 
 	privateHandlers := []common.APIHandler{
 		agencies.New(agencyRepo),
-		attendances.New(attendanceRepo, classRepo, spreadsheet, studentRepo),
+		attendances.New(attendanceRepo, classRepo, excel, studentRepo, spreadsheet.NewExcelGenerator()),
 		classes.New(classRepo),
 		registrations.New(registrationRepo),
 		students.New(studentRepo),
@@ -90,370 +97,43 @@ func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
 	a.RegisterAPIHandlers(v1, privateHandlers)
 }
 
-func (a *App) RunHttpServer() {
-	db, err := database.New(&a.config.DatabaseSecret)
-	if err != nil {
-		log.Panic("Error create dbx: ", err)
-	}
-
-	app := fiber.New()
-	app.Use(recover.New())
-	app.Use(logger.New())
-	app.Use(cors.New())
-
-	app.Get("/docs/*", swagger.HandlerDefault)
-	app.Get("/healthz", healthz)
-	app.Get("/", index)
-
-	api := app.Group("/api")
-	a.ApiV1(api, db)
-
-	app.Get(
-		"/api/messages/admin",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:admin-messages"}),
-		func(c *fiber.Ctx) error {
-			return c.JSON(map[string]string{"message": "Lmao"})
-		},
-	)
-	//registrations
-	app.Get(
-		"/api/v1/registrations",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:registrations"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read registrations"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/registrations/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:registrations"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read one registration"})
-		},
-	)
-
-	app.Post(
-		"/api/v1/registrations",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"create:registrations"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "create a registration"})
-		},
-	)
-
-	app.Patch(
-		"/api/v1/registrations/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"update:registrations"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "update one registration"})
-		},
-	)
-
-	app.Put(
-		"/api/v1/registrations/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"update:registrations"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "update one registration"})
-		},
-	)
-
-	app.Delete(
-		"/api/v1/registrations",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"delete:registrations"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "delete one registration"})
-		},
-	)
-	// agencies
-	app.Get(
-		"/api/v1/agencies",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:agencies"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read agencies"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/agencies/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:agencies"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read one agency"})
-		},
-	)
-
-	app.Post(
-		"/api/v1/agencies",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"create:agencies"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "create an agency"})
-		},
-	)
-
-	app.Put(
-		"/api/v1/agencies/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"update:agencies"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "update an agency"})
-		},
-	)
-	//attendances
-	app.Get(
-		"/api/v1/attendances",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:attendances"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read attendances"})
-		},
-	)
-
-	app.Post(
-		"/api/v1/attendances",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"create:attendances"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "create attendances"})
-		},
-	)
-
-	app.Patch(
-		"/api/v1/attendances",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"update:attendances"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "update attendances"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/attendances/:classId<int,min(1)>/export-excel",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:attendances"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read attendances excel"})
-		},
-	)
-
-	//classes
-	app.Get(
-		"/api/v1/classes",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:classes"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read classes"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/classes/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:classes"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read one class"})
-		},
-	)
-
-	app.Post(
-		"/api/v1/classes",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"create:classes"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "create a class"})
-		},
-	)
-
-	app.Put(
-		"/api/v1/classes/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"update:classes"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "update one class"})
-		},
-	)
-
-	//students
-	app.Delete(
-		"/api/v1/students",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"delete:students"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "delete students"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/students",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:students"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read students"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/students/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:students"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read one student"})
-		},
-	)
-
-	app.Post(
-		"/api/v1/students",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"create:students"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "create new students"})
-		},
-	)
-
-	app.Put(
-		"/api/v1/students/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"update:students"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "update one student"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/users",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:users"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read a list of users"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/users/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:users"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read a user"})
-		},
-	)
-
-	app.Post(
-		"/api/v1/users",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"create:users"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "create a user"})
-		},
-	)
-
-	app.Put(
-		"/api/v1/users/:id<int,min(1)>",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"update:users"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "update a user"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/roles",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:roles"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read a list of roles"})
-		},
-	)
-
-	app.Get(
-		"/api/v1/roles/:id",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:roles"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "read a role"})
-		},
-	)
-
-	app.Post(
-		"/api/v1/roles",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"create:roles"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "create a role"})
-		},
-	)
-
-	app.Put(
-		"/api/v1/roles/:id",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"update:roles"}),
-		func(c *fiber.Ctx) error {
-			log.Print("err", err)
-			return c.JSON(map[string]string{"message": "update a role"})
-		},
-	)
-
-	go func() {
-		if err := app.Listen(":5000"); err != nil {
-			log.Panicln("App.Listen err: ", err)
-		}
-	}()
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(
-		c,
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
-
-	_ = <-c
-	log.Println("Gracefully shutting down...")
-	_ = app.Shutdown()
-
-	log.Println("Running cleanup tasks...")
-
-	// Your cleanup tasks go here
-	db.Close()
-	// redisConn.Close()
-	log.Println("Fiber was successful shutdown.")
+func (a *App) AttachMiddlewares() {
+	a.app.Use(recover.New())
+	a.app.Use(mdwlogger.New())
+	a.app.Use(cors.New())
 }
 
-func NewApp(cfg *config.Config) *App {
-	return &App{cfg}
+func (a *App) SetupRoutes() {
+	a.app.Get("/docs/*", swagger.HandlerDefault)
+	a.app.Get("/healthz", healthz)
+	a.app.Get("/", index)
+
+	api := a.app.Group("/api")
+	a.ApiV1(api)
+}
+
+func (a *App) App() *fiber.App {
+	return a.app
+}
+
+func (a *App) Cleanup() {
+	if err := a.db.Close(); err != nil {
+		logger.Error("App.Cleanup err: ", err)
+	}
+}
+
+func NewServerlessApp() (*App, error) {
+	config, err := config.New()
+	if err != nil {
+		logger.Error("config.New err", "err", err)
+		return nil, err
+	}
+
+	app, err := NewApp(config)
+	if err != nil {
+		logger.Error("NewApp err", "err", err)
+		return nil, err
+	}
+
+	return app, nil
 }
