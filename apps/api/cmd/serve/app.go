@@ -72,13 +72,13 @@ func (a *App) ApiV1(api fiber.Router) {
 		db,
 	), roles.NewRepo(
 		db,
-	), signup.NewRepo(
-		db,
 	)
 	excel := spreadsheet.New()
 
 	publicHandlers := []common.APIHandler{
 		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
+		registrations.New(registrationRepo),
+		agencies.New(agencyRepo),
 	}
 	a.RegisterAPIHandlers(v1, publicHandlers)
 
