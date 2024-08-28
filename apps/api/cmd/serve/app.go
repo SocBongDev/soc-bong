@@ -90,8 +90,8 @@ func (a *App) ApiV1(api fiber.Router) {
 		classes.New(classRepo),
 		registrations.New(registrationRepo),
 		students.New(studentRepo),
-		users.New(userRepo, a.config, a.config.ClientId, a.config.Secret),
-		roles.New(roleRepo, a.config, a.config.ClientId, a.config.Secret),
+		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
+		roles.New(roleRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 	}
 	a.RegisterAPIHandlers(v1, privateHandlers)
 }
