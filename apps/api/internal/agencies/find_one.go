@@ -29,7 +29,7 @@ func (h *AgencyHandler) FindOne(c *fiber.Ctx) error {
 
 	logger.InfoContext(c.Context(), "GetAgencyDetails request", " id", id)
 	resp := &Agency{BaseEntity: common.BaseEntity{Id: id}}
-	if err := h.repo.FindOne(resp); err != nil {
+	if err := h.repo.FindOne(c.Context(), resp); err != nil {
 		logger.ErrorContext(c.Context(), "GetAgencyDetails.Query err", "err", apperr.New(err))
 		if err == sql.ErrNoRows {
 			return fiber.ErrNotFound

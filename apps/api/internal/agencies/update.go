@@ -35,7 +35,7 @@ func (h *AgencyHandler) Update(c *fiber.Ctx) error {
 
 	logger.InfoContext(c.Context(), "UpdateAgency request", "req", body)
 	req := &Agency{WriteAgencyRequest: *body, BaseEntity: common.BaseEntity{Id: id}}
-	if err := h.repo.Update(req); err != nil {
+	if err := h.repo.Update(c.Context(), req); err != nil {
 		logger.ErrorContext(c.Context(), "UpdateAgency.Update err", "err", err)
 
 		if strings.Contains(err.Error(), "FOREIGN KEY constraint failed") {

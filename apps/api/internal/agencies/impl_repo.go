@@ -1,6 +1,8 @@
 package agencies
 
 import (
+	"context"
+
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/pocketbase/dbx"
 )
@@ -11,7 +13,7 @@ type agencyRepo struct {
 
 var _ AgencyRepository = (*agencyRepo)(nil)
 
-func (r *agencyRepo) Find(query *AgencyQuery) ([]Agency, error) {
+func (r *agencyRepo) Find(ctx context.Context, query *AgencyQuery) ([]Agency, error) {
 	resp := make([]Agency, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("agencies").
@@ -36,16 +38,16 @@ func (r *agencyRepo) Find(query *AgencyQuery) ([]Agency, error) {
 	return resp, nil
 }
 
-func (r *agencyRepo) FindOne(req *Agency) error {
-	return r.db.Select().Model(req.Id, req)
+func (r *agencyRepo) FindOne(ctx context.Context, req *Agency) error {
+	return r.db.WithContext(ctx).Select().Model(req.Id, req)
 }
 
-func (r *agencyRepo) Insert(req *Agency) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
+func (r *agencyRepo) Insert(ctx context.Context, req *Agency) error {
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
-func (r *agencyRepo) Update(req *Agency) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
+func (r *agencyRepo) Update(ctx context.Context, req *Agency) error {
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
 func NewRepo(db *dbx.DB) *agencyRepo {

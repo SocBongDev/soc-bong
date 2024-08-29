@@ -26,8 +26,7 @@ func (h *AgencyHandler) Find(c *fiber.Ctx) error {
 	}
 
 	logger.InfoContext(c.Context(), "FindAgencies request", "req", query)
-
-	data, err := h.repo.Find(query)
+	data, err := h.repo.Find(c.Context(), query)
 	if err != nil {
 		logger.ErrorContext(c.Context(), "FindAgencies.All err", "err", err)
 		return fiber.ErrInternalServerError
