@@ -1,9 +1,8 @@
 package attendances
 
 import (
-	"log"
-
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,11 +19,11 @@ import (
 func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
 	body := []UpdateAttendanceRequest{}
 	if err := c.BodyParser(&body); err != nil {
-		log.Println("PatchAttendance.BodyParser err: ", err)
+		logger.ErrorContext(c.UserContext(), "PatchAttendance.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("PatchAttendance request: %+v\n", body)
+	logger.InfoContext(c.UserContext(), "PatchAttendance request", "req", body)
 	req := make([]Attendance, len(body))
 	for i, v := range body {
 		req[i] = Attendance{
@@ -34,11 +33,9 @@ func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
 	}
 
 	if err := h.repo.Update(req); err != nil {
-		log.Println("PatchAttendance.Patch err: ", err)
+		logger.ErrorContext(c.UserContext(), "PatchAttendance.Patch err", "err", err)
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("PatchAttendance success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

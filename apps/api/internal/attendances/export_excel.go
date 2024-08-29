@@ -2,7 +2,6 @@ package attendances
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/SocBongDev/soc-bong/internal/logger"
@@ -28,8 +27,7 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	log.Println("ExportExcel id: ", id)
-
+	logger.InfoContext(c.UserContext(), "ExportExcel request", "id", id)
 	query := &AttendanceQuery{}
 	if err := c.QueryParser(query); err != nil {
 		logger.ErrorContext(c.Context(), "FindAttendances.QueryParser err", "err", err)
@@ -40,7 +38,7 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 
 	attendanceResp, err := h.formatAttendances(query)
 	if err != nil {
-		log.Println("ExportExcel.formatAttendances err: ", err)
+		logger.ErrorContext(c.UserContext(), "ExportExcel.formatAttendances err", "err", err)
 		return err
 	}
 
@@ -57,9 +55,7 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 		return err
 	}
 
-	logger.Info("LmaoBefore", "test", *h.excelGenerator)
 	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp)
-	logger.Info("Lmao")
 	if err != nil {
 		logger.ErrorContext(c.Context(), "f.WriteToBuffer err", "err", err)
 		return fiber.ErrInternalServerError
