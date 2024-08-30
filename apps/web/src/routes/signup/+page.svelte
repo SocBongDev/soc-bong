@@ -199,6 +199,7 @@
 			goto('/')
 		} catch (e) {
 			console.error('Save error: ', e)
+			loading = false
 			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
 		}
 	}
