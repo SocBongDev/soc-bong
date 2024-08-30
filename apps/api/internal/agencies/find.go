@@ -33,7 +33,5 @@ func (h *AgencyHandler) Find(c *fiber.Ctx) error {
 	}
 
 	resp := FindAgencyResp{Data: data, Page: query.GetPage()}
-	logger.DebugContext(c.Context(), "FindAgencies success", "resp", resp)
-
 	return c.JSON(resp)
 }
