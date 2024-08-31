@@ -1,9 +1,9 @@
 package students
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/SocBongDev/soc-bong/internal/entities"
@@ -59,17 +59,17 @@ var (
 	}
 )
 
-func (r *studentRepo) Delete(ids []int) error {
+func (r *studentRepo) Delete(ctx context.Context, ids []int) error {
 	anySlices := make([]any, len(ids))
 	for i, v := range ids {
 		anySlices[i] = v
 	}
 
-	_, err := r.db.Delete("students", dbx.HashExp{"id": anySlices}).Execute()
+	_, err := r.db.WithContext(ctx).Delete("students", dbx.HashExp{"id": anySlices}).Execute()
 	return err
 }
 
-func (r *studentRepo) Find(query *StudentQuery) ([]entities.Student, error) {
+func (r *studentRepo) Find(ctx context.Context, query *StudentQuery) ([]entities.Student, error) {
 	resp := make([]entities.Student, 0, query.GetPageSize())
 	q := r.db.Select(SelectFields...).
 		From(TABLE).
@@ -110,6 +110,7 @@ func (r *studentRepo) Find(query *StudentQuery) ([]entities.Student, error) {
 		).
 		Build().
 		WithAllHook(allHook).
+		WithContext(ctx).
 		All(&resp); err != nil {
 		return nil, err
 	}
@@ -117,9 +118,9 @@ func (r *studentRepo) Find(query *StudentQuery) ([]entities.Student, error) {
 	return resp, nil
 }
 
-func (r *studentRepo) FindOne(req *Student) error {
+func (r *studentRepo) FindOne(ctx context.Context, req *Student) error {
 	students := []Student{}
-	if err := r.db.Select(SelectFields...).From(TABLE).
+	if err := r.db.WithContext(ctx).Select(SelectFields...).From(TABLE).
 		Where(dbx.HashExp{fmt.Sprintf("%s.id", TABLE): req.Id}).
 		InnerJoin(
 			"classes",
@@ -147,13 +148,12 @@ func (r *studentRepo) FindOne(req *Student) error {
 	return nil
 }
 
-func (r *studentRepo) Insert(req *Student) error {
-	log.Printf("check final req: %v", req)
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
+func (r *studentRepo) Insert(ctx context.Context, req *Student) error {
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
-func (r *studentRepo) Update(req *Student) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
+func (r *studentRepo) Update(ctx context.Context, req *Student) error {
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
 func NewRepo(db *dbx.DB) *studentRepo {

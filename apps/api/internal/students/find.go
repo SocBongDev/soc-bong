@@ -1,8 +1,7 @@
 package students
 
 import (
-	"log"
-
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,22 +19,19 @@ import (
 // @Security ApiKeyAuth
 // @Router /students [get]
 func (h *StudentHandler) Find(c *fiber.Ctx) error {
-	query := &StudentQuery{}
+	ctx, query := c.UserContext(), &StudentQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindStudents.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "FindStudents.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindStudents request: %+v\n", query)
-
-	data, err := h.repo.Find(query)
+	logger.InfoContext(ctx, "FindStudents request", "req", query)
+	data, err := h.repo.Find(ctx, query)
 	if err != nil {
-		log.Println("FindStudents.All err: ", err)
+		logger.ErrorContext(ctx, "FindStudents.All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
 	resp := FindStudentResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
-	log.Printf("FindStudents success. Response: %+v\n", resp)
-
 	return c.JSON(resp)
 }
