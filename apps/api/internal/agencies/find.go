@@ -19,16 +19,17 @@ import (
 // @Security ApiKeyAuth
 // @Router /agencies [get]
 func (h *AgencyHandler) Find(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	query := &AgencyQuery{}
 	if err := c.QueryParser(query); err != nil {
-		logger.ErrorContext(c.Context(), "FindAgencies.QueryParser err", "err", err)
+		logger.ErrorContext(ctx, "FindAgencies.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	logger.InfoContext(c.Context(), "FindAgencies request", "req", query)
-	data, err := h.repo.Find(c.Context(), query)
+	logger.InfoContext(ctx, "FindAgencies request", "req", query)
+	data, err := h.repo.Find(ctx, query)
 	if err != nil {
-		logger.ErrorContext(c.Context(), "FindAgencies.All err", "err", err)
+		logger.ErrorContext(ctx, "FindAgencies.All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 

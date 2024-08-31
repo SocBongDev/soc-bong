@@ -31,7 +31,7 @@ func (r *agencyRepo) Find(ctx context.Context, query *AgencyQuery) ([]Agency, er
 		)
 	}
 
-	if err := q.All(&resp); err != nil {
+	if err := q.WithContext(ctx).All(&resp); err != nil {
 		return nil, err
 	}
 
