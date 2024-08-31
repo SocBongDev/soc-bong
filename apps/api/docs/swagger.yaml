@@ -352,64 +352,6 @@ definitions:
       name:
         type: string
     type: object
-  signup.User:
-    properties:
-      agencyId:
-        type: integer
-      auth0_user_id:
-        type: string
-      connection:
-        type: string
-      createdAt:
-        type: string
-      dob:
-        type: string
-      email:
-        type: string
-      first_name:
-        type: string
-      id:
-        type: integer
-      is_active:
-        type: boolean
-      last_name:
-        type: string
-      password:
-        description: Plaintext password for input
-        type: string
-      phone_number:
-        type: string
-      updatedAt:
-        type: string
-      verify_email:
-        type: boolean
-    type: object
-  signup.UserInput:
-    properties:
-      agencyId:
-        type: integer
-      auth0_user_id:
-        type: string
-      connection:
-        type: string
-      dob:
-        type: string
-      email:
-        type: string
-      first_name:
-        type: string
-      is_active:
-        type: boolean
-      last_name:
-        type: string
-      password:
-        description: Plaintext password for input
-        type: string
-      phone_number:
-        type: string
-      verify_email:
-        type: boolean
-    type: object
   students.FindStudentResp:
     properties:
       data:
