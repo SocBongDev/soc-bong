@@ -1,6 +1,7 @@
 package serve
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -19,13 +20,14 @@ func New() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			logger.Info("Serving dinner...")
 
+			ctx := context.Background()
 			config, err := config.New()
 			if err != nil {
 				logger.Error("config.New err", "err", err)
 				panic(err)
 			}
 
-			serverApp, err := NewApp(config)
+			serverApp, err := NewApp(ctx, config)
 			if err != nil {
 				logger.Error("NewApp err", "err", err)
 				panic(err)
@@ -53,7 +55,7 @@ func New() *cobra.Command {
 			logger.Info("Running cleanup tasks...")
 
 			// Your cleanup tasks go here
-			serverApp.db.Close()
+			serverApp.Cleanup(ctx)
 			// redisConn.Close()
 			logger.Info("Fiber was successful shutdown.")
 		},

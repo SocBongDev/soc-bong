@@ -1,6 +1,8 @@
 package serve
 
 import (
+	"context"
+
 	_ "github.com/SocBongDev/soc-bong/docs"
 	"github.com/SocBongDev/soc-bong/internal/agencies"
 	"github.com/SocBongDev/soc-bong/internal/attendances"
@@ -10,31 +12,42 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/database"
 	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
+	"github.com/SocBongDev/soc-bong/internal/otel"
 	"github.com/SocBongDev/soc-bong/internal/registrations"
 	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
 	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/SocBongDev/soc-bong/internal/users"
+	"github.com/gofiber/contrib/otelfiber"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	mdwlogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
 	"github.com/pocketbase/dbx"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 type App struct {
 	app    *fiber.App
 	config *config.Config
 	db     *dbx.DB
+	exp    sdktrace.SpanExporter
+	tp     *sdktrace.TracerProvider
 }
 
-func NewApp(cfg *config.Config) (*App, error) {
+func NewApp(ctx context.Context, cfg *config.Config) (*App, error) {
 	db, err := database.New(&cfg.DatabaseSecret)
 	if err != nil {
 		return nil, err
 	}
 
-	app := &App{fiber.New(), cfg, db}
+	tp, exp, err := otel.New(ctx)
+	if err != nil {
+		logger.ErrorContext(ctx, "otel.New err", "err", err)
+		return nil, err
+	}
+	app := &App{fiber.New(), cfg, db, exp, tp}
+
 	app.AttachMiddlewares()
 	app.SetupRoutes()
 
@@ -93,6 +106,11 @@ func (a *App) AttachMiddlewares() {
 	a.app.Use(recover.New())
 	a.app.Use(mdwlogger.New())
 	a.app.Use(cors.New())
+
+	nextOtp := otelfiber.WithNext(func(c *fiber.Ctx) bool {
+		return c.Path() == "/healthz"
+	})
+	a.app.Use(otelfiber.Middleware(nextOtp))
 }
 
 func (a *App) SetupRoutes() {
@@ -108,9 +126,15 @@ func (a *App) App() *fiber.App {
 	return a.app
 }
 
-func (a *App) Cleanup() {
+func (a *App) Cleanup(ctx context.Context) {
 	if err := a.db.Close(); err != nil {
 		logger.Error("App.Cleanup err: ", err)
+	}
+	if err := a.exp.Shutdown(ctx); err != nil {
+		logger.ErrorContext(ctx, "exp.Shutdown err", "err", err)
+	}
+	if err := a.tp.Shutdown(ctx); err != nil {
+		logger.ErrorContext(ctx, "tp.Shutdown err", "err", err)
 	}
 }
 
@@ -121,7 +145,8 @@ func NewServerlessApp() (*App, error) {
 		return nil, err
 	}
 
-	app, err := NewApp(config)
+	ctx := context.Background()
+	app, err := NewApp(ctx, config)
 	if err != nil {
 		logger.Error("NewApp err", "err", err)
 		return nil, err
