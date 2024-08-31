@@ -16,42 +16,31 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
 	query.set('page', String(page))
 	query.set('pageSize', String(pageSize))
 	query.set('sort', String(sorted))
-	const res = await fetch(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}&${query}`, {
-		method: "GET",
-		headers: {
-			"Authorization": `Bearer ${token}`,
-			"Content-Type": "application/json",
-		}
-	})
-	const agencyRes = await fetch(`${PUBLIC_API_SERVER_URL}/agencies?${query}`, {
-		method: "GET",
-		headers: {
-			"Authorization": `Bearer ${token}`,
-			"Content-Type": "application/json",
-		}
-	})
-	const classes = await fetch(`${PUBLIC_API_SERVER_URL}/classes?${query}`, {
-		method: "GET",
-		headers: {
-			"Authorization": `Bearer ${token}`,
-			"Content-Type": "application/json",
-		}
-	})
 
-	const attendances = await fetch(`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`, {
-		method: "GET",
-		headers: {
-			"Authorization": `Bearer ${token}`,
-			"Content-Type": "application/json",
-		}
-	})
-	depends('app:attendances')
-	depends('app:students')
+	const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+    }
+
+    const fetchData = async (url: string) => {
+        const response = await fetch(url, { method: "GET", headers })
+        return response.json()
+    }
+
+	const [studentsData, agenciesData, classesData, attendancesData] = await Promise.all([
+        fetchData(`${PUBLIC_API_SERVER_URL}/students?classId=${classId}&${query}`),
+        fetchData(`${PUBLIC_API_SERVER_URL}/agencies?${query}`),
+        fetchData(`${PUBLIC_API_SERVER_URL}/classes?${query}`),
+        fetchData(`${PUBLIC_API_SERVER_URL}/attendances?classId=${classId}&period=${dayjs().format('MM-YYYY')}`)
+    ])
+
+    depends('app:attendances')
+    depends('app:students')
 
 	return {
-		students: res.json() as Promise<{ page: number; pageSize: number; data: StudentProps[] }>,
-		agencies: agencyRes.json() as Promise<{ page: number; pageSize: number; data: AgencyProps[] }>,
-		classes: classes.json() as Promise<{ page: number; pageSize: number; data: ClassesProps[] }>,
-		attendances: attendances.json()
+		students: studentsData as Promise<{ page: number; pageSize: number; data: StudentProps[] }>,
+		agencies: agenciesData as Promise<{ page: number; pageSize: number; data: AgencyProps[] }>,
+		classes: classesData as Promise<{ page: number; pageSize: number; data: ClassesProps[] }>,
+		attendances: attendancesData
 	}
 }

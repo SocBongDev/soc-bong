@@ -12,32 +12,25 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
 	query.set('page', String(page))
 	query.set('pageSize', String(pageSize))
 
-	const registration = await fetch(
-		`${PUBLIC_API_SERVER_URL}/registrations?${query}`,
-		{
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${token}`,
-				"Content-Type": "application/json",
-			}
-		}
-	)
-	const agencies = await fetch(
-		`${PUBLIC_API_SERVER_URL}/agencies?${query}`,
-		{
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${token}`,
-				"Content-Type": "application/json",
-			}
-		}
-	)
+	const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+    }
 
+    const fetchData = async (url: string) => {
+        const response = await fetch(url, { method: "GET", headers })
+        return response.json()
+    }
+
+	const [registrationsData, agenciesData] = await Promise.all([
+        fetchData(`${PUBLIC_API_SERVER_URL}/registrations?${query}`),
+        fetchData(`${PUBLIC_API_SERVER_URL}/agencies?${query}`),
+    ])
 
 	depends('app:registrations')
 
 	return {
-		registrations: registration.json() as Promise<{ page: number; pageSize: number; data: RegistrationProps[] }>,
-		agencies: agencies.json() as Promise<{ page: number; pageSize: number; data: AgencyProps[] }>
+		registrations: registrationsData as Promise<{ page: number; pageSize: number; data: RegistrationProps[] }>,
+		agencies: agenciesData as Promise<{ page: number; pageSize: number; data: AgencyProps[] }>
 	}
 }
