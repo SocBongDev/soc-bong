@@ -17,13 +17,13 @@ import (
 // @Security ApiKeyAuth
 // @Router /attendances [patch]
 func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
-	body := []UpdateAttendanceRequest{}
+	ctx, body := c.UserContext(), []UpdateAttendanceRequest{}
 	if err := c.BodyParser(&body); err != nil {
-		logger.ErrorContext(c.UserContext(), "PatchAttendance.BodyParser err", "err", err)
+		logger.ErrorContext(ctx, "PatchAttendance.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	logger.InfoContext(c.UserContext(), "PatchAttendance request", "req", body)
+	logger.InfoContext(ctx, "PatchAttendance request", "req", body)
 	req := make([]Attendance, len(body))
 	for i, v := range body {
 		req[i] = Attendance{
@@ -32,8 +32,8 @@ func (h *AttendanceHandler) Patch(c *fiber.Ctx) error {
 		}
 	}
 
-	if err := h.repo.Update(req); err != nil {
-		logger.ErrorContext(c.UserContext(), "PatchAttendance.Patch err", "err", err)
+	if err := h.repo.Update(ctx, req); err != nil {
+		logger.ErrorContext(ctx, "PatchAttendance.Patch err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 

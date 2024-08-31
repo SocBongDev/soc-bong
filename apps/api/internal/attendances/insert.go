@@ -19,20 +19,20 @@ import (
 // @Security ApiKeyAuth
 // @Router /attendances [post]
 func (h *AttendanceHandler) Insert(c *fiber.Ctx) error {
-	body := []CreateAttendanceRequest{}
+	ctx, body := c.UserContext(), []CreateAttendanceRequest{}
 	if err := c.BodyParser(&body); err != nil {
-		logger.ErrorContext(c.UserContext(), "InsertAttendance.BodyParser err", "err", err)
+		logger.ErrorContext(ctx, "InsertAttendance.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	logger.InfoContext(c.UserContext(), "InsertAttendance request", "request", body)
+	logger.InfoContext(ctx, "InsertAttendance request", "request", body)
 	req := make([]Attendance, len(body))
 	for i, v := range body {
 		req[i] = Attendance{CreateAttendanceRequest: v}
 	}
 
-	if err := h.repo.Insert(req); err != nil {
-		logger.ErrorContext(c.UserContext(), "InsertAttendance.Insert err", "err", err)
+	if err := h.repo.Insert(ctx, req); err != nil {
+		logger.ErrorContext(ctx, "InsertAttendance.Insert err", "err", err)
 
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			return fiber.ErrUnprocessableEntity

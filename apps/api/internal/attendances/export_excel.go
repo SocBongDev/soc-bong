@@ -21,6 +21,7 @@ import (
 // @Security ApiKeyAuth
 // @Router /attendances/{id}/export-excel [get]
 func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	id, err := c.ParamsInt("classId")
 	if err != nil {
 		logger.ErrorContext(c.Context(), "ExportExcel.ParamsInt err", "err", err)
@@ -36,7 +37,7 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 	query.ClassId = id
 	query.Format()
 
-	attendanceResp, err := h.formatAttendances(query)
+	attendanceResp, err := h.formatAttendances(ctx, query)
 	if err != nil {
 		logger.ErrorContext(c.UserContext(), "ExportExcel.formatAttendances err", "err", err)
 		return err

@@ -1,9 +1,13 @@
 package attendances
 
-import "github.com/SocBongDev/soc-bong/internal/entities"
+import (
+	"context"
+
+	"github.com/SocBongDev/soc-bong/internal/entities"
+)
 
 type AttendanceRepository interface {
-	Find(*AttendanceQuery) ([]entities.Attendance, error)
-	Insert([]Attendance) error
-	Update([]Attendance) error
+	Find(context.Context, *AttendanceQuery) ([]entities.Attendance, error)
+	Insert(context.Context, []Attendance) error
+	Update(context.Context, []Attendance) error
 }

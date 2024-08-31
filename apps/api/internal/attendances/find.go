@@ -17,17 +17,17 @@ import (
 // @Security ApiKeyAuth
 // @Router /attendances [get]
 func (h *AttendanceHandler) Find(c *fiber.Ctx) error {
-	query := &AttendanceQuery{}
+	query, ctx := &AttendanceQuery{}, c.UserContext()
 	if err := c.QueryParser(query); err != nil {
-		logger.ErrorContext(c.UserContext(), "FindAttendances.QueryParser err", "err", err)
+		logger.ErrorContext(ctx, "FindAttendances.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 	query.Format()
 
-	logger.InfoContext(c.UserContext(), "FindAttendances request", "query", query)
-	resp, err := h.formatAttendances(query)
+	logger.InfoContext(ctx, "FindAttendances request", "query", query)
+	resp, err := h.formatAttendances(ctx, query)
 	if err != nil {
-		logger.ErrorContext(c.UserContext(), "FindAttendances.formatAttendances err", "err", err)
+		logger.ErrorContext(ctx, "FindAttendances.formatAttendances err", "err", err)
 		return err
 	}
 
