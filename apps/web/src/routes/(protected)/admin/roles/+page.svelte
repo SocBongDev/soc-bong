@@ -5,8 +5,10 @@
     import { invalidate } from '$app/navigation'
 	import RolesList from './RolesList.svelte'
 	import AddRole from './AddRole.svelte'
+	import type { PageData } from './$types'
     let drawerToggleRef: HTMLInputElement
 
+	export let data: PageData
     function refreshData() {
 		invalidate('app:students')
 	}
@@ -16,7 +18,7 @@
 		{ name: 'Tạo mới vai trò', section: 'newRole', value: 1 }
 	]
 
-	let activeTabValue: number = 1
+	let activeTabValue: number = 0
 	function handleClick(tabValue: number) {
 		activeTabValue = tabValue
 	}
@@ -28,7 +30,6 @@
 		type="checkbox"
 		class="drawer-toggle"
 		bind:this={drawerToggleRef}
-		
 	/>
 	<div class="drawer-content">
 		<header class="mb-5 flex items-center justify-between">
@@ -76,7 +77,7 @@
 
 		<div class="mt-4 h-full">
 			{#if activeTabValue === 0}
-				<RolesList />
+				<RolesList data={data}/>
 			{:else if activeTabValue === 1}
 				<AddRole />
 			{/if}

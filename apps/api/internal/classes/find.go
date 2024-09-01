@@ -59,6 +59,6 @@ func (h *ClassHandler) Find(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	resp := FindClassResp{Data: data, Page: query.GetPage()}
+	resp := FindClassResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
 	return c.JSON(resp)
 }

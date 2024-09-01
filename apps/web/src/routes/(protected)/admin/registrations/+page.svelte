@@ -231,6 +231,11 @@
 			const res = await request
 			refreshData()
 			resetDefaultForm()
+			Notify({
+				type: "success",
+				id: crypto.randomUUID(),
+				description: isNew ? 'Tạo đăng kí thành công!' : 'Cập nhật đăng kí thành công!'
+			})
 			hide()
 		} catch (e) {
 			console.error('Save error', e)
@@ -262,7 +267,7 @@
 			).then((res) => res.json())
 			res.studentDob = dayjs(res?.studentDob).format('YYYY-MM-DD')
 			recordData = res
-		} catch (e) {
+		} catch (e: any) {
 			console.error('LoadData: ', e)
 			if (e.name !== undefined && e.name === 'AbortError') {
 				return
@@ -312,6 +317,7 @@
 	}
 
 	function clearSelected() {
+		isCheckedAll = false
 		isChecked = []
 	}
 
@@ -343,6 +349,11 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Sóc Bông Admin</title>
+	<meta name="description" content="Sóc Bông Kindergarten" />
+</svelte:head>
 
 <div class="drawer drawer-end h-full">
 	<input
@@ -456,7 +467,7 @@
 					class={data.registrations.page === 1
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin?page=${data.registrations.page - 1}&pageSize=${
+					href={`/admin?registrations?page=${data.registrations.page - 1}&pageSize=${
 						data.registrations.pageSize
 					}`}
 				>
@@ -468,7 +479,7 @@
 					data.registrations.data.length === 0
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin?page=${data.registrations.page + 1}&pageSize=${
+					href={`/admin/registrations?page=${data.registrations.page + 1}&pageSize=${
 						data.registrations.pageSize
 					}`}
 				>

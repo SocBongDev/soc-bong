@@ -53,6 +53,10 @@ func (r *repo) Insert(ctx context.Context, req *User) error {
 	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
+func (r *repo) Update(ctx context.Context, req *User) error {
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Update()
+}
+
 func NewRepo(db *dbx.DB) *repo {
 	return &repo{db}
 }

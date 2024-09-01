@@ -33,7 +33,6 @@
 	$: isNew = !recordData
 	$: if (recordData !== null) {
 		const { id, createdAt, updatedAt, ...initialValues } = recordData
-		console.log('check recordData: ', recordData)
 		setInitialValues(initialValues)
 		reset()
 	}
@@ -57,11 +56,23 @@
 		value: el.id ? el.id.toString() : '1'
 	}))
 
+	var teacherOptions = data?.users.data?.map((el) => ({
+		label: el.first_name + " " + el.last_name,
+		value: el.auth0_user_id ? el.auth0_user_id : " "
+	}))
+
 	function formatAgencyName(agencyId: number) {
 		const agency = data.agencies.data.find(
 			(el) => (el.id && parseInt(el.id?.toString())) === agencyId
 		)
 		return agency?.name || 'N/A'
+	}
+
+	function formatTeacherName(auth0_user_id: string) {
+		const teacher = data.users.data.find( 
+			(el) => (el.auth0_user_id) === auth0_user_id
+		)
+		return teacher ? (teacher?.first_name + " " + teacher?.last_name) : "N/A" 
 	}
 
 	const { form, errors, setInitialValues, reset } = createForm({
@@ -98,8 +109,9 @@
 		},
 		{
 			name: 'teacherId',
-			type: 'text',
-			required: true
+			type: 'select',
+			required: true,
+			options: teacherOptions
 		},
 		{
 			name: 'agencyId',
@@ -196,7 +208,6 @@
 	}
 
 	async function save(req: ClassesProps) {
-		console.log('check body', req)
 		loading = true
 		const body = JSON.stringify(req)
 		const method = isNew ? 'POST' : 'PUT'
@@ -231,6 +242,11 @@
 			const res = await request
 			refreshData()
 			resetDefaultForm()
+			Notify({
+				type: "success",
+				id: crypto.randomUUID(),
+				description: isNew ? 'Tạo lớp học thành công!' : 'Cập nhật lớp học thành công!'
+			})
 			hide()
 		} catch (e) {
 			console.error('Save error', e)
@@ -430,7 +446,7 @@
 								</th>
 								<th on:click={() => show(classroom.id)}>{classroom.name}</th>
 								<td on:click={() => show(classroom.id)}>{formatClasses(classroom.grade || '')}</td>
-								<td on:click={() => show(classroom.id)}>{classroom.teacherId}</td>
+								<td on:click={() => show(classroom.id)}>{formatTeacherName(classroom.teacherId)}</td>
 								<td on:click={() => show(classroom.id)}>{formatAgencyName(classroom.agencyId)}</td>
 
 								<td on:click={() => show(classroom.id)}>
@@ -447,7 +463,7 @@
 			<div class="join mt-auto self-center">
 				<a
 					class={data.classes.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-					href={`/admin?page=${data.classes.page - 1}&pageSize=${data.classes.pageSize}`}
+					href={`/admin/classes?page=${data.classes.page - 1}&pageSize=${data.classes.pageSize}`}
 				>
 					<button class="btn join-item">«</button>
 				</a>
@@ -456,7 +472,7 @@
 					class={data.classes.data.length < data.classes.pageSize || data.classes.data.length === 0
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin?page=${data.classes.page + 1}&pageSize=${data.classes.pageSize}`}
+					href={`/admin/classes?page=${data.classes.page + 1}&pageSize=${data.classes.pageSize}`}
 				>
 					<button class="btn join-item">»</button>
 				</a>
