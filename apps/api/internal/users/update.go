@@ -19,7 +19,7 @@ import (
 // @Security ApiKeyAuth
 // @Router /users/{id} [put]
 func (h *UserHandler) Update(c *fiber.Ctx) error {
-	body := new(UserInput)
+	ctx, body := c.UserContext(), new(UserInput)
 	if err := c.BodyParser(body); err != nil {
 		log.Println("UpdateUser.BodyParser err: ", err)
 		return fiber.ErrBadRequest
@@ -33,12 +33,10 @@ func (h *UserHandler) Update(c *fiber.Ctx) error {
 
 	log.Printf("UpdateRegistration request: %+v\n", body)
 	req := &User{UserInput: *body, BaseEntity: common.BaseEntity{Id: id}}
-	if err := h.repo.Update(req); err != nil {
+	if err := h.repo.Update(ctx, req); err != nil {
 		log.Println("UpdateRegistration.Update err: ", err)
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("UpdateUser success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

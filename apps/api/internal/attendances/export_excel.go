@@ -24,14 +24,14 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 	ctx := c.UserContext()
 	id, err := c.ParamsInt("classId")
 	if err != nil {
-		logger.ErrorContext(c.Context(), "ExportExcel.ParamsInt err", "err", err)
+		logger.ErrorContext(ctx, "ExportExcel.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	logger.InfoContext(c.UserContext(), "ExportExcel request", "id", id)
+	logger.InfoContext(ctx, "ExportExcel request", "id", id)
 	query := &AttendanceQuery{}
 	if err := c.QueryParser(query); err != nil {
-		logger.ErrorContext(c.Context(), "FindAttendances.QueryParser err", "err", err)
+		logger.ErrorContext(ctx, "FindAttendances.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 	query.ClassId = id
@@ -39,26 +39,26 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 
 	attendanceResp, err := h.formatAttendances(ctx, query)
 	if err != nil {
-		logger.ErrorContext(c.UserContext(), "ExportExcel.formatAttendances err", "err", err)
+		logger.ErrorContext(ctx, "ExportExcel.formatAttendances err", "err", err)
 		return err
 	}
 
 	// buf, err := h.spreadsheet.ExportClassAttendances(attendanceResp)
 	month, err := strconv.Atoi(query.month)
 	if err != nil {
-		logger.ErrorContext(c.Context(), "ExportExcel.Atoi err", "err", err)
+		logger.ErrorContext(ctx, "ExportExcel.Atoi err", "err", err)
 		return err
 	}
 
 	year, err := strconv.Atoi(query.year)
 	if err != nil {
-		logger.ErrorContext(c.Context(), "ExportExcel.Atoi err", "err", err)
+		logger.ErrorContext(ctx, "ExportExcel.Atoi err", "err", err)
 		return err
 	}
 
 	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp)
 	if err != nil {
-		logger.ErrorContext(c.Context(), "f.WriteToBuffer err", "err", err)
+		logger.ErrorContext(ctx, "f.WriteToBuffer err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
