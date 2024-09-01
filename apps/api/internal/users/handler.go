@@ -7,7 +7,7 @@ import (
 )
 
 type UserHandler struct {
-	repo         UserRepository
+	repo         Repository
 	config       *config.Config
 	tokenManager *common.Auth0TokenManager
 }
@@ -31,7 +31,7 @@ func (h *UserHandler) RegisterRoute(router fiber.Router) {
 	)
 }
 
-func New(repo UserRepository, config *config.Config, clientID, clientSecret string) common.APIHandler {
+func New(repo Repository, config *config.Config, clientID, clientSecret string) common.APIHandler {
 	return &UserHandler{
 		repo:         repo,
 		config:       config,
