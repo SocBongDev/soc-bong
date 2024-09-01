@@ -10,7 +10,6 @@
 	function hasRequiredPermission(access_token: string): boolean {
 		try {
 			const decodedToken = JSON.parse(atob(access_token.split('.')[1]))
-			console.log('check decodedToken: ', decodedToken)
 			const permissions = decodedToken.permissions || []
 			const roles = decodedToken['user/roles']
 			localStorage.setItem("role", roles[0])

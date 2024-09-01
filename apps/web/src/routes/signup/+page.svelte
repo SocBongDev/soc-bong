@@ -148,7 +148,7 @@
 
 			const bodyReq = JSON.stringify(body)
 
-			const request = fetch(`${PUBLIC_API_SERVER_URL}/sign-up`, {
+			const request = fetch(`${PUBLIC_API_SERVER_URL}/public/sign-up`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -199,6 +199,7 @@
 			goto('/')
 		} catch (e) {
 			console.error('Save error: ', e)
+			loading = false
 			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
 		}
 	}

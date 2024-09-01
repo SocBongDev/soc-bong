@@ -11,41 +11,28 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
 
     query.set('page', String(page))
     query.set('pageSize', String(pageSize))
+    
+    const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+    }
 
-    const classes = await fetch(`${PUBLIC_API_SERVER_URL}/classes?${query}`,
-        {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            }
-        }
-    )
+    const fetchData = async (url: string) => {
+        const response = await fetch(url, { method: "GET", headers })
+        return response.json()
+    }
 
-    const agencies = await fetch(`${PUBLIC_API_SERVER_URL}/agencies?${query}`,
-        {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            }
-        }
-    )
+	const [classesData, agenciesData, usersData] = await Promise.all([
+        fetchData(`${PUBLIC_API_SERVER_URL}/classes?${query}`),
+        fetchData(`${PUBLIC_API_SERVER_URL}/agencies?${query}`),
+        fetchData(`${PUBLIC_API_SERVER_URL}/users?${query}`),
+    ])
 
-    const users = await fetch(`${PUBLIC_API_SERVER_URL}/users?${query}`, 
-        {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            }
-        }
-    )
     depends('app:classes')
 
     return {
-        classes: classes.json() as Promise<{ page: number; pageSize: number; data: ClassesProps[] }>,
-        agencies: agencies.json() as Promise<{page: number; pageSize: number; data: AgencyProps[]}>,
-        users: users.json() as Promise<{page: number, pageSize: number, data: UserProps[]}>
+        classes: classesData as Promise<{ page: number; pageSize: number; data: ClassesProps[] }>,
+        agencies: agenciesData as Promise<{page: number; pageSize: number; data: AgencyProps[]}>,
+        users: usersData as Promise<{page: number, pageSize: number, data: UserProps[]}>
     }
 }

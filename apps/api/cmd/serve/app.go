@@ -93,7 +93,8 @@ func (a *App) ApiV1(api fiber.Router) {
 		registrations.New(registrationRepo),
 		agencies.New(agencyRepo),
 	}
-	a.RegisterAPIHandlers(v1, publicHandlers)
+	publicGroup := v1.Group("/public")
+	a.RegisterAPIHandlers(publicGroup, publicHandlers)
 
 	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
 
