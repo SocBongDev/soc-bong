@@ -1,9 +1,8 @@
 package registrations
 
 import (
-	"log"
-
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,26 +18,24 @@ import (
 // @Security ApiKeyAuth
 // @Router /registrations/{id} [put]
 func (h *RegistrationHandler) Update(c *fiber.Ctx) error {
-	body := new(WriteRegistrationRequest)
+	ctx, body := c.UserContext(), new(WriteRegistrationRequest)
 	if err := c.BodyParser(body); err != nil {
-		log.Println("UpdateRegistration.BodyParser err: ", err)
+		logger.ErrorContext(ctx, "UpdateRegistration.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		log.Println("UpdateRegistration.ParamsInt err: ", err)
+		logger.ErrorContext(ctx, "UpdateRegistration.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("UpdateRegistration request: %+v\n", body)
+	logger.InfoContext(ctx, "UpdateRegistration request", "req", body)
 	req := &Registration{WriteRegistrationRequest: *body, BaseEntity: common.BaseEntity{Id: id}}
-	if err := h.repo.Update(req); err != nil {
-		log.Println("UpdateRegistration.Update err: ", err)
+	if err := h.repo.Update(ctx, req); err != nil {
+		logger.ErrorContext(ctx, "UpdateRegistration.Update err", "err", err)
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("UpdateRegistration success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }
