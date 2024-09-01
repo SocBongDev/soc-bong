@@ -1,8 +1,10 @@
 package agencies
 
+import "context"
+
 type AgencyRepository interface {
-	Find(*AgencyQuery) ([]Agency, error)
-	FindOne(*Agency) error
-	Insert(*Agency) error
-	Update(*Agency) error
+	Find(context.Context, *AgencyQuery) ([]Agency, error)
+	FindOne(context.Context, *Agency) error
+	Insert(context.Context, *Agency) error
+	Update(context.Context, *Agency) error
 }

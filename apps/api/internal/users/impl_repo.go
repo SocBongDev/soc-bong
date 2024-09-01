@@ -1,15 +1,19 @@
 package users
 
 import (
+	"context"
+
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/pocketbase/dbx"
 )
 
-type userRepo struct {
+type repo struct {
 	db *dbx.DB
 }
 
-func (r *userRepo) Find(query *UserQuery) ([]User, error) {
+var _ Repository = (*repo)(nil)
+
+func (r *repo) Find(ctx context.Context, query *UserQuery) ([]User, error) {
 	resp := make([]User, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("users").
@@ -34,25 +38,25 @@ func (r *userRepo) Find(query *UserQuery) ([]User, error) {
 		q = q.AndWhere(dbx.Or(dbx.Like("name", query.Search), dbx.Like("grade", query.Search)))
 	}
 
-	if err := q.All(&resp); err != nil {
+	if err := q.WithContext(ctx).All(&resp); err != nil {
 		return nil, err
 	}
 
 	return resp, nil
 }
 
-func (r *userRepo) FindOne(req *User) error {
-	return r.db.Select().Model(req.Id, req)
+func (r *repo) FindOne(ctx context.Context, req *User) error {
+	return r.db.WithContext(ctx).Select().Model(req.Id, req)
 }
 
-func (r *userRepo) Insert(req *User) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
+func (r *repo) Insert(ctx context.Context, req *User) error {
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
-func (r *userRepo) Update(req *User) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
+func (r *repo) Update(ctx context.Context, req *User) error {
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
-func NewRepo(db *dbx.DB) *userRepo {
-	return &userRepo{db}
+func NewRepo(db *dbx.DB) *repo {
+	return &repo{db}
 }

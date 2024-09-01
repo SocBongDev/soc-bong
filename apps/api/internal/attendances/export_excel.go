@@ -2,7 +2,6 @@ package attendances
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/SocBongDev/soc-bong/internal/logger"
@@ -22,46 +21,44 @@ import (
 // @Security ApiKeyAuth
 // @Router /attendances/{id}/export-excel [get]
 func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	id, err := c.ParamsInt("classId")
 	if err != nil {
-		logger.ErrorContext(c.Context(), "ExportExcel.ParamsInt err", "err", err)
+		logger.ErrorContext(ctx, "ExportExcel.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Println("ExportExcel id: ", id)
-
+	logger.InfoContext(ctx, "ExportExcel request", "id", id)
 	query := &AttendanceQuery{}
 	if err := c.QueryParser(query); err != nil {
-		logger.ErrorContext(c.Context(), "FindAttendances.QueryParser err", "err", err)
+		logger.ErrorContext(ctx, "FindAttendances.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 	query.ClassId = id
 	query.Format()
 
-	attendanceResp, err := h.formatAttendances(query)
+	attendanceResp, err := h.formatAttendances(ctx, query)
 	if err != nil {
-		log.Println("ExportExcel.formatAttendances err: ", err)
+		logger.ErrorContext(ctx, "ExportExcel.formatAttendances err", "err", err)
 		return err
 	}
 
 	// buf, err := h.spreadsheet.ExportClassAttendances(attendanceResp)
 	month, err := strconv.Atoi(query.month)
 	if err != nil {
-		logger.ErrorContext(c.Context(), "ExportExcel.Atoi err", "err", err)
+		logger.ErrorContext(ctx, "ExportExcel.Atoi err", "err", err)
 		return err
 	}
 
 	year, err := strconv.Atoi(query.year)
 	if err != nil {
-		logger.ErrorContext(c.Context(), "ExportExcel.Atoi err", "err", err)
+		logger.ErrorContext(ctx, "ExportExcel.Atoi err", "err", err)
 		return err
 	}
 
-	logger.Info("LmaoBefore", "test", *h.excelGenerator)
 	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp)
-	logger.Info("Lmao")
 	if err != nil {
-		logger.ErrorContext(c.Context(), "f.WriteToBuffer err", "err", err)
+		logger.ErrorContext(ctx, "f.WriteToBuffer err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 

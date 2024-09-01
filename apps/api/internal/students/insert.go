@@ -1,9 +1,9 @@
 package students
 
 import (
-	"log"
 	"strings"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,17 +19,16 @@ import (
 // @Security ApiKeyAuth
 // @Router /students [post]
 func (h *StudentHandler) Insert(c *fiber.Ctx) error {
-	body := new(WriteStudentRequest)
+	ctx, body := c.UserContext(), new(WriteStudentRequest)
 	if err := c.BodyParser(body); err != nil {
-		log.Println("InsertStudent.BodyParser err: ", err)
+		logger.InfoContext(ctx, "InsertStudent.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("InsertStudent request: %+v\n", body)
+	logger.InfoContext(ctx, "InsertStudent request", "req", body)
 	req := &Student{WriteStudentRequest: *body}
-
-	if err := h.repo.Insert(req); err != nil {
-		log.Println("InsertStudent.Insert err: ", err)
+	if err := h.repo.Insert(ctx, req); err != nil {
+		logger.InfoContext(ctx, "InsertStudent.Insert err", "err", err)
 
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			return fiber.ErrUnprocessableEntity
@@ -37,8 +36,6 @@ func (h *StudentHandler) Insert(c *fiber.Ctx) error {
 
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("InsertStudent success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

@@ -1,8 +1,7 @@
 package students
 
 import (
-	"log"
-
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,20 +16,17 @@ import (
 // @Security ApiKeyAuth
 // @Router /students [delete]
 func (h *StudentHandler) Delete(c *fiber.Ctx) error {
-	query := new(DeleteStudentQuery)
+	ctx, query := c.UserContext(), new(DeleteStudentQuery)
 	if err := c.QueryParser(query); err != nil {
-		log.Println("DeleteStudent.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "DeleteStudent.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("DeleteStudents request: %+v\n", query)
-
-	if err := h.repo.Delete(query.Ids); err != nil {
-		log.Println("DeleteStudent.Delete err: ", err)
+	logger.InfoContext(ctx, "DeleteStudents request", "req", query)
+	if err := h.repo.Delete(ctx, query.Ids); err != nil {
+		logger.ErrorContext(ctx, "DeleteStudent.Delete err", "err", err)
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("DeleteStudent success. Response: %+v\n", query.Ids)
 
 	return c.JSON(nil)
 }

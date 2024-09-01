@@ -1,6 +1,7 @@
 package attendances
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -64,7 +65,7 @@ var (
 	}
 )
 
-func (r *attendanceRepo) Find(query *AttendanceQuery) ([]entities.Attendance, error) {
+func (r *attendanceRepo) Find(ctx context.Context, query *AttendanceQuery) ([]entities.Attendance, error) {
 	resp := []entities.Attendance{}
 	q := r.db.Select("*").
 		From(TABLE).
@@ -86,6 +87,7 @@ func (r *attendanceRepo) Find(query *AttendanceQuery) ([]entities.Attendance, er
 		InnerJoin("students", dbx.NewExp(fmt.Sprintf("%s.id = %s.student_id", "students", TABLE))).
 		Build().
 		WithAllHook(allHook). */
+		WithContext(ctx).
 		All(&resp); err != nil {
 		return nil, err
 	}
@@ -93,7 +95,7 @@ func (r *attendanceRepo) Find(query *AttendanceQuery) ([]entities.Attendance, er
 	return resp, nil
 }
 
-func (r *attendanceRepo) Insert(req []Attendance) error {
+func (r *attendanceRepo) Insert(ctx context.Context, req []Attendance) error {
 	vals := make([]string, len(req))
 	for i, v := range req {
 		vals[i] = fmt.Sprintf(
@@ -105,7 +107,7 @@ func (r *attendanceRepo) Insert(req []Attendance) error {
 		)
 	}
 
-	_, err := r.db.NewQuery(
+	_, err := r.db.WithContext(ctx).NewQuery(
 		fmt.Sprintf(
 			`
              INSERT INTO attendances ("attended_at", "class_id", "attended_status", "student_id") 
@@ -119,14 +121,14 @@ func (r *attendanceRepo) Insert(req []Attendance) error {
 	return err
 }
 
-func (r *attendanceRepo) Update(req []Attendance) error {
+func (r *attendanceRepo) Update(ctx context.Context, req []Attendance) error {
 	cases, ids := make([]string, len(req)+1), make([]string, len(req))
 	for i, v := range req {
 		cases[i] = fmt.Sprintf("WHEN %d THEN %d", v.Id, v.AttendedStatus)
 		ids[i] = fmt.Sprint(v.Id)
 	}
 
-	_, err := r.db.NewQuery(
+	_, err := r.db.WithContext(ctx).NewQuery(
 		fmt.Sprintf(
 			`
             UPDATE attendances

@@ -1,8 +1,7 @@
 package attendances
 
 import (
-	"log"
-
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -18,21 +17,19 @@ import (
 // @Security ApiKeyAuth
 // @Router /attendances [get]
 func (h *AttendanceHandler) Find(c *fiber.Ctx) error {
-	query := &AttendanceQuery{}
+	query, ctx := &AttendanceQuery{}, c.UserContext()
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindAttendances.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "FindAttendances.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 	query.Format()
 
-	log.Printf("FindAttendances request: %+v\n", query)
-	resp, err := h.formatAttendances(query)
+	logger.InfoContext(ctx, "FindAttendances request", "query", query)
+	resp, err := h.formatAttendances(ctx, query)
 	if err != nil {
-		log.Println("FindAttendances.formatAttendances err: ", err)
+		logger.ErrorContext(ctx, "FindAttendances.formatAttendances err", "err", err)
 		return err
 	}
-
-	log.Printf("FindAttendances success. Response: %+v\n", resp)
 
 	return c.JSON(resp)
 }

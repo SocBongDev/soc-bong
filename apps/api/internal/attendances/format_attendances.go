@@ -1,14 +1,16 @@
 package attendances
 
 import (
+	"context"
+
 	"github.com/SocBongDev/soc-bong/internal/entities"
 	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/SocBongDev/soc-bong/internal/students"
 	"github.com/gofiber/fiber/v2"
 )
 
-func (h *AttendanceHandler) formatAttendances(query *AttendanceQuery) (map[int]entities.AttendanceResponse, error) {
-	data, err := h.repo.Find(query)
+func (h *AttendanceHandler) formatAttendances(ctx context.Context, query *AttendanceQuery) (map[int]entities.AttendanceResponse, error) {
+	data, err := h.repo.Find(ctx, query)
 	if err != nil {
 		logger.Error("FindAttendances.All err", "err", err)
 		return nil, fiber.ErrInternalServerError
@@ -31,7 +33,7 @@ func (h *AttendanceHandler) formatAttendances(query *AttendanceQuery) (map[int]e
 		attendanceResp.Attendances = append(attendanceResp.Attendances, a)
 		resp[a.StudentId] = attendanceResp
 	}
-	students, err := h.studentRepo.Find(&students.StudentQuery{Ids: studentIds})
+	students, err := h.studentRepo.Find(ctx, &students.StudentQuery{Ids: studentIds})
 	if err != nil {
 		logger.Error("FindAttendances.studentRepo.Find err", "err", err)
 		return nil, fiber.ErrInternalServerError

@@ -1,8 +1,7 @@
 package registrations
 
 import (
-	"log"
-
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,20 +16,17 @@ import (
 // @Security ApiKeyAuth
 // @Router /registrations [delete]
 func (h *RegistrationHandler) Delete(c *fiber.Ctx) error {
-	query := new(DeleteRegistrationQuery)
+	ctx, query := c.UserContext(), new(DeleteRegistrationQuery)
 	if err := c.QueryParser(query); err != nil {
-		log.Println("DeleteRegistration.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "DeleteRegistration.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("DeleteRegistrations request: %+v\n", query)
-
-	if err := h.repo.Delete(query.Ids); err != nil {
-		log.Println("DeleteRegistration.Delete err: ", err)
+	logger.InfoContext(ctx, "DeleteRegistrations request", "req", query)
+	if err := h.repo.Delete(ctx, query.Ids); err != nil {
+		logger.ErrorContext(ctx, "DeleteRegistration.Delete err", "err", err)
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("DeleteRegistration success. Response: %+v\n", query.Ids)
 
 	return c.JSON(nil)
 }

@@ -89,6 +89,7 @@ func fmtErr(err error) slog.Value {
 func NewSlogLogger(options ...Option) *SlogLogger {
 	defaultOptions := &slog.HandlerOptions{
 		ReplaceAttr: replaceAttr,
+		AddSource:   true,
 	}
 	for _, opt := range options {
 		opt(defaultOptions)

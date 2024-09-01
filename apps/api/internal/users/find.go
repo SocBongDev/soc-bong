@@ -1,8 +1,7 @@
 package users
 
 import (
-	"log"
-
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,21 +20,19 @@ import (
 // @Security ApiKeyAuth
 // @Router /users [get]
 func (h *UserHandler) Find(c *fiber.Ctx) error {
-	query := &UserQuery{}
+	ctx, query := c.UserContext(), &UserQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindUser.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "FindUser QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindUsers request: %+v\n", query)
-
-	data, err := h.repo.Find(query)
+	logger.InfoContext(ctx, "FindUsers request", "req", query)
+	data, err := h.repo.Find(ctx, query)
 	if err != nil {
-		log.Println("FindUser.All err: ", err)
+		logger.ErrorContext(ctx, "FindUser All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
 	resp := FindUserResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
-	log.Printf("FindUsers success. Response: %+v\n", resp)
 	return c.JSON(resp)
 }

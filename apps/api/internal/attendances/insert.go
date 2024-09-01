@@ -1,9 +1,9 @@
 package attendances
 
 import (
-	"log"
 	"strings"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,20 +19,20 @@ import (
 // @Security ApiKeyAuth
 // @Router /attendances [post]
 func (h *AttendanceHandler) Insert(c *fiber.Ctx) error {
-	body := []CreateAttendanceRequest{}
+	ctx, body := c.UserContext(), []CreateAttendanceRequest{}
 	if err := c.BodyParser(&body); err != nil {
-		log.Println("InsertAttendance.BodyParser err: ", err)
+		logger.ErrorContext(ctx, "InsertAttendance.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("InsertAttendance request: %+v\n", body)
+	logger.InfoContext(ctx, "InsertAttendance request", "request", body)
 	req := make([]Attendance, len(body))
 	for i, v := range body {
 		req[i] = Attendance{CreateAttendanceRequest: v}
 	}
 
-	if err := h.repo.Insert(req); err != nil {
-		log.Println("InsertAttendance.Insert err: ", err)
+	if err := h.repo.Insert(ctx, req); err != nil {
+		logger.ErrorContext(ctx, "InsertAttendance.Insert err", "err", err)
 
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			return fiber.ErrUnprocessableEntity
@@ -40,8 +40,6 @@ func (h *AttendanceHandler) Insert(c *fiber.Ctx) error {
 
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("InsertAttendance success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

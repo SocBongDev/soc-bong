@@ -28,7 +28,7 @@ func (h *AgencyHandler) Insert(c *fiber.Ctx) error {
 
 	logger.InfoContext(c.Context(), "InsertAgency request", "req", body)
 	req := &Agency{WriteAgencyRequest: *body}
-	if err := h.repo.Insert(req); err != nil {
+	if err := h.repo.Insert(c.Context(), req); err != nil {
 		logger.ErrorContext(c.Context(), "InsertAgency.Insert err", "err", err)
 
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {

@@ -25,8 +25,8 @@ import (
 // @Failure 500 {string} string
 // @Router /sign-up [post]
 func (h *UserHandler) SignUp(c *fiber.Ctx) error {
-	//expected data from the user
-	input := new(UserInput)
+	// expected data from the user
+	ctx, input := c.UserContext(), new(UserInput)
 
 	if err := c.BodyParser(&input); err != nil {
 		log.Println("InsertUser.BodyParser err: ", err)
@@ -57,7 +57,7 @@ func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 		BirthDate:   input.BirthDate,
 		AgencyId:    input.AgencyId,
 	}}
-	//validator
+	// validator
 
 	v := common.New()
 	if ValidateUser(v, req); !v.Valid() {
@@ -65,12 +65,12 @@ func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	//Create user in Auth0
+	// Create user in Auth0
 
 	auth0User, err := h.createSignUpAuth0User(req, input.Password)
 	if err != nil {
 		log.Println("Auth0 user creation error: ", err)
-		//delete user in database if createAuth0User error
+		// delete user in database if createAuth0User error
 		return fiber.ErrConflict
 	}
 
@@ -83,7 +83,7 @@ func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 	} else {
 		req.Auth0UserId = auth0UserID
 		log.Printf("check this req Insert: %+v\n", req)
-		if err := h.repo.Insert(req); err != nil {
+		if err := h.repo.Insert(ctx, req); err != nil {
 			log.Println("User insertion error: ", err)
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				return fiber.ErrUnprocessableEntity
@@ -91,7 +91,7 @@ func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 			return fiber.ErrInternalServerError
 		}
 
-		//Respond with success
+		// Respond with success
 		return c.JSON(fiber.Map{
 			"user":          auth0User,
 			"auth0_user_id": auth0UserID,
@@ -134,13 +134,12 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 	url := auth0Domain + "api/v2/users"
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
-
 	if err != nil {
 		log.Printf("Error creating request: %v", err)
 		return nil, err
 	}
 
-	//Get token using the token manager
+	// Get token using the token manager
 	token, err := h.tokenManager.GetToken()
 	if err != nil {
 		log.Printf("err getting Auth0 token: %v", err)
@@ -154,9 +153,9 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 	log.Printf("Auth0 request URL: %s", auth0Domain+"api/v2/users")
 	log.Printf("Auth0 request payload: %s", string(payload))
 
-	//HTTP client with timeout
+	// HTTP client with timeout
 	client := &http.Client{
-		Timeout: time.Second * 30, //appropriate timeout
+		Timeout: time.Second * 30, // appropriate timeout
 	}
 
 	resp, err := client.Do(req)
@@ -202,5 +201,4 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 	}
 
 	return createdUser, nil
-
 }

@@ -1,11 +1,15 @@
 package students
 
-import "github.com/SocBongDev/soc-bong/internal/entities"
+import (
+	"context"
+
+	"github.com/SocBongDev/soc-bong/internal/entities"
+)
 
 type StudentRepository interface {
-	Delete([]int) error
-	Find(*StudentQuery) ([]entities.Student, error)
-	FindOne(*Student) error
-	Insert(*Student) error
-	Update(*Student) error
+	Delete(context.Context, []int) error
+	Find(context.Context, *StudentQuery) ([]entities.Student, error)
+	FindOne(context.Context, *Student) error
+	Insert(context.Context, *Student) error
+	Update(context.Context, *Student) error
 }

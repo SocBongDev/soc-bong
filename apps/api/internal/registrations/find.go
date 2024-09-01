@@ -1,8 +1,7 @@
 package registrations
 
 import (
-	"log"
-
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,22 +19,19 @@ import (
 // @Security ApiKeyAuth
 // @Router /registrations [get]
 func (h *RegistrationHandler) Find(c *fiber.Ctx) error {
-	query := &RegistrationQuery{}
+	ctx, query := c.UserContext(), &RegistrationQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindRegistrations.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "FindRegistrations.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindRegistrations request: %+v\n", query)
-
-	data, err := h.repo.Find(query)
+	logger.InfoContext(ctx, "FindRegistrations request", "req", query)
+	data, err := h.repo.Find(ctx, query)
 	if err != nil {
-		log.Println("FindRegistrations.All err: ", err)
+		logger.ErrorContext(ctx, "FindRegistrations.All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
 	resp := FindRegistrationResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
-	log.Printf("FindRegistrations success. Response: %+v\n", resp)
-
 	return c.JSON(resp)
 }

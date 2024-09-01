@@ -21,22 +21,22 @@ import (
 // @Security ApiKeyAuth
 // @Router /agencies/{id} [put]
 func (h *AgencyHandler) Update(c *fiber.Ctx) error {
-	body := new(WriteAgencyRequest)
+	ctx, body := c.UserContext(), new(WriteAgencyRequest)
 	if err := c.BodyParser(body); err != nil {
-		logger.ErrorContext(c.Context(), "UpdateAgency.BodyParser err", "err", err)
+		logger.ErrorContext(ctx, "UpdateAgency.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		logger.ErrorContext(c.Context(), "UpdateAgency.ParamsInt err", "err", err)
+		logger.ErrorContext(ctx, "UpdateAgency.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	logger.InfoContext(c.Context(), "UpdateAgency request", "req", body)
+	logger.InfoContext(ctx, "UpdateAgency request", "req", body)
 	req := &Agency{WriteAgencyRequest: *body, BaseEntity: common.BaseEntity{Id: id}}
-	if err := h.repo.Update(req); err != nil {
-		logger.ErrorContext(c.Context(), "UpdateAgency.Update err", "err", err)
+	if err := h.repo.Update(ctx, req); err != nil {
+		logger.ErrorContext(ctx, "UpdateAgency.Update err", "err", err)
 
 		if strings.Contains(err.Error(), "FOREIGN KEY constraint failed") {
 			return fiber.ErrUnprocessableEntity
@@ -45,6 +45,5 @@ func (h *AgencyHandler) Update(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	logger.DebugContext(c.Context(), "UpdateAgency success", "resp", body)
 	return c.JSON(req)
 }
