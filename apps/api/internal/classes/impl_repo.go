@@ -38,7 +38,7 @@ func (r *classRepo) Find(ctx context.Context, query *ClassQuery) ([]*Class, erro
 		q = q.AndWhere(dbx.NewExp("teacher_id = {:teacher_id}", dbx.Params{"teacher_id": query.TeacherId}))
 	}
 
-	if err := q.All(&resp); err != nil {
+	if err := q.WithContext(ctx).All(&resp); err != nil {
 		return nil, err
 	}
 
@@ -46,15 +46,15 @@ func (r *classRepo) Find(ctx context.Context, query *ClassQuery) ([]*Class, erro
 }
 
 func (r *classRepo) FindOne(ctx context.Context, req *Class) error {
-	return r.db.Select().Model(req.Id, req)
+	return r.db.WithContext(ctx).Select().Model(req.Id, req)
 }
 
 func (r *classRepo) Insert(ctx context.Context, req *Class) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
 func (r *classRepo) Update(ctx context.Context, req *Class) error {
-	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
+	return r.db.WithContext(ctx).Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 
 func NewRepo(db *dbx.DB) *classRepo {
