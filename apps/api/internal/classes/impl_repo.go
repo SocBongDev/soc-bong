@@ -1,6 +1,8 @@
 package classes
 
 import (
+	"context"
+
 	"github.com/SocBongDev/soc-bong/internal/common"
 	"github.com/pocketbase/dbx"
 )
@@ -11,7 +13,7 @@ type classRepo struct {
 
 var _ ClassRepository = (*classRepo)(nil)
 
-func (r *classRepo) Find(query *ClassQuery) ([]*Class, error) {
+func (r *classRepo) Find(ctx context.Context, query *ClassQuery) ([]*Class, error) {
 	resp := make([]*Class, 0, query.GetPageSize())
 	q := r.db.Select("*").
 		From("classes").
@@ -43,15 +45,15 @@ func (r *classRepo) Find(query *ClassQuery) ([]*Class, error) {
 	return resp, nil
 }
 
-func (r *classRepo) FindOne(req *Class) error {
+func (r *classRepo) FindOne(ctx context.Context, req *Class) error {
 	return r.db.Select().Model(req.Id, req)
 }
 
-func (r *classRepo) Insert(req *Class) error {
+func (r *classRepo) Insert(ctx context.Context, req *Class) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Insert()
 }
 
-func (r *classRepo) Update(req *Class) error {
+func (r *classRepo) Update(ctx context.Context, req *Class) error {
 	return r.db.Model(req).Exclude(common.BaseExcludeFields...).Update()
 }
 

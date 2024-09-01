@@ -1,10 +1,10 @@
 package classes
 
 import (
-	"log"
 	"strings"
 
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,22 +21,22 @@ import (
 // @Security ApiKeyAuth
 // @Router /classes/{id} [put]
 func (h *ClassHandler) Update(c *fiber.Ctx) error {
-	body := new(WriteClassRequest)
+	ctx, body := c.UserContext(), new(WriteClassRequest)
 	if err := c.BodyParser(body); err != nil {
-		log.Println("UpdateClass.BodyParser err: ", err)
+		logger.ErrorContext(ctx, "UpdateClass.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		log.Println("UpdateClass.ParamsInt err: ", err)
+		logger.ErrorContext(ctx, "UpdateClass.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("UpdateClass request: %+v\n", body)
+	logger.InfoContext(ctx, "UpdateClass request", "req", body)
 	req := &Class{WriteClassRequest: *body, BaseEntity: common.BaseEntity{Id: id}}
-	if err := h.repo.Update(req); err != nil {
-		log.Println("UpdateClass.Update err: ", err)
+	if err := h.repo.Update(ctx, req); err != nil {
+		logger.ErrorContext(ctx, "UpdateClass.Update err", "err", err)
 
 		if strings.Contains(err.Error(), "FOREIGN KEY constraint failed") {
 			return fiber.ErrUnprocessableEntity
@@ -44,8 +44,6 @@ func (h *ClassHandler) Update(c *fiber.Ctx) error {
 
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("UpdateClass success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

@@ -1,9 +1,9 @@
 package classes
 
 import (
-	"log"
 	"strings"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,16 +19,16 @@ import (
 // @Security ApiKeyAuth
 // @Router /classes [post]
 func (h *ClassHandler) Insert(c *fiber.Ctx) error {
-	body := new(WriteClassRequest)
+	ctx, body := c.UserContext(), new(WriteClassRequest)
 	if err := c.BodyParser(body); err != nil {
-		log.Println("InsertClass.BodyParser err: ", err)
+		logger.ErrorContext(ctx, "InsertClass.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("InsertClass request: %+v\n", body)
+	logger.InfoContext(ctx, "InsertClass request", "req", body)
 	req := &Class{WriteClassRequest: *body}
-	if err := h.repo.Insert(req); err != nil {
-		log.Println("InsertClass.Insert err: ", err)
+	if err := h.repo.Insert(ctx, req); err != nil {
+		logger.ErrorContext(ctx, "InsertClass.Insert err", "err", err)
 
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			return fiber.ErrUnprocessableEntity
@@ -36,8 +36,6 @@ func (h *ClassHandler) Insert(c *fiber.Ctx) error {
 
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("InsertClass success. Response: %+v\n", body)
 
 	return c.JSON(req)
 }

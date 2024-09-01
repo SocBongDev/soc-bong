@@ -1,8 +1,7 @@
 package classes
 
 import (
-	"log"
-
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -17,14 +16,15 @@ import (
 // @Security ApiKeyAuth
 // @Router /classes [get]
 func (h *ClassHandler) Find(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	roles, ok := c.Locals("role").([]string)
 	userId, _ := c.Locals("userId").(string)
 	query := &ClassQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindClasses.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "FindClasses.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
-	log.Printf("FindClasses request: %+v\n", query)
+	logger.InfoContext(ctx, "FindClasses request", "req", query)
 
 	isAdmin := false
 	isTeacher := false
@@ -46,21 +46,19 @@ func (h *ClassHandler) Find(c *fiber.Ctx) error {
 	var err error
 
 	if isAdmin {
-		data, err = h.repo.Find(query)
+		data, err = h.repo.Find(ctx, query)
 	} else if isTeacher {
 		query.TeacherId = userId
-		data, err = h.repo.Find(query)
+		data, err = h.repo.Find(ctx, query)
 	} else {
 		return fiber.ErrForbidden
 	}
 
 	if err != nil {
-		log.Println("FindClasses.All err: ", err)
+		logger.ErrorContext(ctx, "FindClasses.All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
 	resp := FindClassResp{Data: data, Page: query.GetPage()}
-	log.Printf("FindClasses success. Response: %+v\n", resp)
-
 	return c.JSON(resp)
 }
