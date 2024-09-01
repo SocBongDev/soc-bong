@@ -21,16 +21,17 @@ import (
 // @Security ApiKeyAuth
 // @Router /agencies/{id} [get]
 func (h *AgencyHandler) FindOne(c *fiber.Ctx) error {
+	ctx := c.UserContext()
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		logger.ErrorContext(c.Context(), "GetAgencyDetails.ParamsInt err", "err", err)
+		logger.ErrorContext(ctx, "GetAgencyDetails.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	logger.InfoContext(c.Context(), "GetAgencyDetails request", " id", id)
+	logger.InfoContext(ctx, "GetAgencyDetails request", " id", id)
 	resp := &Agency{BaseEntity: common.BaseEntity{Id: id}}
-	if err := h.repo.FindOne(c.Context(), resp); err != nil {
-		logger.ErrorContext(c.Context(), "GetAgencyDetails.Query err", "err", apperr.New(err))
+	if err := h.repo.FindOne(ctx, resp); err != nil {
+		logger.ErrorContext(ctx, "GetAgencyDetails.Query err", "err", apperr.New(err))
 		if err == sql.ErrNoRows {
 			return fiber.ErrNotFound
 		}
@@ -38,6 +39,5 @@ func (h *AgencyHandler) FindOne(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	logger.DebugContext(c.Context(), "GetAgencyDetails success", "resp", resp)
 	return c.JSON(resp)
 }
