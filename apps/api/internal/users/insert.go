@@ -94,13 +94,12 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 
 func (h *UserHandler) createAuth0User(ctx context.Context, user *User, password string) (map[string]interface{}, error) {
 	auth0User := map[string]any{
-		"email": user.Email,
-		// "given_name":   user.FirstName,
-		// "family_name":  user.LastName,
-		// "name":         user.FirstName + " " + user.LastName,
-		"connection": "Username-Password-Authentication",
-		"password":   password,
-		// "verify_email": user.VerifyEmail,
+		"email":       user.Email,
+		"given_name":  user.FirstName,
+		"family_name": user.LastName,
+		"name":        user.FirstName + " " + user.LastName,
+		"connection":  "Username-Password-Authentication",
+		"password":    password,
 	}
 
 	payload, err := json.Marshal(auth0User)
