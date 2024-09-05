@@ -38,7 +38,7 @@ func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendance
 		return e.file.WriteToBuffer()
 	}
 
-	if err := e.writeFormulas(classAttendances); err != nil {
+	if err := e.writeFormulas(classAttendances, month, year); err != nil {
 		logger.Error("ExportClassAttendances.writeFormulas err", "err", err)
 		return e.file.WriteToBuffer()
 	}
@@ -58,10 +58,13 @@ func (e *ExcelGenerator) setupTemplate() error {
 }
 
 func (e *ExcelGenerator) writeStudentData(classAttendances map[int]entities.AttendanceResponse) error {
-	for idx, v := range classAttendances {
-		rowIdx := idx + 2
+	rowIdx := 3 // Start from row 3
+	for i := 1; i <= len(classAttendances); i++ {
+		v, ok := classAttendances[i]
+		if !ok {
+			return apperr.New(fmt.Errorf("missing student data for index %d", i))
+		}
 		student := v.Student
-
 		studentData := []struct {
 			col   string
 			value interface{}
@@ -102,6 +105,8 @@ func (e *ExcelGenerator) writeStudentData(classAttendances map[int]entities.Atte
 		if err := e.file.SetCellValue(WORKSHEET, fmt.Sprintf("%s%d", genderCol, rowIdx), "x"); err != nil {
 			return apperr.New(fmt.Errorf("failed to set gender: %w", err))
 		}
+
+		rowIdx++
 	}
 	return nil
 }
@@ -134,8 +139,13 @@ func (e *ExcelGenerator) writeAttendanceData(classAttendances map[int]entities.A
 	}
 
 	// Write attendance data for each student
-	rowIdx := 3
-	for _, v := range classAttendances {
+	rowIdx := 3 // Start from row 3, matching writeStudentData
+	for i := 1; i <= len(classAttendances); i++ {
+		v, ok := classAttendances[i]
+		if !ok {
+			return apperr.New(fmt.Errorf("missing attendance data for student index %d", i))
+		}
+
 		// Create a map of attendance data for quick lookup
 		attendanceMap := make(map[int]entities.AttendEnum)
 		for _, att := range v.Attendances {
@@ -144,7 +154,6 @@ func (e *ExcelGenerator) writeAttendanceData(classAttendances map[int]entities.A
 
 		for day := 1; day <= totalDays; day++ {
 			cell, _ := excelize.CoordinatesToCellName(dateColIdx+day-1, rowIdx)
-
 			if status, exists := attendanceMap[day]; exists {
 				if err := e.file.SetCellValue(WORKSHEET, cell, int(status)); err != nil {
 					return apperr.New(fmt.Errorf("set attendance status error: %w", err))
@@ -158,11 +167,10 @@ func (e *ExcelGenerator) writeAttendanceData(classAttendances map[int]entities.A
 		}
 		rowIdx++
 	}
-
 	return nil
 }
 
-func (e *ExcelGenerator) writeFormulas(classAttendances map[int]entities.AttendanceResponse) error {
+func (e *ExcelGenerator) writeFormulas(classAttendances map[int]entities.AttendanceResponse, month, year int) error {
 	rowCount := len(classAttendances)
 
 	// First formula: Tăng ca
@@ -174,7 +182,7 @@ func (e *ExcelGenerator) writeFormulas(classAttendances map[int]entities.Attenda
 		return apperr.New(fmt.Errorf("failed to merge cells for overtime: %w", err))
 	}
 
-	if err := e.file.SetCellValue(WORKSHEET, topLeftCell, fmt.Sprintf("Tăng ca T%02d/%d", time.Now().Month(), time.Now().Year())); err != nil {
+	if err := e.file.SetCellValue(WORKSHEET, topLeftCell, fmt.Sprintf("Tăng ca T%02d/%d", month, year)); err != nil {
 		return apperr.New(fmt.Errorf("failed to set overtime cell value: %w", err))
 	}
 
@@ -237,7 +245,7 @@ func (e *ExcelGenerator) writeFormulas(classAttendances map[int]entities.Attenda
 	if err := e.mergeCell(topLeftCell, bottomRightCell); err != nil {
 		return apperr.New(fmt.Errorf("failed to merge cells for payments: %w", err))
 	}
-	if err := e.file.SetCellValue(WORKSHEET, topLeftCell, fmt.Sprintf("CÁC KHOẢN PHẢI THU T%02d/%d", time.Now().Month(), time.Now().Year())); err != nil {
+	if err := e.file.SetCellValue(WORKSHEET, topLeftCell, fmt.Sprintf("CÁC KHOẢN PHẢI THU T%02d/%d", month, year)); err != nil {
 		return apperr.New(fmt.Errorf("failed to set payments cell value: %w", err))
 	}
 
@@ -329,7 +337,7 @@ func (e *ExcelGenerator) writeFormulas(classAttendances map[int]entities.Attenda
 		return apperr.New(fmt.Errorf("failed to set total cell value: %w", err))
 	}
 
-	if err := e.file.SetCellValue(WORKSHEET, collectCell, fmt.Sprintf("THU T%02d", time.Now().Month())); err != nil {
+	if err := e.file.SetCellValue(WORKSHEET, collectCell, fmt.Sprintf("THU T%02d", month)); err != nil {
 		return apperr.New(fmt.Errorf("failed to set collection month cell value: %w", err))
 	}
 
