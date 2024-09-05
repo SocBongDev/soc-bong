@@ -90,7 +90,7 @@ func (a *App) ApiV1(api fiber.Router) {
 	excel := spreadsheet.New()
 
 	publicEndpoints := map[string][9]string{
-		"/api/v1/agencies": {""},
+		"/api/v1/agencies": {fiber.MethodGet},
 	}
 	skipJWTOption := func(c *fiber.Ctx) bool {
 		val := publicEndpoints[c.Path()]
