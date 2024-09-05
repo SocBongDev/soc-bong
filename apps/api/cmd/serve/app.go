@@ -88,17 +88,17 @@ func (a *App) ApiV1(api fiber.Router) {
 	)
 	excel := spreadsheet.New()
 
-	publicHandlers := []common.APIHandler{
+	publicEndpoints := map[string]*struct{}{
+		"/api/v1/agencies": {},
+	}
+	skipJWTOption := func(c *fiber.Ctx) bool {
+		return publicEndpoints[c.Path()] != nil
+	}
+	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain, middlewares.WithNext(skipJWTOption)))
+
+	handlers := []common.APIHandler{
 		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 		registrations.New(registrationRepo),
-		agencies.New(agencyRepo),
-	}
-	publicGroup := v1.Group("/public")
-	a.RegisterAPIHandlers(publicGroup, publicHandlers)
-
-	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain))
-
-	privateHandlers := []common.APIHandler{
 		agencies.New(agencyRepo),
 		attendances.New(attendanceRepo, classRepo, excel, studentRepo, spreadsheet.NewExcelGenerator()),
 		classes.New(classRepo),
@@ -107,7 +107,7 @@ func (a *App) ApiV1(api fiber.Router) {
 		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 		roles.New(roleRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 	}
-	a.RegisterAPIHandlers(v1, privateHandlers)
+	a.RegisterAPIHandlers(v1, handlers)
 }
 
 func (a *App) AttachMiddlewares() {

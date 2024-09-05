@@ -56,14 +56,14 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 		return err
 	}
 
-	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp)
+	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp.Data)
 	if err != nil {
 		logger.ErrorContext(ctx, "f.WriteToBuffer err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
 	c.Set("Content-Type", "application/octet-stream")
-	c.Set("Content-Disposition", fmt.Sprintf("attachment; filename=Workbook-%d-.xlsx", id))
+	c.Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s-%d-%d.xlsx", attendanceResp.Class.Name, month, year))
 	c.Set("Content-Transfer-Encoding", "binary")
 	c.Set("Expires", "0")
 	return c.SendStream(buf)
