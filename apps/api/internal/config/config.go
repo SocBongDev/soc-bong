@@ -32,6 +32,7 @@ type Config struct {
 	ClientOriginUrl string `env:"CLIENT_ORIGIN_URL" env-default:"http://localhost:5173" json:"client_origin_url"`
 	Env             string `env:"ENV" env-default:"dev" json:"env"`
 	Port            int    `env:"PORT" env-default:"5000" json:"port"`
+	OtelEndpoint    string `env:"OTEL_ENDPOINT" env-default:"localhost:4318" json:"otel_endpoint"`
 }
 
 func (c *Config) LogValue() slog.Value {

@@ -446,7 +446,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "name": "ids",
                         "in": "query"
                     },
@@ -470,7 +470,7 @@ const docTemplate = `{
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "name": "sortBy",
                         "in": "query"
                     },
@@ -773,7 +773,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Registration IDs",
                         "name": "ids",
                         "in": "query",
@@ -1280,7 +1280,7 @@ const docTemplate = `{
                         "items": {
                             "type": "integer"
                         },
-                        "collectionFormat": "csv",
+                        "collectionFormat": "multi",
                         "description": "Student IDs",
                         "name": "ids",
                         "in": "query",

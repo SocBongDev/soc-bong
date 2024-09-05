@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/logger"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -22,7 +23,7 @@ var (
 )
 
 func init() {
-	otlpEndpoint = os.Getenv("OTLP_ENDPOINT")
+	otlpEndpoint = config.GetConfig().OtelEndpoint
 	if otlpEndpoint == "" {
 		logger.Error("You MUST set OTLP_ENDPOINT env variable!")
 		panic("You MUST set OTLP_ENDPOINT env variable!")
