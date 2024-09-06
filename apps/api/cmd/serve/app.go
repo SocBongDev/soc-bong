@@ -2,6 +2,7 @@ package serve
 
 import (
 	"context"
+	"slices"
 
 	_ "github.com/SocBongDev/soc-bong/docs"
 	"github.com/SocBongDev/soc-bong/internal/agencies"
@@ -88,24 +89,37 @@ func (a *App) ApiV1(api fiber.Router) {
 	)
 	excel := spreadsheet.New()
 
-	publicEndpoints := map[string]*struct{}{
-		"/api/v1/agencies": {},
+	publicEndpoints := map[string][9]string{
+		"/api/v1/agencies": {fiber.MethodGet},
 	}
 	skipJWTOption := func(c *fiber.Ctx) bool {
-		return publicEndpoints[c.Path()] != nil
+		val := publicEndpoints[c.Path()]
+		return slices.Contains(val[:], c.Method())
 	}
-	v1.Use(middlewares.ValidateJWT(a.config.Audience, a.config.Domain, middlewares.WithNext(skipJWTOption)))
+	v1.Use(
+		middlewares.ValidateJWT(
+			a.config.Audience,
+			a.config.Domain,
+			middlewares.WithNext(skipJWTOption),
+		),
+	)
 
 	handlers := []common.APIHandler{
-		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
-		registrations.New(registrationRepo),
 		agencies.New(agencyRepo),
-		attendances.New(attendanceRepo, classRepo, excel, studentRepo, spreadsheet.NewExcelGenerator()),
+		attendances.New(
+			attendanceRepo,
+			classRepo,
+			excel,
+			studentRepo,
+			spreadsheet.NewExcelGenerator(),
+		),
 		classes.New(classRepo),
 		registrations.New(registrationRepo),
+		registrations.New(registrationRepo),
+		roles.New(roleRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 		students.New(studentRepo),
 		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
-		roles.New(roleRepo, a.config, a.config.ClientId, a.config.ClientSecret),
+		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 	}
 	a.RegisterAPIHandlers(v1, handlers)
 }

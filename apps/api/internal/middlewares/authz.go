@@ -3,10 +3,10 @@ package middlewares
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"slices"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 	"github.com/gofiber/fiber/v2"
@@ -64,32 +64,9 @@ func WriteJSON(rw http.ResponseWriter, status int, data interface{}) error {
 	return nil
 }
 
-func ServerError(rw http.ResponseWriter, err error) {
-	errorMessage := ErrorMessage{Message: internalServerErrorMessage}
-	werr := WriteJSON(rw, http.StatusInternalServerError, errorMessage)
-	if werr != nil {
-		log.Println("Error writing error message: ", werr.Error())
-	}
-	log.Print("Internal error server: ", err.Error())
-}
-
 func ValidatePermissions(expectedClaims []string) fiber.Handler {
-	// return func(c *fiber.Ctx) error {
-	// 	token := c.Locals(jwtmiddleware.ContextKey{}).(*validator.ValidatedClaims)
-	// 	claims := token.CustomClaims.(*CustomClaims)
-	// 	if !claims.HasPermissions(expectedClaims) {
-	// 		errorMessage := ErrorMessage{Message: permissionDeniedErrorMessage}
-	// 		if err := c.Status(http.StatusForbidden).JSON(errorMessage); err != nil {
-	// 			log.Printf("Failed to write error message: %v", err)
-	// 		}
-	// 		return nil
-	// 	}
-	// 	c.Locals("role", token.RegisteredClaims.Role)
-	// 	c.Locals("userId", token.RegisteredClaims.Subject)
-	// 	return c.Next()
-	// }
-
 	return func(c *fiber.Ctx) error {
+		ctx := c.UserContext()
 		token, ok := c.Locals(jwtmiddleware.ContextKey{}).(*EnhancedValidatedClaims)
 		if !ok {
 			return c.Status(http.StatusUnauthorized).JSON(ErrorMessage{Message: "Invalid token"})
@@ -98,7 +75,7 @@ func ValidatePermissions(expectedClaims []string) fiber.Handler {
 		if !claims.HasPermissions(expectedClaims) {
 			errorMessage := ErrorMessage{Message: permissionDeniedErrorMessage}
 			if err := c.Status(http.StatusForbidden).JSON(errorMessage); err != nil {
-				log.Printf("Failed to write error message: %v", err)
+				logger.ErrorContext(ctx, "Failed to write error message", "err", err)
 			}
 			return nil
 		}
