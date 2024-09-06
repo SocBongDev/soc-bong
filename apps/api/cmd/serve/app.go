@@ -105,8 +105,6 @@ func (a *App) ApiV1(api fiber.Router) {
 	)
 
 	handlers := []common.APIHandler{
-		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
-		registrations.New(registrationRepo),
 		agencies.New(agencyRepo),
 		attendances.New(
 			attendanceRepo,
@@ -117,9 +115,11 @@ func (a *App) ApiV1(api fiber.Router) {
 		),
 		classes.New(classRepo),
 		registrations.New(registrationRepo),
+		registrations.New(registrationRepo),
+		roles.New(roleRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 		students.New(studentRepo),
 		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
-		roles.New(roleRepo, a.config, a.config.ClientId, a.config.ClientSecret),
+		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
 	}
 	a.RegisterAPIHandlers(v1, handlers)
 }
