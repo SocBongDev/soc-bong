@@ -21,22 +21,13 @@ func GetGlobalLogger() Logger {
 
 // SetGlobalLogger allows changing the global logger after initialization if needed
 func SetGlobalLogger(loggerType LoggerType, options ...Option) {
-	var logger Logger
-	// _err   error
-
 	env, ok := os.LookupEnv("ENV")
 	if !ok {
 		env = "dev"
 	}
 
+	logger := initDefaultLogger(env)
 	switch loggerType {
-	case Default:
-		logLevel := slog.LevelDebug
-		if env == "prod" {
-			logLevel = slog.LevelInfo
-		}
-
-		logger = NewSlogLogger(WithLevel(logLevel))
 	/* case File:
 		logger, err = NewFileLogger("app.log")
 		if err != nil {
@@ -49,10 +40,19 @@ func SetGlobalLogger(loggerType LoggerType, options ...Option) {
 			Error("SetCompositeLogger err", "err", apperr.New(err))
 			return
 		} */
+	case Default:
 	default:
-		logger = NewSlogLogger()
 	}
 	globalLogger.Store(logger)
+}
+
+func initDefaultLogger(env string) *SlogLogger {
+	logLevel := slog.LevelDebug
+	if env == "prod" {
+		logLevel = slog.LevelInfo
+	}
+
+	return NewSlogLogger("soc-bong", WithLevel(logLevel))
 }
 
 // Global logger methods for convenience

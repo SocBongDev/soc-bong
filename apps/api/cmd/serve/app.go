@@ -26,15 +26,13 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
 	"github.com/pocketbase/dbx"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 type App struct {
-	app    *fiber.App
-	config *config.Config
-	db     *dbx.DB
-	exp    sdktrace.SpanExporter
-	tp     *sdktrace.TracerProvider
+	app        *fiber.App
+	config     *config.Config
+	db         *dbx.DB
+	otelConfig otel.OtelConfig
 }
 
 func NewApp(ctx context.Context, cfg *config.Config) (*App, error) {
@@ -43,12 +41,12 @@ func NewApp(ctx context.Context, cfg *config.Config) (*App, error) {
 		return nil, err
 	}
 
-	tp, exp, err := otel.New(ctx)
+	otelCfg, err := otel.New(ctx)
 	if err != nil {
 		logger.ErrorContext(ctx, "otel.New err", "err", err)
 		return nil, err
 	}
-	app := &App{fiber.New(), cfg, db, exp, tp}
+	app := &App{fiber.New(), cfg, db, otelCfg}
 
 	app.AttachMiddlewares()
 	app.SetupRoutes()
@@ -152,13 +150,10 @@ func (a *App) App() *fiber.App {
 
 func (a *App) Cleanup(ctx context.Context) {
 	if err := a.db.Close(); err != nil {
-		logger.Error("App.Cleanup err: ", err)
+		logger.ErrorContext(ctx, "App.Cleanup Db err: ", err)
 	}
-	if err := a.exp.Shutdown(ctx); err != nil {
-		logger.ErrorContext(ctx, "exp.Shutdown err", "err", err)
-	}
-	if err := a.tp.Shutdown(ctx); err != nil {
-		logger.ErrorContext(ctx, "tp.Shutdown err", "err", err)
+	if err := a.otelConfig.Shutdown(ctx); err != nil {
+		logger.ErrorContext(ctx, "App.Cleanup Otel err: ", err)
 	}
 }
 
