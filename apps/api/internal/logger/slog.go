@@ -18,28 +18,12 @@ const (
 type (
 	SlogLogger struct{}
 	ctxKey     string
-	Option     func(*slog.HandlerOptions)
 	stackFrame struct {
 		Func   string `json:"func"`
 		Source string `json:"source"`
 		Line   int    `json:"line"`
 	}
-	ContextHandler struct {
-		slog.Handler
-	}
 )
-
-// Handle adds contextual attributes to the Record before calling the underlying
-// handler
-func (h ContextHandler) Handle(ctx context.Context, r slog.Record) error {
-	if attrs, ok := ctx.Value(slogFields).([]slog.Attr); ok {
-		for _, v := range attrs {
-			r.AddAttrs(v)
-		}
-	}
-
-	return h.Handler.Handle(ctx, r)
-}
 
 // AppendCtx adds an slog attribute to the provided context so that it will be
 // included in any Record created with such context
@@ -56,12 +40,6 @@ func AppendCtx(parent context.Context, attr slog.Attr) context.Context {
 	v := []slog.Attr{}
 	v = append(v, attr)
 	return context.WithValue(parent, slogFields, v)
-}
-
-func WithLevel(level slog.Level) Option {
-	return func(otps *slog.HandlerOptions) {
-		otps.Level = level
-	}
 }
 
 func replaceAttr(_ []string, a slog.Attr) slog.Attr {
@@ -123,16 +101,9 @@ func fmtErr(err error) slog.Value {
 	return slog.GroupValue(groupValues...)
 }
 
-func NewSlogLogger(options ...Option) *SlogLogger {
-	defaultOptions := &slog.HandlerOptions{
-		ReplaceAttr: replaceAttr,
-		AddSource:   true,
-	}
-	for _, opt := range options {
-		opt(defaultOptions)
-	}
-
-	h := &ContextHandler{slog.NewJSONHandler(os.Stdout, defaultOptions)}
+func NewSlogLogger(name string, options ...Option) *SlogLogger {
+	cfg := newConfig(options)
+	h := &ContextHandler{Handler: slog.NewJSONHandler(os.Stdout, cfg.HandlerOptions), logger: cfg.logger(name)}
 	slog.SetDefault(slog.New(h))
 	return &SlogLogger{}
 }
