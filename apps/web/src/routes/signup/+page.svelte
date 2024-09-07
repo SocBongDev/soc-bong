@@ -148,7 +148,7 @@
 
 			const bodyReq = JSON.stringify(body)
 
-			const request = fetch(`${PUBLIC_API_SERVER_URL}/public/sign-up`, {
+			const request = fetch(`${PUBLIC_API_SERVER_URL}/sign-up`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
