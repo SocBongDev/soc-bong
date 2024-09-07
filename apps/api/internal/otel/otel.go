@@ -7,9 +7,12 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/logger"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/log/global"
 	"go.opentelemetry.io/otel/propagation"
+	sdklog "go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/resource"
 	oteltrace "go.opentelemetry.io/otel/sdk/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -17,10 +20,40 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+type (
+	OtelConfig interface {
+		Shutdown(context.Context) error
+	}
+	otelConfig struct {
+		logExp  *otlploghttp.Exporter
+		lp      *sdklog.LoggerProvider
+		spanExp oteltrace.SpanExporter
+		tp      *sdktrace.TracerProvider
+	}
+)
+
 var (
 	tracer       trace.Tracer
 	otlpEndpoint string
+	_            OtelConfig = (*otelConfig)(nil)
 )
+
+func (o *otelConfig) Shutdown(ctx context.Context) error {
+	if err := o.logExp.Shutdown(ctx); err != nil {
+		return err
+	}
+	if err := o.lp.Shutdown(ctx); err != nil {
+		return err
+	}
+	if err := o.spanExp.Shutdown(ctx); err != nil {
+		return err
+	}
+	if err := o.tp.Shutdown(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func init() {
 	otlpEndpoint = config.GetConfig().OtelEndpoint
@@ -30,7 +63,7 @@ func init() {
 	}
 }
 
-func newExporter(ctx context.Context) (oteltrace.SpanExporter, error) {
+func newTraceExporter(ctx context.Context) (oteltrace.SpanExporter, error) {
 	// Change default HTTPS -> HTTP
 	insecureOpt := otlptracehttp.WithInsecure()
 
@@ -63,15 +96,49 @@ func newTraceProvider(exp sdktrace.SpanExporter) *sdktrace.TracerProvider {
 	)
 }
 
-func New(ctx context.Context) (*sdktrace.TracerProvider, oteltrace.SpanExporter, error) {
-	exp, err := newExporter(ctx)
+func newLogExporter(ctx context.Context) *otlploghttp.Exporter {
+	logExporter, err := otlploghttp.New(
+		ctx,
+		otlploghttp.WithEndpoint(otlpEndpoint),
+		otlploghttp.WithInsecure(),
+	)
 	if err != nil {
-		return nil, nil, err
+		panic("failed to initialize exporter")
 	}
 
-	tp := newTraceProvider(exp)
+	return logExporter
+}
+
+func newLogProvider(exp sdklog.Exporter) *sdklog.LoggerProvider {
+	// Ensure default SDK resources and the required service name are set.
+	r, err := resource.Merge(
+		resource.Default(),
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName("soc-bong"),
+		),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	return sdklog.NewLoggerProvider(
+		sdklog.WithProcessor(sdklog.NewBatchProcessor(exp)),
+		sdklog.WithResource(r),
+	)
+}
+
+func New(ctx context.Context) (*otelConfig, error) {
+	spanExp, err := newTraceExporter(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	logExp := newLogExporter(ctx)
+	tp, lp := newTraceProvider(spanExp), newLogProvider(logExp)
 
 	otel.SetTracerProvider(tp)
+	global.SetLoggerProvider(lp)
 
 	otel.SetTextMapPropagator(
 		propagation.NewCompositeTextMapPropagator(
@@ -81,7 +148,7 @@ func New(ctx context.Context) (*sdktrace.TracerProvider, oteltrace.SpanExporter,
 	)
 
 	tracer = tp.Tracer("soc-bong")
-	return tp, exp, nil
+	return &otelConfig{logExp, lp, spanExp, tp}, nil
 }
 
 func TracerStart(ctx context.Context, spanName string, otps ...trace.SpanStartOption) (context.Context, trace.Span) {
