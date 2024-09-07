@@ -1,14 +1,14 @@
 package middlewares
 
 import (
-	"context"
 	"errors"
+	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
@@ -40,7 +40,7 @@ func ValidateJWT(audience, domain string, opts ...JWTMiddlewareOption) fiber.Han
 		opt(config)
 	}
 
-	issuerURL, err := url.Parse("https://" + config.Domain + "/")
+	issuerURL, err := url.Parse(fmt.Sprintf("https://%s/", config.Domain))
 	if err != nil {
 		log.Fatalf("Failed to parse the issuer url: %v", err)
 	}
@@ -61,6 +61,7 @@ func ValidateJWT(audience, domain string, opts ...JWTMiddlewareOption) fiber.Han
 	}
 
 	return func(c *fiber.Ctx) error {
+		ctx := c.UserContext()
 		if config.Next != nil && config.Next(c) {
 			return c.Next()
 		}
@@ -77,8 +78,14 @@ func ValidateJWT(audience, domain string, opts ...JWTMiddlewareOption) fiber.Han
 
 		token, err := jwtValidator.ValidateToken(c.Context(), tokenString)
 		if err != nil {
-			log.Printf("Encountered error while validating JWT: %v", err)
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": invalidJWTErrorMessage})
+			logger.ErrorContext(ctx, "Encountered error while validating JWT", "err", err)
+			if errors.Is(err, jwtmiddleware.ErrJWTMissing) {
+				return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": missingJWTErrorMessage})
+			}
+			if errors.Is(err, jwtmiddleware.ErrJWTInvalid) {
+				return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": invalidJWTErrorMessage})
+			}
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Internal server error"})
 		}
 
 		validatedClaims, ok := token.(*validator.ValidatedClaims)
@@ -94,93 +101,8 @@ func ValidateJWT(audience, domain string, opts ...JWTMiddlewareOption) fiber.Han
 			enhancedClaims.Role = customClaims.UserRoles
 		}
 
-		c.Locals("user", enhancedClaims)
+		c.Locals(jwtmiddleware.ContextKey{}, enhancedClaims)
 
 		return c.Next()
 	}
-}
-
-func validateJWT(config *JWTMiddlewareConfig, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		audience, domain := config.Audience, config.Domain
-		// if config.Next != nil && config.Next(adaptor.)
-
-		issuerURL, err := url.Parse("https://" + domain + "/")
-		if err != nil {
-			log.Fatalf("Failed to parse the issuer url: %v", err)
-		}
-
-		provider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
-
-		jwtValidator, err := validator.New(
-			provider.KeyFunc,
-			validator.RS256,
-			issuerURL.String(),
-			[]string{audience},
-			validator.WithCustomClaims(func() validator.CustomClaims {
-				return new(CustomClaims)
-			}),
-		)
-		if err != nil {
-			log.Fatalf("Failed to set up the jwt validator")
-		}
-
-		if authHeaderParts := strings.Fields(r.Header.Get("Authorization")); len(
-			authHeaderParts,
-		) > 0 &&
-			strings.ToLower(authHeaderParts[0]) != "bearer" {
-			errorMessage := ErrorMessage{Message: invalidJWTErrorMessage}
-			if err := WriteJSON(w, http.StatusUnauthorized, errorMessage); err != nil {
-				log.Printf("Failed to write error message: %v", err)
-			}
-			return
-		}
-
-		errorHandler := func(w http.ResponseWriter, r *http.Request, err error) {
-			log.Printf("Encountered error while validating JWT: %v", err)
-			if errors.Is(err, jwtmiddleware.ErrJWTMissing) {
-				errorMessage := ErrorMessage{Message: missingJWTErrorMessage}
-				if err := WriteJSON(w, http.StatusUnauthorized, errorMessage); err != nil {
-					log.Printf("Failed to write error message: %v", err)
-				}
-				return
-			}
-			if errors.Is(err, jwtmiddleware.ErrJWTInvalid) {
-				errorMessage := ErrorMessage{Message: invalidJWTErrorMessage}
-				if err := WriteJSON(w, http.StatusUnauthorized, errorMessage); err != nil {
-					log.Printf("Failed to write error message: %v", err)
-				}
-				return
-			}
-			ServerError(w, err)
-		}
-
-		middleware := jwtmiddleware.New(
-			func(ctx context.Context, tokenString string) (interface{}, error) {
-				token, err := jwtValidator.ValidateToken(ctx, tokenString)
-				if err != nil {
-					return nil, err
-				}
-
-				validatedClaims, ok := token.(*validator.ValidatedClaims)
-
-				if !ok {
-					return nil, errors.New("invalid token claims")
-				}
-
-				enhancedClaims := &EnhancedValidatedClaims{
-					ValidatedClaims: validatedClaims,
-				}
-
-				// Extract role from token code
-				if customClaims, ok := validatedClaims.CustomClaims.(*CustomClaims); ok {
-					enhancedClaims.Role = customClaims.UserRoles
-				}
-				return enhancedClaims, nil
-			},
-			jwtmiddleware.WithErrorHandler(errorHandler),
-		)
-
-		middleware.CheckJWT(next).ServeHTTP(w, r)
-	})
 }

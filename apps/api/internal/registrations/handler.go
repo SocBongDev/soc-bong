@@ -34,7 +34,6 @@ func (h *RegistrationHandler) RegisterRoute(group fiber.Router) {
 	)
 	r.Post(
 		"/",
-		// middlewares.ValidatePermissions([]string{"create:registrations"}),
 		h.Insert,
 	)
 	r.Put(
