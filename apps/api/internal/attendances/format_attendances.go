@@ -25,6 +25,11 @@ func (h *AttendanceHandler) formatAttendances(ctx context.Context, query *Attend
 
 	classChan, classErrChan := make(chan *classes.Class, 1), make(chan error, 1)
 	go func() {
+		defer func() {
+			close(classChan)
+			close(classErrChan)
+		}()
+
 		class := &classes.Class{BaseEntity: common.BaseEntity{Id: query.ClassId}}
 		if err := h.classRepo.FindOne(ctx, class); err != nil {
 			classErrChan <- err
@@ -62,11 +67,16 @@ func (h *AttendanceHandler) formatAttendances(ctx context.Context, query *Attend
 	}
 
 	// Find students concurrently
-	studentsChan, errChan := make(chan []entities.Student), make(chan error)
+	studentsChan, studentsErrChan := make(chan []entities.Student), make(chan error)
 	go func() {
+		defer func() {
+			close(studentsChan)
+			close(studentsErrChan)
+		}()
+
 		students, err := h.studentRepo.Find(ctx, &students.StudentQuery{Ids: studentIds})
 		if err != nil {
-			errChan <- err
+			studentsErrChan <- err
 			return
 		}
 		studentsChan <- students
@@ -74,7 +84,7 @@ func (h *AttendanceHandler) formatAttendances(ctx context.Context, query *Attend
 
 	// Wait for student finding to complete
 	select {
-	case err := <-errChan:
+	case err := <-studentsErrChan:
 		logger.ErrorContext(ctx, "FindAttendances.studentRepo.Find err", "err", err)
 		return nil, err
 	case students := <-studentsChan:
