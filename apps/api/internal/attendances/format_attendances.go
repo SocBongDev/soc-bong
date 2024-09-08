@@ -12,8 +12,8 @@ import (
 )
 
 type ClassAttendances struct {
-	Data  map[int]entities.AttendanceResponse
-	Class *classes.Class
+	Data  map[int]entities.AttendanceResponse `json:"data"`
+	Class *classes.Class                      `json:"class"`
 }
 
 func (h *AttendanceHandler) formatAttendances(ctx context.Context, query *AttendanceQuery) (*ClassAttendances, error) {
