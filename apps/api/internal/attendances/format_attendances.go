@@ -2,7 +2,6 @@ package attendances
 
 import (
 	"context"
-	"sync"
 
 	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
@@ -24,22 +23,18 @@ func (h *AttendanceHandler) formatAttendances(ctx context.Context, query *Attend
 		return nil, fiber.ErrInternalServerError
 	}
 
-	var (
-		wg       sync.WaitGroup
-		class    *classes.Class
-		classErr error
-	)
-
-	wg.Add(1)
+	classChan, classErrChan := make(chan *classes.Class, 1), make(chan error, 1)
 	go func() {
-		defer wg.Done()
-		class = &classes.Class{BaseEntity: common.BaseEntity{Id: query.ClassId}}
-		classErr = h.classRepo.FindOne(ctx, class)
+		class := &classes.Class{BaseEntity: common.BaseEntity{Id: query.ClassId}}
+		if err := h.classRepo.FindOne(ctx, class); err != nil {
+			classErrChan <- err
+			return
+		}
+
+		classChan <- class
 	}()
 
-	attendancesData := make(map[int]entities.AttendanceResponse)
-	studentIds := make([]int, 0)
-
+	attendancesData, studentIds := make(map[int]entities.AttendanceResponse), make([]int, 0)
 	// Process attendance data
 	for _, a := range data {
 		attendanceResp, ok := attendancesData[a.StudentId]
@@ -52,10 +47,11 @@ func (h *AttendanceHandler) formatAttendances(ctx context.Context, query *Attend
 		attendancesData[a.StudentId] = attendanceResp
 	}
 
-	// Wait for class finding to complete
-	wg.Wait()
-	if classErr != nil {
-		logger.ErrorContext(ctx, "FindAttendances.FindOne err", "err", classErr, "id", query.ClassId)
+	class := &classes.Class{}
+	select {
+	case class = <-classChan:
+	case err := <-classErrChan:
+		logger.ErrorContext(ctx, "FindAttendances.FindOne err", "err", err, "id", query.ClassId)
 		return nil, fiber.ErrInternalServerError
 	}
 
