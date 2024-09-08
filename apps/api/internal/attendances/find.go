@@ -31,5 +31,5 @@ func (h *AttendanceHandler) Find(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(resp)
+	return c.JSON(resp.Data)
 }
