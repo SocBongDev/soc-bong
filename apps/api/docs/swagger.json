@@ -1959,6 +1959,9 @@
         "registrations.Registration": {
             "type": "object",
             "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -2001,6 +2004,9 @@
         "registrations.WriteRegistrationRequest": {
             "type": "object",
             "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
                 "note": {
                     "type": "string"
                 },
