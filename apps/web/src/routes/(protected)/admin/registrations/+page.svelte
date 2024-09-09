@@ -34,17 +34,25 @@
 		setInitialValues(initialValues)
 		reset()
 	}
-
 	const token = localStorage.getItem('access_token')
-
+	
+	
+	var agencyOptions = data?.agencies?.data?.map((el) => ({
+		label: el.name,
+		value: el.id ? el.id.toString() : '1'
+	}))
+	
 	const defaultFormValues = {
 		studentClass: 'seed',
 		studentName: '',
 		phoneNumber: '',
 		studentDob: '',
 		parentName: '',
+		agencyId: parseInt(agencyOptions[0]?.value || '1'),
 		note: undefined
 	}
+
+
 	const registrationSchema: {
 		name: string
 		type: 'text' | 'date' | 'select'
@@ -86,13 +94,13 @@
 			name: 'note',
 			type: 'text',
 			required: false
+		},
+		{
+			name: 'agencyId',
+			type: 'select',
+			required: true,
+			options: agencyOptions
 		}
-		// {
-		// 	name: 'agencyId',
-		// 	type: 'select',
-		// 	required: true,
-		// 	options: agencyOptions
-		// }
 	]
 	const studentClassMap = {
 		seed: 'Lớp mầm',
@@ -120,6 +128,13 @@
 			default:
 				return 'N/A'
 		}
+	}
+
+	function formatAgencyName(agencyId: number) {
+		const agency = data.agencies.data.find(
+			(el) => (el.id && parseInt(el.id?.toString())) === agencyId
+		)
+		return agency?.name || 'N/A'
 	}
 
 	let prevPromise: Promise<void>
@@ -414,6 +429,7 @@
 						<th>Ngày sinh</th>
 						<th>Tên phụ huynh</th>
 						<th>Số điện thoại</th>
+						<th>Cơ sở</th>
 						<th>Ghi chú</th>
 						<th>
 							<button class="btn btn-square btn-ghost btn-sm active:!translate-y-1">
@@ -446,6 +462,7 @@
 								>
 								<td on:click={() => show(registration.id)}>{registration.parentName}</td>
 								<td on:click={() => show(registration.id)}>{registration.phoneNumber}</td>
+								<td on:click={() => show(registration.id)}>{formatAgencyName(registration.agencyId)}</td>
 								{#if registration.note === null}
 									<td on:click={() => show(registration.id)} />
 								{:else}
