@@ -36,6 +36,7 @@ func (r *registrationRepo) Find(ctx context.Context, query *RegistrationQuery) (
 				dbx.Like("parent_name", query.Search),
 				dbx.Like("student_name", query.Search),
 				dbx.Like("phone_number", query.Search),
+				dbx.Like("agency_id", query.Search),
 			),
 		)
 	}

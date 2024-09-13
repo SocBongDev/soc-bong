@@ -16,6 +16,7 @@ type WriteRegistrationRequest struct {
 	StudentClass string          `json:"studentClass" enums:"buds,seed,leaf, toddler"`
 	StudentDob   common.DateTime `json:"studentDob"                          swaggertype:"string"`
 	StudentName  string          `json:"studentName"`
+	AgencyId     int             `json:"agencyId"`
 }
 
 type RegistrationQuery struct {

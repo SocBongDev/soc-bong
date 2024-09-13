@@ -8,7 +8,8 @@ export type RegistrationProps = {
     studentClass: string,
     studentDob: string,
     studentName: string,
-    updatedAt?: string
+    updatedAt?: string,
+    agencyId: number,
 }
 
 

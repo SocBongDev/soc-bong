@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     student_dob DATE NOT NULL,
     student_name TEXT NOT NULL,
 
+    agency_id INTEGER NOT NULL,
     UNIQUE(parent_name, phone_number, student_class, student_dob, student_name)
 );
 

@@ -1966,6 +1966,9 @@ const docTemplate = `{
         "registrations.Registration": {
             "type": "object",
             "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -2008,6 +2011,9 @@ const docTemplate = `{
         "registrations.WriteRegistrationRequest": {
             "type": "object",
             "properties": {
+                "agencyId": {
+                    "type": "integer"
+                },
                 "note": {
                     "type": "string"
                 },

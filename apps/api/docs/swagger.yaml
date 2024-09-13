@@ -267,6 +267,8 @@ definitions:
     type: object
   registrations.Registration:
     properties:
+      agencyId:
+        type: integer
       createdAt:
         type: string
       id:
@@ -301,6 +303,8 @@ definitions:
     type: object
   registrations.WriteRegistrationRequest:
     properties:
+      agencyId:
+        type: integer
       note:
         type: string
       parentName:
