@@ -47,3 +47,21 @@ export const dialogProps = writable<DialogProps | undefined>(undefined)
 export const openDialog = writable(false)
 
 export const statusChange = writable<Array<AttendedStatus>>([])
+
+
+interface ISidebarContext {
+	collapseMenu: boolean;
+	setCollapseMenu: (v: boolean) => void;
+}
+
+export const collapseMenu = writable(false)
+
+export const SidebarContext = writable<ISidebarContext>({
+	collapseMenu: false,
+	setCollapseMenu: (v) => {
+		SidebarContext.update((context) => ({
+			...context,
+			collapseMenu: v,
+		}));
+	}
+})
