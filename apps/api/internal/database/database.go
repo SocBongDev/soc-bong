@@ -1,8 +1,9 @@
 package database
 
 import (
+	"log"
+
 	"github.com/SocBongDev/soc-bong/internal/config"
-	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/pocketbase/dbx"
 	"go.nhat.io/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
@@ -26,7 +27,7 @@ func New(cfg *config.DatabaseSecret) (*dbx.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.LogFunc = logger.Info
+	db.LogFunc = log.Printf
 
 	return db, nil
 }

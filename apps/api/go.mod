@@ -18,10 +18,14 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240409095100-b3f915fbd79c
 	go.nhat.io/otelsql v0.13.0
+	go.opentelemetry.io/contrib/bridges/otelslog v0.4.0
 	go.opentelemetry.io/otel v1.29.0
+	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.5.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.29.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.24.0
+	go.opentelemetry.io/otel/log v0.5.0
 	go.opentelemetry.io/otel/sdk v1.29.0
+	go.opentelemetry.io/otel/sdk/log v0.5.0
 	go.opentelemetry.io/otel/trace v1.29.0
 )
 

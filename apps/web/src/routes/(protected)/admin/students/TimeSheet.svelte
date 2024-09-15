@@ -29,6 +29,7 @@
 	export let data: PageData
 	let classId = get(classIdStore) || 1
 	let studentList: StudentProps[] = data.students.data ?? []
+
 	let attendances: any = data.attendances.Data ?? []
 	const studentIds =
 		studentList && studentList.map((student: any) => student.id).sort((a: any, b: any) => b - a)
