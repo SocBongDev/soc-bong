@@ -392,7 +392,7 @@
 													<ClickDropdown
 														data={attendance}
 														date={date.day.toString()}
-														studentId={student?.id}
+														studentId={student?.id?.toString()}
 														classId={classId.toString()}
 														{monthPicked}
 														{yearPicked}
@@ -407,7 +407,7 @@
 											<ClickDropdown
 												data={null}
 												date={date.day.toString()}
-												studentId={student?.id}
+												studentId={student?.id?.toString()}
 												classId={classId.toString()}
 												{monthPicked}
 												{yearPicked}
