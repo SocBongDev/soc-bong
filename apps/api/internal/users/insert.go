@@ -34,15 +34,15 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	logger.InfoContext(ctx, "User request", "req", input)
+	logger.InfoContext(ctx, "InsertUser request", "req", input)
 	pwd := password{}
 	hash, err := pwd.Set(input.Password)
 	if err != nil {
-		logger.ErrorContext(ctx, "Password hashing err", "err", err)
+		logger.ErrorContext(ctx, "InsertUser.PasswordHashing err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
-	logger.InfoContext(ctx, "User password hash", "req", hash)
+	logger.InfoContext(ctx, "InsertUser.PasswordAfterHash", "req", hash)
 	req := &User{UserInput: UserInput{
 		Email:       input.Email,
 		FirstName:   input.FirstName,
@@ -95,28 +95,27 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 
 func (h *UserHandler) createAuth0User(ctx context.Context, user *User, password string) (map[string]interface{}, error) {
 	auth0User := map[string]any{
-		"email": user.Email,
-		// "given_name":   user.FirstName,
-		// "family_name":  user.LastName,
-		// "name":         user.FirstName + " " + user.LastName,
-		"connection": "Username-Password-Authentication",
-		"password":   password,
-		// "verify_email": user.VerifyEmail,
+		"email":       user.Email,
+		"given_name":  user.FirstName,
+		"family_name": user.LastName,
+		"name":        user.FirstName + " " + user.LastName,
+		"connection":  "Username-Password-Authentication",
+		"password":    password,
 	}
 
 	payload, err := json.Marshal(auth0User)
 	if err != nil {
-		logger.ErrorContext(ctx, "createAuth0User Marshal err", "err", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User Marshal err", "err", err)
 		return nil, err
 	}
 
 	var js json.RawMessage
 	if err := json.Unmarshal(payload, &js); err != nil {
-		logger.ErrorContext(ctx, "createAuth0User Unmarshal err", "err", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User Unmarshal err", "err", err)
 		return nil, fmt.Errorf("invalid JSON payload: %v", err)
 	}
 
-	logger.InfoContext(ctx, "createAuth0User Validated Auth0 request payload", "payload", string(payload))
+	logger.InfoContext(ctx, "InsertUser.CreateAuth0User Validated Auth0 request payload", "payload", string(payload))
 	auth0Domain := h.config.Domain
 	if !strings.HasPrefix(auth0Domain, "https://") {
 		auth0Domain = "https://" + auth0Domain
@@ -129,14 +128,14 @@ func (h *UserHandler) createAuth0User(ctx context.Context, user *User, password 
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
-		logger.ErrorContext(ctx, "NewRequest err", "err", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User req err", "err", err)
 		return nil, err
 	}
 
 	// Get token using the token manager
 	token, err := h.tokenManager.GetToken()
 	if err != nil {
-		logger.ErrorContext(ctx, "GetToken err", "err", err)
+		logger.ErrorContext(ctx, "InsertUser.GetManagementAPIToken err", "err", err)
 		return nil, err
 	}
 	// Set up the request
@@ -144,7 +143,7 @@ func (h *UserHandler) createAuth0User(ctx context.Context, user *User, password 
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	logger.InfoContext(ctx, "createAuth0User Auth0 request", "URL", fmt.Sprintf("%sapi/v2/users", auth0Domain), "payload", string(payload))
+	logger.InfoContext(ctx, "InsertUser.CreateAuth0User Auth0 request", "URL", fmt.Sprintf("%sapi/v2/users", auth0Domain), "payload", string(payload))
 	// HTTP client with timeout
 	client := &http.Client{
 		Timeout: time.Second * 30, // appropriate timeout
@@ -152,7 +151,7 @@ func (h *UserHandler) createAuth0User(ctx context.Context, user *User, password 
 
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.ErrorContext(ctx, "createAuth0User client.Do err", "err", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User client.Do err", "err", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -160,7 +159,7 @@ func (h *UserHandler) createAuth0User(ctx context.Context, user *User, password 
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		logger.ErrorContext(ctx, "createAuth0User ReadAll err", "err", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User ReadAll err", "err", err)
 		return nil, err
 	}
 
@@ -172,10 +171,10 @@ func (h *UserHandler) createAuth0User(ctx context.Context, user *User, password 
 			Message    string `json:"message"`
 		}
 		if err := json.Unmarshal(body, &errorResponse); err != nil {
-			logger.ErrorContext(ctx, "createAuth0User Unmarshal err", "err", err)
+			logger.ErrorContext(ctx, "InsertUser.CreateAuth0User Unmarshal Response err", "err", err)
 			return nil, fmt.Errorf("failed to create Auth0 user. Status: %d, Body: %s", resp.StatusCode, string(body))
 		}
-		logger.ErrorContext(ctx, "Auth0 error: %+v", errorResponse)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User error: %+v", errorResponse)
 		return nil, fmt.Errorf("failed to create Auth0 user: %s", errorResponse.Message)
 	}
 
