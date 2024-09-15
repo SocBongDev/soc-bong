@@ -2,6 +2,7 @@ package roles
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -25,26 +27,24 @@ import (
 // @Security ApiKeyAuth
 // @Router /roles [post]
 func (h *RoleHandler) Insert(c *fiber.Ctx) error {
-	body := new(WriteRoleRequest)
+	ctx, body := c.UserContext(), new(WriteRoleRequest)
 	if err := c.BodyParser(body); err != nil {
 		log.Println("InsertRole.BodyParser err: ", err)
 		return fiber.ErrBadRequest
 	}
-
-	log.Printf("InsertRole request: %+v\n", body)
+	logger.InfoContext(ctx, "InsertRole request", "req", body)
 	req := &Role{WriteRoleRequest: *body}
-	role, err := h.createRole(req)
+	role, err := h.createRole(ctx, req)
 	if err != nil {
-		log.Println("Auth0 role creation error: ", err)
+		logger.ErrorContext(ctx, "InsertRole.CreateAuth0Role err", "err", err)
 		return fiber.ErrConflict
 	}
 
-	log.Printf("create role successfully: %+v\n", role)
-
+	logger.InfoContext(ctx, "InsertRole.CreateAuth0Role Success Response", "res", role)
 	return c.JSON(role)
 }
 
-func (h *RoleHandler) createRole(role *Role) (map[string]interface{}, error) {
+func (h *RoleHandler) createRole(ctx context.Context, role *Role) (map[string]interface{}, error) {
 	auth0Role := map[string]interface{}{
 		"name":        role.Name,
 		"description": role.Description,
@@ -52,18 +52,18 @@ func (h *RoleHandler) createRole(role *Role) (map[string]interface{}, error) {
 
 	payload, err := json.Marshal(auth0Role)
 	if err != nil {
-		log.Printf("error marshaling Auth0 role data: %+v\n", err)
+		logger.ErrorContext(ctx, "InsertRole.CreateAuth0Role Marshal err", "err", err)
 		return nil, err
 	}
 
 	var js json.RawMessage
 
 	if err := json.Unmarshal(payload, &js); err != nil {
-		log.Printf("Invalid JSON payload %+v\n", err)
+		logger.ErrorContext(ctx, "InsertRole.CreateAuth0Role Unmarshal err", "err", err)
 		return nil, fmt.Errorf("invalid JSON payload: %v", err)
 	}
 
-	log.Printf("Validated Auth0 request payload: %s", string(payload))
+	logger.InfoContext(ctx, "InsertRole.CreateAuth0Role Validated Auth0 request payload", "payload", string(payload))
 
 	auth0Domain := h.config.Domain
 	if !strings.HasPrefix(auth0Domain, "https://") {
@@ -78,14 +78,14 @@ func (h *RoleHandler) createRole(role *Role) (map[string]interface{}, error) {
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 
 	if err != nil {
-		log.Printf("Error creating request: %v", err)
+		logger.ErrorContext(ctx, "InsertRole.CreateAuth0Role req err", "err", err)
 		return nil, err
 	}
 
 	//Get token using the token manager
 	token, err := h.tokenManager.GetToken()
 	if err != nil {
-		log.Printf("err getting Auth0 token: %v", err)
+		logger.ErrorContext(ctx, "InsertRole.GetManagementAPIToken err", "err", err)
 		return nil, err
 	}
 	// Set up the request
@@ -93,8 +93,7 @@ func (h *RoleHandler) createRole(role *Role) (map[string]interface{}, error) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	log.Printf("Auth0 request URL: %s", auth0Domain+"api/v2/users")
-	log.Printf("Auth0 request payload: %s", string(payload))
+	logger.InfoContext(ctx, "InsertRole.CreateAuth0Role Auth0 request", "URL", fmt.Sprintf("%sapi/v2/roles", auth0Domain), "payload", string(payload))
 
 	//HTTP client with timeout
 	client := &http.Client{
@@ -103,7 +102,7 @@ func (h *RoleHandler) createRole(role *Role) (map[string]interface{}, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error sending request: %v", err)
+		logger.ErrorContext(ctx, "InsertRole.CreateAuth0Role client.Do err", "err", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -111,12 +110,9 @@ func (h *RoleHandler) createRole(role *Role) (map[string]interface{}, error) {
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error reading response body: %v", err)
+		logger.ErrorContext(ctx, "InsertRole.CreateAuth0Role ReadAll err", "err", err)
 		return nil, err
 	}
-
-	fmt.Printf("Auth0 response status code: %d\n", resp.StatusCode)
-	fmt.Printf("Auth0 response body: %s\n", string(body))
 
 	// Check the response
 	if resp.StatusCode != 201 && resp.StatusCode != 200 && resp.StatusCode != 204 {
@@ -126,10 +122,10 @@ func (h *RoleHandler) createRole(role *Role) (map[string]interface{}, error) {
 			Message    string `json:"message"`
 		}
 		if err := json.Unmarshal(body, &errorResponse); err != nil {
-			log.Printf("Failed to parse error response: %v", err)
+			logger.ErrorContext(ctx, "InsertRole.CreateAuth0Role Unmarshal Response err", "err", err)
 			return nil, fmt.Errorf("failed to create Auth0 role. Status: %d, Body: %s", resp.StatusCode, string(body))
 		}
-		log.Printf("Auth0 error: %+v", errorResponse)
+		logger.ErrorContext(ctx, "InsertRole.CreateAuth0Role error: %+v", errorResponse)
 		return nil, fmt.Errorf("failed to create Auth0 role: %s", errorResponse.Message)
 	}
 
