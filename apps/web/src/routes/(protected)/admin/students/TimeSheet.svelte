@@ -11,6 +11,7 @@
 	import type { AttendedStatus } from '$lib/store'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	import { get } from 'svelte/store'
+	import type { StudentProps } from '$lib/common/type'
 	let inputValue: string = dayjs().format('YYYY-MM') || '07-2024'
 	let yearPicked: number = parseInt(inputValue.split('-')[0], 10)
 	let monthPicked: number = parseInt(inputValue.split('-')[1], 10)
@@ -27,7 +28,7 @@
 
 	export let data: PageData
 	let classId = get(classIdStore) || 1
-	let studentList: any = data.students.data ?? []
+	let studentList: StudentProps[] = data.students.data ?? []
 	let attendances: any = data.attendances.Data ?? []
 	const studentIds =
 		studentList && studentList.map((student: any) => student.id).sort((a: any, b: any) => b - a)
