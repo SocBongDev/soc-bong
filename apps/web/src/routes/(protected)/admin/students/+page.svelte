@@ -28,8 +28,8 @@
 	let checked: boolean
 	let loading = false
 	let abortController: AbortController | undefined = undefined
-	let studentListComponent: StudentList;
-	let attendancesComponent: TimeSheet;
+	let studentListComponent: StudentList
+	let attendancesComponent: TimeSheet
 	const token = localStorage.getItem('access_token')
 	$: isNew = !recordData
 	$: if (recordData !== null) {
@@ -354,7 +354,7 @@
 			await refreshData()
 			resetDefaultForm()
 			Notify({
-				type: "success",
+				type: 'success',
 				id: crypto.randomUUID(),
 				description: isNew ? 'Tạo học sinh thành công!' : 'Cập nhật học sinh thành công!'
 			})
@@ -373,11 +373,11 @@
 	]
 
 	async function refreshData() {
-		invalidate("app:students")
+		invalidate('app:students')
 		if (studentListComponent) {
-			studentListComponent.refreshStudentList();
+			studentListComponent.refreshStudentList()
 		} else if (attendancesComponent) {
-			attendancesComponent.refreshStudentAttendances();
+			attendancesComponent.refreshStudentAttendances()
 		}
 	}
 
@@ -490,6 +490,7 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div class="drawer drawer-end h-full">
 	<input
 		id="my-drawer"
@@ -552,14 +553,14 @@
 
 		<div class="mt-4">
 			{#if activeTabValue === 0}
-				<TimeSheet {data} bind:this={attendancesComponent}/>
+				<TimeSheet {data} bind:this={attendancesComponent} />
 			{:else if activeTabValue === 1}
-				<StudentList {data} onClick={(id) => show(id)} bind:this={studentListComponent}/>
+				<StudentList {data} onClick={(id) => show(id)} bind:this={studentListComponent} />
 			{/if}
 		</div>
 	</div>
 
-	<div class="drawer-side z-10 place-items-center">
+	<div class="drawer-side z-10 place-items-center h-full">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}

@@ -123,7 +123,7 @@
 			last_name: req.last_name,
 			phone_number: req.phone_number,
 			dob: req.dob,
-			connection: 'Username-Password-Authentication',
+			connection: 'Username-Password-Authentication'
 		}
 		const bodyFormated = JSON.stringify(body)
 		const method = isNew ? 'POST' : 'PUT'
@@ -160,7 +160,7 @@
 			refreshData()
 			resetDefaultForm()
 			Notify({
-				type: "success",
+				type: 'success',
 				id: crypto.randomUUID(),
 				description: isNew ? 'Tạo người dùng thành công!' : 'Cập nhật thành công!'
 			})
@@ -445,7 +445,7 @@
 		</div>
 	</div>
 
-	<div class="drawer-side z-10 place-items-center">
+	<div class="drawer-side z-10 place-items-center h-full">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}

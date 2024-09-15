@@ -505,7 +505,7 @@
 			{/if}
 		</div>
 	</div>
-	<div class="drawer-side z-10 place-items-center">
+	<div class="drawer-side z-10 place-items-center h-full">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}
