@@ -59,33 +59,32 @@ func (h *UserHandler) Insert(c *fiber.Ctx) error {
 
 	v := common.New()
 	if ValidateUser(v, req); !v.Valid() {
-		logger.ErrorContext(ctx, "Validate User error. Response", "req", v)
+		logger.ErrorContext(ctx, "InsertUser.Validate.User error.", "err", v)
 		return fiber.ErrBadRequest
 	}
 
-	if err := h.repo.Insert(ctx, req); err != nil {
-		logger.ErrorContext(ctx, "User insertion err", "err", err)
-		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-			return fiber.ErrUnprocessableEntity
-		}
-		return fiber.ErrInternalServerError
-	}
-
 	// Create user in Auth0
-
 	auth0User, err := h.createAuth0User(ctx, req, input.Password)
 	if err != nil {
-		logger.ErrorContext(ctx, "Auth0 user creation err", "err", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User err", "err", err)
 		// delete user in database if createAuth0User error
-		return fiber.ErrInternalServerError
+		return fiber.ErrConflict
 	}
-
 	auth0UserID, ok := auth0User["user_id"].(string)
-	if !ok {
-		logger.ErrorContext(ctx, "Failed to get Auth0 user ID from response")
-		return fiber.ErrInternalServerError
-	}
 
+	if !ok {
+		logger.ErrorContext(ctx, "InsertUser.FailedGetAuth0UserID err")
+		return fiber.ErrInternalServerError
+	} else {
+		req.Auth0UserId = auth0UserID
+		if err := h.repo.Insert(ctx, req); err != nil {
+			logger.ErrorContext(ctx, "InsertUser.Insert err", "err", err)
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
+				return fiber.ErrUnprocessableEntity
+			}
+			return fiber.ErrInternalServerError
+		}
+	}
 	// Respond with success
 	return c.JSON(fiber.Map{
 		"user":          auth0User,
