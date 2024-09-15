@@ -1,9 +1,8 @@
 package users
 
 import (
-	"log"
-
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,22 +20,22 @@ import (
 func (h *UserHandler) Update(c *fiber.Ctx) error {
 	ctx, body := c.UserContext(), new(UserInput)
 	if err := c.BodyParser(body); err != nil {
-		log.Println("UpdateUser.BodyParser err: ", err)
+		logger.ErrorContext(ctx, "UpdateUser.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		log.Println("UpdateUser.ParamsInt err: ", err)
+		logger.ErrorContext(ctx, "UpdateUser.ParamsInt err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("UpdateRegistration request: %+v\n", body)
+	logger.InfoContext(ctx, "UpdateUser.Request Body request", "req", body)
 	req := &User{UserInput: *body, BaseEntity: common.BaseEntity{Id: id}}
 	if err := h.repo.Update(ctx, req); err != nil {
-		log.Println("UpdateRegistration.Update err: ", err)
+		logger.ErrorContext(ctx, "UpdateUser.Update err", "err", err)
 		return fiber.ErrInternalServerError
 	}
-
+	logger.InfoContext(ctx, "UpdateUser.Update Success Response", "req", req)
 	return c.JSON(req)
 }
