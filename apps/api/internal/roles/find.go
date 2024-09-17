@@ -1,15 +1,16 @@
 package roles
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -27,26 +28,25 @@ import (
 // @Security ApiKeyAuth
 // @Router /roles [get]
 func (h *RoleHandler) Find(c *fiber.Ctx) error {
-	query := &RoleQuery{}
+	ctx, query := c.UserContext(), &RoleQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindRole.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "FindRole.QueryParser err: ", err)
 		return fiber.ErrBadRequest
 	}
+	logger.InfoContext(ctx, "FindRoles request", "req", query)
 
-	log.Printf("FindRoles request: %+v\n", query)
-
-	data, err := h.findRole(query)
+	data, err := h.findRole(ctx, query)
 	if err != nil {
-		log.Println("FindRole.All err: ", err)
+		logger.ErrorContext(ctx, "FindRole.All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
 	resp := FindRoleResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
-	log.Printf("FindRoles success. Response: %+v\n", resp)
+	logger.InfoContext(ctx, "FindRoles.Success Response", "res", resp)
 	return c.JSON(resp)
 }
 
-func (h *RoleHandler) findRole(query *RoleQuery) ([]Role, error) {
+func (h *RoleHandler) findRole(ctx context.Context, query *RoleQuery) ([]Role, error) {
 	auth0Domain := h.config.Domain
 	if !strings.HasPrefix(auth0Domain, "https://") {
 		auth0Domain = "https://" + auth0Domain
@@ -56,9 +56,10 @@ func (h *RoleHandler) findRole(query *RoleQuery) ([]Role, error) {
 	}
 
 	url := auth0Domain + "api/v2/roles"
+	logger.InfoContext(ctx, "FindRoles.FindAuth0Roles url", "req", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Printf("Error get request: %+v\n", err)
+		logger.ErrorContext(ctx, "FindRoles.FindAuth0Roles req err", "err", err)
 		return nil, err
 	}
 
@@ -77,17 +78,13 @@ func (h *RoleHandler) findRole(query *RoleQuery) ([]Role, error) {
 
 	token, err := h.tokenManager.GetToken()
 	if err != nil {
-		log.Printf("err getting Auth0 token: %v", err)
+		logger.ErrorContext(ctx, "FindRoles.GetManageMentAPIToken err", "err", err)
 		return nil, err
 	}
 
-	log.Printf("check token: %+v\n", token)
-
 	req.Header.Set("Content-Type", "application/json charset=utf-8")
-	// req.Header.Set("Accept", "application/json")
+	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
-
-	log.Printf("Auth0 request URL: %s", auth0Domain+"api/v2/roles")
 
 	//HTTP client with timeout
 	client := &http.Client{
@@ -96,11 +93,10 @@ func (h *RoleHandler) findRole(query *RoleQuery) ([]Role, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error sending request: %v", err)
+		logger.ErrorContext(ctx, "FindRoles.FindAuth0Roles client.Do err", "err", err)
 		return nil, err
 	}
 
-	log.Printf("check this resp: %+v\n", resp)
 	defer resp.Body.Close()
 
 	// Check the status code
@@ -108,7 +104,7 @@ func (h *RoleHandler) findRole(query *RoleQuery) ([]Role, error) {
 		// Read the error response
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Printf("Error reading response body: %v", err)
+			logger.ErrorContext(ctx, "FindRoles.FindAuth0Roles ReadAll Body err", "err", err)
 			return nil, err
 		}
 
@@ -121,26 +117,25 @@ func (h *RoleHandler) findRole(query *RoleQuery) ([]Role, error) {
 		}
 		err = json.Unmarshal(body, &errorResp)
 		if err != nil {
-			log.Printf("Error parsing error response: %v", err)
+			logger.ErrorContext(ctx, "FindRoles.FindAuth0Roles Unmarshal Response err", "err", err)
 			return nil, err
 		}
-
+		logger.ErrorContext(ctx, "FindRoles.FindAuth0Roles error", "err", errorResp)
 		// Return the error
 		return nil, fmt.Errorf("Auth0 API error: [%d] %s: %s", errorResp.StatusCode, errorResp.Error, errorResp.Message)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error reading response body: %v", err)
+		logger.ErrorContext(ctx, "FindRoles.FindAuth0Roles ReadAll Body err", "err", err)
 		return nil, err
 	}
-
-	log.Printf("Check body after get Roles from Auth0: %+v\n", body)
 
 	// Parse the JSON response
 	var roles []Role
 	err = json.Unmarshal(body, &roles)
 	if err != nil {
+		logger.ErrorContext(ctx, "FindRoles.FindAuth0Roles Unmarshal Response err", "err", err)
 		return nil, err
 	}
 

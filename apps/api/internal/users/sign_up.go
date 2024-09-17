@@ -2,6 +2,7 @@ package users
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -29,20 +31,20 @@ func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 	ctx, input := c.UserContext(), new(UserInput)
 
 	if err := c.BodyParser(&input); err != nil {
-		log.Println("InsertUser.BodyParser err: ", err)
+		logger.ErrorContext(ctx, "InsertUser.BodyParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("User request: %+v\n", input)
+	logger.InfoContext(ctx, "InsertUser request", "req", input)
 
 	pwd := password{}
 	hash, err := pwd.Set(input.Password)
 	if err != nil {
-		log.Println("Password hashing error: ", err)
+		logger.ErrorContext(ctx, "InsertUser.PasswordHashing err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
-	log.Printf("User password hash: %+v\n", hash)
+	logger.InfoContext(ctx, "InsertUser.PasswordAfterHash", "req", hash)
 
 	req := &User{UserInput: UserInput{
 		Email:     input.Email,
@@ -61,30 +63,28 @@ func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 
 	v := common.New()
 	if ValidateUser(v, req); !v.Valid() {
-		log.Printf("Validate User error. Response: %+v\n", v)
+		logger.ErrorContext(ctx, "InsertUser.Validate.User error.", "err", v)
 		return fiber.ErrBadRequest
 	}
 
 	// Create user in Auth0
 
-	auth0User, err := h.createSignUpAuth0User(req, input.Password)
+	auth0User, err := h.createSignUpAuth0User(ctx, req, input.Password)
 	if err != nil {
-		log.Println("Auth0 user creation error: ", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User err", "err", err)
 		// delete user in database if createAuth0User error
 		return fiber.ErrConflict
 	}
 
 	auth0UserID, ok := auth0User["user_id"].(string)
-	log.Printf("auth0UserID: %+v\n", auth0UserID)
 
 	if !ok {
-		log.Println("Failed to get Auth0 user ID from response")
+		logger.ErrorContext(ctx, "InsertUser.FailedGetAuth0UserID err")
 		return fiber.ErrBadRequest
 	} else {
 		req.Auth0UserId = auth0UserID
-		log.Printf("check this req Insert: %+v\n", req)
 		if err := h.repo.Insert(ctx, req); err != nil {
-			log.Println("User insertion error: ", err)
+			logger.ErrorContext(ctx, "InsertUser.Insert err", "err", err)
 			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				return fiber.ErrUnprocessableEntity
 			}
@@ -99,7 +99,7 @@ func (h *UserHandler) SignUp(c *fiber.Ctx) error {
 	}
 }
 
-func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[string]interface{}, error) {
+func (h *UserHandler) createSignUpAuth0User(ctx context.Context, user *User, password string) (map[string]interface{}, error) {
 	auth0User := map[string]interface{}{
 		"email":       user.Email,
 		"given_name":  user.FirstName,
@@ -117,11 +117,11 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 
 	var js json.RawMessage
 	if err := json.Unmarshal(payload, &js); err != nil {
-		log.Printf("Invalid JSON payload %+v\n", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User Unmarshal err", "err", err)
 		return nil, fmt.Errorf("invalid JSON payload: %v", err)
 	}
 
-	log.Printf("Validated Auth0 request payload: %s", string(payload))
+	logger.InfoContext(ctx, "InsertUser.CreateAuth0User Validated Auth0 request payload", "payload", string(payload))
 
 	auth0Domain := h.config.Domain
 	if !strings.HasPrefix(auth0Domain, "https://") {
@@ -135,14 +135,14 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
 	if err != nil {
-		log.Printf("Error creating request: %v", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User req err", "err", err)
 		return nil, err
 	}
 
 	// Get token using the token manager
 	token, err := h.tokenManager.GetToken()
 	if err != nil {
-		log.Printf("err getting Auth0 token: %v", err)
+		logger.ErrorContext(ctx, "InsertUser.GetManagementAPIToken err", "err", err)
 		return nil, err
 	}
 	// Set up the request
@@ -150,8 +150,7 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	log.Printf("Auth0 request URL: %s", auth0Domain+"api/v2/users")
-	log.Printf("Auth0 request payload: %s", string(payload))
+	logger.InfoContext(ctx, "InsertUser.CreateAuth0User Auth0 request", "URL", fmt.Sprintf("%sapi/v2/users", auth0Domain), "payload", string(payload))
 
 	// HTTP client with timeout
 	client := &http.Client{
@@ -160,7 +159,7 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error sending request: %v", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User client.Do err", "err", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
@@ -168,12 +167,9 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error reading response body: %v", err)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User ReadAll err", "err", err)
 		return nil, err
 	}
-
-	fmt.Printf("Auth0 response status code: %d\n", resp.StatusCode)
-	fmt.Printf("Auth0 response body: %s\n", string(body))
 
 	// Check the response
 	if resp.StatusCode != 201 && resp.StatusCode != 200 && resp.StatusCode != 204 {
@@ -183,10 +179,10 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 			Message    string `json:"message"`
 		}
 		if err := json.Unmarshal(body, &errorResponse); err != nil {
-			log.Printf("Failed to parse error response: %v", err)
+			logger.ErrorContext(ctx, "InsertUser.CreateAuth0User Unmarshal Response err", "err", err)
 			return nil, fmt.Errorf("failed to create Auth0 user. Status: %d, Body: %s", resp.StatusCode, string(body))
 		}
-		log.Printf("Auth0 error: %+v", errorResponse)
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User error: %+v", errorResponse)
 		return nil, fmt.Errorf("failed to create Auth0 user: %s", errorResponse.Message)
 	}
 
@@ -197,6 +193,7 @@ func (h *UserHandler) createSignUpAuth0User(user *User, password string) (map[st
 	}
 
 	if createdUser == nil {
+		logger.ErrorContext(ctx, "InsertUser.CreateAuth0User no user created in Auth0 response")
 		return nil, fmt.Errorf("no user created in Auth0 response")
 	}
 

@@ -103,12 +103,12 @@
 		},
 		{
 			name: 'password',
-			type: 'text' || 'password',
+			type: 'password',
 			required: true
 		},
 		{
 			name: 'confirmPassword',
-			type: 'text' || 'password',
+			type: 'password',
 			required: true
 		}
 	]
@@ -224,12 +224,10 @@
 		>
 			<form class="grid grid-cols-1 gap-4 text-sm" id="signupForm" use:form>
 				{#each userSchema as { type, name, required, options } (name)}
-					{#if type === 'text' || type === 'password'}
-						{#if name == 'password' || name == 'confirmPassword'}
-							<PasswordField error={$errors[name]} {name} {required} bind:value={formData[name]} />
-						{:else}
-							<TextField error={$errors[name]} {name} {required} />
-						{/if}
+					{#if type === 'text'}
+						<TextField error={$errors[name]} {name} {required} />
+					{:else if type == 'password'}
+						<PasswordField error={$errors[name]} {name} {required} bind:value={formData[name]} />
 					{:else if type === 'select'}
 						<SelectField error={$errors[name]} {name} {options} {required} />
 					{:else if type === 'date'}

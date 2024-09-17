@@ -1,15 +1,16 @@
 package roles
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,31 +25,27 @@ import (
 // @Security ApiKeyAuth
 // @Router /roles/{id} [get]
 func (h *RoleHandler) FindOne(c *fiber.Ctx) error {
-	id := c.Params("id")
+	ctx, id := c.UserContext(), c.Params("id")
 	if id == "" {
-		log.Println("GetRoleDetails.Param empty")
+		logger.ErrorContext(ctx, "GetRoleDetails.Param err", "err")
 		return fiber.ErrBadRequest
 	}
+	logger.InfoContext(ctx, "GetRoleDetails request", "id", id)
 
-	log.Println("GetRoleDetails id: ", id)
-
-	resp, err := h.findOneRole(id)
+	resp, err := h.findOneRole(ctx, id)
 
 	if err != nil {
-		log.Println("GetRoleDetails err: ", err)
+		logger.ErrorContext(ctx, "GetRoleDetails.Query err", "err", err)
 		if err == sql.ErrNoRows {
 			return fiber.ErrNotFound
 		}
 		return fiber.ErrInternalServerError
 	}
-
-	log.Printf("GetRoleDetails success. Response: %+v\n", resp)
-
+	logger.InfoContext(ctx, "GetRoleDetails.Success Response", "resp", resp)
 	return c.JSON(resp)
-
 }
 
-func (h *RoleHandler) findOneRole(id string) (*Role, error) {
+func (h *RoleHandler) findOneRole(ctx context.Context, id string) (*Role, error) {
 	auth0Domain := h.config.Domain
 	if !strings.HasPrefix(auth0Domain, "https://") {
 		auth0Domain = "https://" + auth0Domain
@@ -60,23 +57,20 @@ func (h *RoleHandler) findOneRole(id string) (*Role, error) {
 	url := auth0Domain + "api/v2/roles/" + id
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Printf("Error get request: %+v\n", err)
+		logger.ErrorContext(ctx, "GetRoleDetails.Auth0RoleDetails err", "err", err)
 		return nil, err
 	}
 
 	token, err := h.tokenManager.GetToken()
 	if err != nil {
-		log.Printf("err getting Auth0 token: %v", err)
+		logger.ErrorContext(ctx, "GetRoleDetails.GetManagementAPIToken err", "err", err)
 		return nil, err
 	}
 
-	log.Printf("check token: %+v\n", token)
-
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	// req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	log.Printf("Auth0 request URL: %s", auth0Domain+"api/v2/roles/:id")
+	logger.InfoContext(ctx, "GetRoleDetails.Auth0RoleDetails Auth0 request", "URL", fmt.Sprintf("%sapi/v2/roles/:id", auth0Domain))
 
 	//HTTP client with timeout
 	client := &http.Client{
@@ -85,11 +79,10 @@ func (h *RoleHandler) findOneRole(id string) (*Role, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("Error sending request: %v", err)
+		logger.ErrorContext(ctx, "GetRoleDetails.Auth0RoleDetails client.Do err", "err", err)
 		return nil, err
 	}
 
-	log.Printf("check this resp: %+v\n", resp)
 	defer resp.Body.Close()
 
 	// Check the status code
@@ -97,7 +90,7 @@ func (h *RoleHandler) findOneRole(id string) (*Role, error) {
 		// Read the error response
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			log.Printf("Error reading response body: %v", err)
+			logger.ErrorContext(ctx, "GetRoleDetails.Auth0RoleDetails ReadAll err", "err", err)
 			return nil, err
 		}
 
@@ -110,27 +103,25 @@ func (h *RoleHandler) findOneRole(id string) (*Role, error) {
 		}
 		err = json.Unmarshal(body, &errorResp)
 		if err != nil {
-			log.Printf("Error parsing error response: %v", err)
+			logger.ErrorContext(ctx, "GetRoleDetails.Auth0RoleDetails Unmarshal Response err", "err", err)
 			return nil, err
 		}
-
+		logger.ErrorContext(ctx, "GetRoleDetails.Auth0RoleDetails error", "err", errorResp)
 		// Return the error
 		return nil, fmt.Errorf("Auth0 API error: [%d] %s: %s", errorResp.StatusCode, errorResp.Error, errorResp.Message)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Error reading response body: %v", err)
+		logger.ErrorContext(ctx, "GetRoleDetails.Auth0RoleDetails ReadAll err", "err", err)
 		return nil, err
 	}
-
-	log.Printf("Check body after get a role from Auth0: %+v\n", body)
 
 	// Parse the JSON response
 	var role Role
 	err = json.Unmarshal(body, &role)
 	if err != nil {
-		log.Println("Can't unmarshal json: ", err)
+		logger.ErrorContext(ctx, "GetRoleDetails.Auth0RoleDetails Unmarshal Response err", "err", err)
 		return nil, err
 	}
 

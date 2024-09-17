@@ -36,6 +36,7 @@ func (h *UserHandler) FindOne(c *fiber.Ctx) error {
 
 		return fiber.ErrInternalServerError
 	}
+	logger.InfoContext(ctx, "GetUserDetails.Request Success", "req", err)
 
 	return c.JSON(resp)
 }

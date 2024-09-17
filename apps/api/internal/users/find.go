@@ -22,17 +22,18 @@ import (
 func (h *UserHandler) Find(c *fiber.Ctx) error {
 	ctx, query := c.UserContext(), &UserQuery{}
 	if err := c.QueryParser(query); err != nil {
-		logger.ErrorContext(ctx, "FindUser QueryParser err", "err", err)
+		logger.ErrorContext(ctx, "FindUsers.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
 	logger.InfoContext(ctx, "FindUsers request", "req", query)
 	data, err := h.repo.Find(ctx, query)
 	if err != nil {
-		logger.ErrorContext(ctx, "FindUser All err", "err", err)
+		logger.ErrorContext(ctx, "FindUser.All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
 	resp := FindUserResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
+	logger.InfoContext(ctx, "FindUsers.Success Response", resp)
 	return c.JSON(resp)
 }

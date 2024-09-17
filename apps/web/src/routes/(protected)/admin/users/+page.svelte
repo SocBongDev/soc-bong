@@ -123,7 +123,7 @@
 			last_name: req.last_name,
 			phone_number: req.phone_number,
 			dob: req.dob,
-			connection: 'Username-Password-Authentication',
+			connection: 'Username-Password-Authentication'
 		}
 		const bodyFormated = JSON.stringify(body)
 		const method = isNew ? 'POST' : 'PUT'
@@ -160,7 +160,7 @@
 			refreshData()
 			resetDefaultForm()
 			Notify({
-				type: "success",
+				type: 'success',
 				id: crypto.randomUUID(),
 				description: isNew ? 'Tạo người dùng thành công!' : 'Cập nhật thành công!'
 			})
@@ -281,9 +281,9 @@
 		},
 		{
 			name: 'password',
-			type: 'text' || 'password',
+			type: 'password',
 			required: true,
-			disabled: true,
+			disabled: true
 		},
 		{
 			name: 'agencyId',
@@ -445,7 +445,7 @@
 		</div>
 	</div>
 
-	<div class="drawer-side z-10 place-items-center">
+	<div class="drawer-side z-10 place-items-center h-full">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}
@@ -485,27 +485,25 @@
 				class="flex-1 overflow-scroll px-7 py-6 {scrollClass}"
 				on:scroll={(e) => handleContentScroll(e.currentTarget)}
 			>
-					<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
-						{#each userSchema as { type, name, required, options, disabled } (name)}
-							{#if type === 'text' || type === 'password'}
-								{#if name == 'password' || name == 'confirmPassword'}
-									<PasswordField
-										error={$errors[name]}
-										{name}
-										{required}
-										{disabled}
-										bind:value={formData[name]}
-									/>
-								{:else}
-									<TextField error={$errors[name]} {name} {required} {disabled}/>
-								{/if}
-							{:else if type === 'select'}
-								<SelectField error={$errors[name]} {name} {options} {required} />
-							{:else if type === 'date'}
-								<DateField error={$errors[name]} {name} {required} />
-							{/if}
-						{/each}
-					</form>
+				<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
+					{#each userSchema as { type, name, required, options, disabled } (name)}
+						{#if type === 'text'}
+							<TextField error={$errors[name]} {name} {required} {disabled} />
+						{:else if type == 'password'}
+							<PasswordField
+								error={$errors[name]}
+								{name}
+								{required}
+								{disabled}
+								bind:value={formData[name]}
+							/>
+						{:else if type === 'select'}
+							<SelectField error={$errors[name]} {name} {options} {required} />
+						{:else if type === 'date'}
+							<DateField error={$errors[name]} {name} {required} />
+						{/if}
+					{/each}
+				</form>
 			</section>
 			<footer class="flex flex-shrink-0 items-center justify-end px-7 py-6">
 				<div class="flex items-center gap-5">
