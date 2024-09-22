@@ -5,10 +5,25 @@ import (
 
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/pocketbase/dbx"
+	"go.nhat.io/otelsql"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 func New(cfg *config.DatabaseSecret) (*dbx.DB, error) {
-	db, err := dbx.MustOpen("libsql", cfg.Url)
+	driverName, err := otelsql.Register(
+		"libsql",
+		otelsql.AllowRoot(),
+		otelsql.TraceQueryWithoutArgs(),
+		otelsql.TraceRowsClose(),
+		otelsql.TraceRowsAffected(),
+		// otelsql.WithDatabaseName("my_database"),        // Optional.
+		otelsql.WithSystem(semconv.DBSystemSqlite), // Optional.
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	db, err := dbx.MustOpen(driverName, cfg.GetUrl())
 	if err != nil {
 		return nil, err
 	}

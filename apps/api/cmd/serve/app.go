@@ -1,28 +1,57 @@
 package serve
 
 import (
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"github.com/SocBongDev/soc-bong/internal/config"
-	"github.com/SocBongDev/soc-bong/internal/database"
-	"github.com/SocBongDev/soc-bong/internal/middlewares"
-	"github.com/SocBongDev/soc-bong/internal/registrations"
-	"github.com/gofiber/fiber/v2"
-	"github.com/pocketbase/dbx"
+	"context"
+	"slices"
 
 	_ "github.com/SocBongDev/soc-bong/docs"
-
+	"github.com/SocBongDev/soc-bong/internal/agencies"
+	"github.com/SocBongDev/soc-bong/internal/attendances"
+	"github.com/SocBongDev/soc-bong/internal/classes"
+	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/config"
+	"github.com/SocBongDev/soc-bong/internal/database"
+	"github.com/SocBongDev/soc-bong/internal/logger"
+	"github.com/SocBongDev/soc-bong/internal/middlewares"
+	"github.com/SocBongDev/soc-bong/internal/otel"
+	"github.com/SocBongDev/soc-bong/internal/registrations"
+	"github.com/SocBongDev/soc-bong/internal/roles"
+	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
+	"github.com/SocBongDev/soc-bong/internal/students"
+	"github.com/SocBongDev/soc-bong/internal/users"
+	"github.com/gofiber/contrib/otelfiber"
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	mdwlogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/swagger"
+	"github.com/pocketbase/dbx"
 )
 
 type App struct {
-	config *config.Config
+	app        *fiber.App
+	config     *config.Config
+	db         *dbx.DB
+	otelConfig otel.OtelConfig
+}
+
+func NewApp(ctx context.Context, cfg *config.Config) (*App, error) {
+	db, err := database.New(&cfg.DatabaseSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	otelCfg, err := otel.New(ctx)
+	if err != nil {
+		logger.ErrorContext(ctx, "otel.New err", "err", err)
+		return nil, err
+	}
+	app := &App{fiber.New(), cfg, db, otelCfg}
+
+	app.AttachMiddlewares()
+	app.SetupRoutes()
+
+	return app, nil
 }
 
 func healthz(c *fiber.Ctx) error {
@@ -33,65 +62,114 @@ func index(c *fiber.Ctx) error {
 	return c.Redirect("/docs")
 }
 
-func (a *App) ApiV1(api fiber.Router, db *dbx.DB) {
-	v1 := api.Group("/v1")
-	registrationRepo := registrations.NewRepo(db)
-	registrationHandler := registrations.New(registrationRepo)
-	registrationHandler.RegisterRoute(v1)
+func (a *App) RegisterAPIHandlers(router fiber.Router, handlers []common.APIHandler) {
+	for _, handler := range handlers {
+		handler.RegisterRoute(router)
+	}
 }
 
-func (a *App) RunHttpServer() {
-	db, err := database.New(&a.config.DatabaseSecret)
+func (a *App) ApiV1(api fiber.Router) {
+	v1, db := api.Group("/v1"), a.db
+	agencyRepo, attendanceRepo, classRepo, registrationRepo, studentRepo, userRepo, roleRepo := agencies.NewRepo(
+		db,
+	), attendances.NewRepo(
+		db,
+	), classes.NewRepo(
+		db,
+	), registrations.NewRepo(
+		db,
+	), students.NewRepo(
+		db,
+	), users.NewRepo(
+		db,
+	), roles.NewRepo(
+		db,
+	)
+	excel := spreadsheet.New()
+
+	publicEndpoints := map[string][9]string{
+		"/api/v1/agencies":      {fiber.MethodGet},
+		"/api/v1/registrations": {fiber.MethodPost},
+		"/api/v1/sign-up":       {fiber.MethodPost},
+	}
+	skipJWTOption := func(c *fiber.Ctx) bool {
+		val := publicEndpoints[c.Path()]
+		return slices.Contains(val[:], c.Method())
+	}
+	v1.Use(
+		middlewares.ValidateJWT(
+			a.config.Audience,
+			a.config.Domain,
+			middlewares.WithNext(skipJWTOption),
+		),
+	)
+
+	handlers := []common.APIHandler{
+		agencies.New(agencyRepo),
+		attendances.New(
+			attendanceRepo,
+			classRepo,
+			excel,
+			studentRepo,
+			spreadsheet.NewExcelGenerator(),
+		),
+		classes.New(classRepo),
+		registrations.New(registrationRepo),
+		registrations.New(registrationRepo),
+		roles.New(roleRepo, a.config, a.config.ClientId, a.config.ClientSecret),
+		students.New(studentRepo),
+		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
+		users.New(userRepo, a.config, a.config.ClientId, a.config.ClientSecret),
+	}
+	a.RegisterAPIHandlers(v1, handlers)
+}
+
+func (a *App) AttachMiddlewares() {
+	a.app.Use(recover.New())
+	a.app.Use(mdwlogger.New())
+	a.app.Use(cors.New())
+
+	nextOtp := otelfiber.WithNext(func(c *fiber.Ctx) bool {
+		return c.Path() == "/healthz"
+	})
+	a.app.Use(otelfiber.Middleware(nextOtp))
+}
+
+func (a *App) SetupRoutes() {
+	a.app.Get("/docs/*", swagger.HandlerDefault)
+	a.app.Get("/healthz", healthz)
+	a.app.Get("/", index)
+
+	api := a.app.Group("/api")
+	a.ApiV1(api)
+}
+
+func (a *App) App() *fiber.App {
+	return a.app
+}
+
+func (a *App) Cleanup(ctx context.Context) {
+	if err := a.db.Close(); err != nil {
+		logger.ErrorContext(ctx, "App.Cleanup Db err: ", err)
+	}
+	if err := a.otelConfig.Shutdown(ctx); err != nil {
+		logger.ErrorContext(ctx, "App.Cleanup Otel err: ", err)
+	}
+}
+
+func NewServerlessApp() (*App, error) {
+	config, err := config.New()
 	if err != nil {
-		log.Panic("Error create dbx: ", err)
+		logger.Error("config.New err", "err", err)
+		return nil, err
 	}
 
-	app := fiber.New()
-	app.Use(recover.New())
-	app.Use(logger.New())
-	app.Use(cors.New())
+	ctx := context.Background()
+	app, err := NewApp(ctx, config)
+	if err != nil {
+		logger.Error("NewApp err", "err", err)
+		return nil, err
+	}
 
-	app.Get("/docs/*", swagger.HandlerDefault)
-	app.Get("/healthz", healthz)
-	app.Get("/", index)
-
-	api := app.Group("/api")
-	a.ApiV1(api, db)
-
-	app.Get(
-		"/api/messages/admin",
-		middlewares.ValidateJWT(a.config.Audience, a.config.Domain),
-		middlewares.ValidatePermissions([]string{"read:admin-messages"}),
-		func(c *fiber.Ctx) error {
-			return c.JSON(map[string]string{"message": "Lmao"})
-		},
-	)
-
-	go func() {
-		if err := app.Listen(":5000"); err != nil {
-			log.Panicln("App.Listen err: ", err)
-		}
-	}()
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(
-		c,
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
-
-	_ = <-c
-	log.Println("Gracefully shutting down...")
-	_ = app.Shutdown()
-
-	log.Println("Running cleanup tasks...")
-
-	// Your cleanup tasks go here
-	db.Close()
-	// redisConn.Close()
-	log.Println("Fiber was successful shutdown.")
-}
-
-func NewApp(cfg *config.Config) *App {
-	return &App{cfg}
+	return app, nil
 }

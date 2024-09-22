@@ -1,13 +1,9 @@
 package registrations
 
 import (
-	"log"
-
-	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/gofiber/fiber/v2"
 )
-
-type FindRegistrationResp common.FindResponse[Registration]
 
 // @FindRegistration godoc
 // @Summary Get list registration details api
@@ -20,24 +16,22 @@ type FindRegistrationResp common.FindResponse[Registration]
 // @Param  search query string false "Search term"
 // @Success 200 {object} FindRegistrationResp
 // @Failure 500 {string} string
+// @Security ApiKeyAuth
 // @Router /registrations [get]
 func (h *RegistrationHandler) Find(c *fiber.Ctx) error {
-	query := &RegistrationQuery{}
+	ctx, query := c.UserContext(), &RegistrationQuery{}
 	if err := c.QueryParser(query); err != nil {
-		log.Println("FindRegistrations.QueryParser err: ", err)
+		logger.ErrorContext(ctx, "FindRegistrations.QueryParser err", "err", err)
 		return fiber.ErrBadRequest
 	}
 
-	log.Printf("FindRegistrations request: %#v\n", query)
-
-	data, err := h.repo.Find(query)
+	logger.InfoContext(ctx, "FindRegistrations request", "req", query)
+	data, err := h.repo.Find(ctx, query)
 	if err != nil {
-		log.Println("FindRegistrations.All err: ", err)
+		logger.ErrorContext(ctx, "FindRegistrations.All err", "err", err)
 		return fiber.ErrInternalServerError
 	}
 
-	resp := FindRegistrationResp{Data: data, Page: query.GetPage()}
-	log.Printf("FindRegistrations success. Response: %#v\n", resp)
-
+	resp := FindRegistrationResp{Data: data, Page: query.GetPage(), PageSize: query.GetPageSize()}
 	return c.JSON(resp)
 }

@@ -24,6 +24,10 @@ func (this migrator) Down(steps int) error {
 	return this.m.Steps(-steps)
 }
 
+func (this migrator) Force(version int) error {
+	return this.m.Force(version)
+}
+
 func NewMigrator(cfg *config.DatabaseSecret) (Migrator, error) {
 	dbx, err := New(cfg)
 	if err != nil {

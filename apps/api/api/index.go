@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
+	"github.com/SocBongDev/soc-bong/cmd/serve"
 	"github.com/gofiber/adaptor/v2"
-	"github.com/gofiber/fiber/v2"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -15,26 +16,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 // building the fiber application
 func handler() http.HandlerFunc {
-	app := fiber.New()
+	serverApp, err := serve.NewServerlessApp()
+	if err != nil {
+		log.Panic("NewApp err: ", err)
+	}
 
-	app.Get("/v1", func(ctx *fiber.Ctx) error {
-		return ctx.JSON(fiber.Map{
-			"version": "v1",
-		})
-	})
-
-	app.Get("/v2", func(ctx *fiber.Ctx) error {
-		return ctx.JSON(fiber.Map{
-			"version": "v2",
-		})
-	})
-
-	app.Get("/", func(ctx *fiber.Ctx) error {
-		return ctx.JSON(fiber.Map{
-			"uri":  ctx.Request().URI().String(),
-			"path": ctx.Path(),
-		})
-	})
-
+	app := serverApp.App()
 	return adaptor.FiberApp(app)
 }

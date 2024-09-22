@@ -1,10 +1,9 @@
 package migrate
 
 import (
-	"log"
-
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/spf13/cobra"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
@@ -17,19 +16,19 @@ func UpCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg, err := config.New()
 			if err != nil {
-				log.Fatal("config.New err: ", err)
+				logger.Error("config.New err", "err", err)
 			}
 
 			m, err := database.NewMigrator(&cfg.DatabaseSecret)
 			if err != nil {
-				log.Fatal("database.NewMigrator err: ", err)
+				logger.Error("database.NewMigrator err", "err", err)
 			}
 
 			if err := m.Up(); err != nil {
-				log.Fatal("Up failed: ", err)
+				logger.Error("Up failed", "err", err)
 			}
 
-			log.Println("Migrate up success!")
+			logger.Info("Migrate up success!")
 		},
 	}
 

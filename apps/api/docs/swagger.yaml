@@ -1,5 +1,259 @@
 basePath: /api/v1
 definitions:
+  agencies.Agency:
+    properties:
+      address:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  agencies.FindAgencyResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/agencies.Agency'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  agencies.WriteAgencyRequest:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  attendances.AttendEnum:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-varnames:
+    - Absented
+    - Attended
+    - Excused
+    - Dayoff
+    - Holiday
+  attendances.Attendance:
+    properties:
+      attendedAt:
+        type: string
+      attendedStatus:
+        enum:
+        - absented
+        - attended
+        - excused
+        - dayoff
+        - holiday
+        type: string
+      classId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      studentId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  attendances.CreateAttendanceRequest:
+    properties:
+      attendedAt:
+        type: string
+      attendedStatus:
+        enum:
+        - absented
+        - attended
+        - excused
+        - dayoff
+        - holiday
+        type: string
+      classId:
+        type: integer
+      studentId:
+        type: integer
+    type: object
+  attendances.UpdateAttendanceRequest:
+    properties:
+      attendedStatus:
+        $ref: '#/definitions/attendances.AttendEnum'
+      id:
+        type: integer
+    type: object
+  classes.Class:
+    properties:
+      agencyId:
+        type: integer
+      createdAt:
+        type: string
+      grade:
+        description: |-
+          Grade type:
+          * buds - Children who is 3 yo.
+          * seed - Children who is 4 yo.
+          * leaf - Children who is 5 yo.
+          * toddler - Children who is lower than 2 yo.
+        enum:
+        - buds
+        - seed
+        - leaf
+        - ' toddler'
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      teacherId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  classes.FindClassResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/classes.Class'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  classes.WriteClassRequest:
+    properties:
+      agencyId:
+        type: integer
+      grade:
+        description: |-
+          Grade type:
+          * buds - Children who is 3 yo.
+          * seed - Children who is 4 yo.
+          * leaf - Children who is 5 yo.
+          * toddler - Children who is lower than 2 yo.
+        enum:
+        - buds
+        - seed
+        - leaf
+        - ' toddler'
+        type: string
+      name:
+        type: string
+      teacherId:
+        type: string
+    type: object
+  entities.Class:
+    properties:
+      agencyId:
+        type: integer
+      createdAt:
+        type: string
+      grade:
+        description: |-
+          Grade type:
+          * buds - Children who is 3 yo.
+          * seed - Children who is 4 yo.
+          * leaf - Children who is 5 yo.
+          * toddler - Children who are lower than 2 yo.
+        enum:
+        - buds
+        - seed
+        - leaf
+        - ' toddler'
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      teacherId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  entities.Student:
+    properties:
+      agencyId:
+        type: integer
+      birthPlace:
+        type: string
+      class:
+        $ref: '#/definitions/entities.Class'
+      classId:
+        type: integer
+      createdAt:
+        type: string
+      dob:
+        type: string
+      enrolledAt:
+        type: string
+      ethnic:
+        type: string
+      father_birth_place:
+        type: string
+      father_dob:
+        type: string
+      father_name:
+        type: string
+      father_occupation:
+        type: string
+      father_phone_number:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: boolean
+      id:
+        type: integer
+      land_lord:
+        type: string
+      lastName:
+        type: string
+      mother_birth_place:
+        type: string
+      mother_dob:
+        type: string
+      mother_name:
+        type: string
+      mother_occupation:
+        type: string
+      mother_phone_number:
+        type: string
+      parent_res_registration:
+        type: string
+      parent_roi:
+        type: string
+      parent_zalo:
+        type: string
+      permanentAddressCommune:
+        type: string
+      permanentAddressDistrict:
+        type: string
+      permanentAddressProvince:
+        type: string
+      tempAddress:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   registrations.FindRegistrationResp:
     properties:
       data:
@@ -8,9 +262,13 @@ definitions:
         type: array
       page:
         type: integer
+      pageSize:
+        type: integer
     type: object
   registrations.Registration:
     properties:
+      agencyId:
+        type: integer
       createdAt:
         type: string
       id:
@@ -29,10 +287,12 @@ definitions:
           * buds - Children who is 3 yo.
           * seed - Children who is 4 yo.
           * leaf - Children who is 5 yo.
+          * toddler - Children who is 1 - 3 yo.
         enum:
         - buds
         - seed
         - leaf
+        - ' toddler'
         type: string
       studentDob:
         type: string
@@ -43,6 +303,8 @@ definitions:
     type: object
   registrations.WriteRegistrationRequest:
     properties:
+      agencyId:
+        type: integer
       note:
         type: string
       parentName:
@@ -55,15 +317,246 @@ definitions:
           * buds - Children who is 3 yo.
           * seed - Children who is 4 yo.
           * leaf - Children who is 5 yo.
+          * toddler - Children who is 1 - 3 yo.
         enum:
         - buds
         - seed
         - leaf
+        - ' toddler'
         type: string
       studentDob:
         type: string
       studentName:
         type: string
+    type: object
+  roles.FindRoleResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/roles.Role'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  roles.Role:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  roles.WriteRoleRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  students.FindStudentResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/entities.Student'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  students.Student:
+    properties:
+      agencyId:
+        type: integer
+      birthPlace:
+        type: string
+      class:
+        $ref: '#/definitions/entities.Class'
+      classId:
+        type: integer
+      createdAt:
+        type: string
+      dob:
+        type: string
+      enrolledAt:
+        type: string
+      ethnic:
+        type: string
+      father_birth_place:
+        type: string
+      father_dob:
+        type: string
+      father_name:
+        type: string
+      father_occupation:
+        type: string
+      father_phone_number:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: boolean
+      id:
+        type: integer
+      land_lord:
+        type: string
+      lastName:
+        type: string
+      mother_birth_place:
+        type: string
+      mother_dob:
+        type: string
+      mother_name:
+        type: string
+      mother_occupation:
+        type: string
+      mother_phone_number:
+        type: string
+      parent_res_registration:
+        type: string
+      parent_roi:
+        type: string
+      parent_zalo:
+        type: string
+      permanentAddressCommune:
+        type: string
+      permanentAddressDistrict:
+        type: string
+      permanentAddressProvince:
+        type: string
+      tempAddress:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  students.WriteStudentRequest:
+    properties:
+      agencyId:
+        type: integer
+      birthPlace:
+        type: string
+      classId:
+        type: integer
+      dob:
+        type: string
+      enrolledAt:
+        type: string
+      ethnic:
+        type: string
+      father_birth_place:
+        type: string
+      father_dob:
+        type: string
+      father_name:
+        type: string
+      father_occupation:
+        type: string
+      father_phone_number:
+        type: string
+      firstName:
+        type: string
+      gender:
+        type: boolean
+      land_lord:
+        type: string
+      lastName:
+        type: string
+      mother_birth_place:
+        type: string
+      mother_dob:
+        type: string
+      mother_name:
+        type: string
+      mother_occupation:
+        type: string
+      mother_phone_number:
+        type: string
+      parent_res_registration:
+        type: string
+      parent_roi:
+        type: string
+      parent_zalo:
+        type: string
+      permanentAddressCommune:
+        type: string
+      permanentAddressDistrict:
+        type: string
+      permanentAddressProvince:
+        type: string
+      tempAddress:
+        type: string
+    type: object
+  users.FindUserResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/users.User'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+    type: object
+  users.User:
+    properties:
+      agencyId:
+        type: integer
+      auth0_user_id:
+        type: string
+      connection:
+        type: string
+      createdAt:
+        type: string
+      dob:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      password:
+        description: Plaintext password for input
+        type: string
+      phone_number:
+        type: string
+      updatedAt:
+        type: string
+      verify_email:
+        type: boolean
+    type: object
+  users.UserInput:
+    properties:
+      agencyId:
+        type: integer
+      auth0_user_id:
+        type: string
+      connection:
+        type: string
+      dob:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      password:
+        description: Plaintext password for input
+        type: string
+      phone_number:
+        type: string
+      verify_email:
+        type: boolean
     type: object
 info:
   contact:
@@ -77,7 +570,426 @@ info:
   title: Fiber Example API
   version: "1.0"
 paths:
+  /agencies:
+    get:
+      consumes:
+      - application/json
+      description: Get list agency
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agencies.FindAgencyResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list agency details api
+      tags:
+      - Agency
+    post:
+      consumes:
+      - application/json
+      description: Insert agency
+      parameters:
+      - description: Create agency body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/agencies.WriteAgencyRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agencies.Agency'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create agency api
+      tags:
+      - Agency
+  /agencies/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one agency
+      parameters:
+      - description: Agency ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agencies.Agency'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get agency details api
+      tags:
+      - Agency
+    put:
+      consumes:
+      - application/json
+      description: Update agency
+      parameters:
+      - description: Update agency body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/agencies.WriteAgencyRequest'
+      - description: Agency ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agencies.Agency'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update agency api
+      tags:
+      - Agency
+  /attendances:
+    get:
+      consumes:
+      - application/json
+      description: Get list attendance
+      parameters:
+      - description: Class id
+        in: query
+        name: classId
+        required: true
+        type: string
+      - description: Time range
+        in: query
+        name: period
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/attendances.Attendance'
+              type: array
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list attendance details api
+      tags:
+      - Attendance
+    patch:
+      consumes:
+      - application/json
+      description: Patch attendance
+      parameters:
+      - description: Patch attendance body
+        in: body
+        name: post
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/attendances.UpdateAttendanceRequest'
+          type: array
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/attendances.Attendance'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Patch attendance api
+      tags:
+      - Attendance
+    post:
+      consumes:
+      - application/json
+      description: Insert attendance
+      parameters:
+      - description: Create attendance body
+        in: body
+        name: post
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/attendances.CreateAttendanceRequest'
+          type: array
+      responses:
+        "200":
+          description: OK
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create attendance api
+      tags:
+      - Attendance
+  /attendances/{id}/export-excel:
+    get:
+      consumes:
+      - application/json
+      description: Get one class excel file
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Time range
+        in: query
+        name: period
+        type: string
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get class excel api
+      tags:
+      - Attendance
+  /classes:
+    get:
+      consumes:
+      - application/json
+      description: Get list class
+      parameters:
+      - in: query
+        name: agencyId
+        type: integer
+      - collectionFormat: csv
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
+      - in: query
+        name: page
+        type: integer
+      - in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: search
+        type: string
+      - collectionFormat: csv
+        in: query
+        items:
+          type: string
+        name: sortBy
+        type: array
+      - in: query
+        name: sortOrder
+        type: string
+      - in: query
+        name: teacherId
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/classes.FindClassResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list class details api
+      tags:
+      - Class
+    post:
+      consumes:
+      - application/json
+      description: Insert class
+      parameters:
+      - description: Create class body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/classes.WriteClassRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/classes.Class'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create class api
+      tags:
+      - Class
+  /classes/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one class
+      parameters:
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/classes.Class'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get class details api
+      tags:
+      - Class
+    put:
+      consumes:
+      - application/json
+      description: Update class
+      parameters:
+      - description: Update class body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/classes.WriteClassRequest'
+      - description: Class ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/classes.Class'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update class api
+      tags:
+      - Class
   /registrations:
+    delete:
+      consumes:
+      - application/json
+      description: Delete registration
+      parameters:
+      - collectionFormat: csv
+        description: Registration IDs
+        in: query
+        items:
+          type: integer
+        name: ids
+        required: true
+        type: array
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete registration api
+      tags:
+      - Registration
     get:
       consumes:
       - application/json
@@ -112,6 +1024,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Get list registration details api
       tags:
       - Registration
@@ -131,36 +1045,20 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/registrations.Registration'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
         "500":
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Create registration api
       tags:
       - Registration
   /registrations/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete registration
-      parameters:
-      - description: Registration ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/registrations.Registration'
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Delete registration api
-      tags:
-      - Registration
     get:
       consumes:
       - application/json
@@ -180,6 +1078,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Get registration details api
       tags:
       - Registration
@@ -200,6 +1100,8 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Mark as done registration api
       tags:
       - Registration
@@ -228,7 +1130,448 @@ paths:
           description: Internal Server Error
           schema:
             type: string
+      security:
+      - ApiKeyAuth: []
       summary: Update registration api
       tags:
       - Registration
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: Get list role
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/roles.FindRoleResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list role details api
+      tags:
+      - Role
+    post:
+      consumes:
+      - application/json
+      description: Insert role
+      parameters:
+      - description: Create role body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/roles.WriteRoleRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/roles.Role'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create role api
+      tags:
+      - Role
+  /roles/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/roles.Role'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get role details api
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      description: Update role
+      parameters:
+      - description: Update role body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/roles.WriteRoleRequest'
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/roles.Role'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update role api
+      tags:
+      - Role
+  /sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Insert user by sign up
+      parameters:
+      - description: Create user sign up body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserInput'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create user by sign up api
+      tags:
+      - SignUpInTheUserRoute
+  /students:
+    delete:
+      consumes:
+      - application/json
+      description: Delete student
+      parameters:
+      - collectionFormat: csv
+        description: Student IDs
+        in: query
+        items:
+          type: integer
+        name: ids
+        required: true
+        type: array
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Delete student api
+      tags:
+      - Student
+    get:
+      consumes:
+      - application/json
+      description: Get list student
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.FindStudentResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list student details api
+      tags:
+      - Student
+    post:
+      consumes:
+      - application/json
+      description: Insert student
+      parameters:
+      - description: Create student body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/students.WriteStudentRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create student api
+      tags:
+      - Student
+  /students/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one student
+      parameters:
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get student details api
+      tags:
+      - Student
+    put:
+      consumes:
+      - application/json
+      description: Update student
+      parameters:
+      - description: Update student body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/students.WriteStudentRequest'
+      - description: Student ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/students.Student'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update student api
+      tags:
+      - Student
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get list user
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page Size
+        in: query
+        name: pageSize
+        type: integer
+      - default: desc
+        description: Sort direction
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: Email term
+        in: query
+        name: email
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.FindUserResp'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get list user details api
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Insert user
+      parameters:
+      - description: Create user body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserInput'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create user api
+      tags:
+      - User
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get one user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Get user details api
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update user
+      parameters:
+      - description: Update user body
+        in: body
+        name: post
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserInput'
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.User'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Update user api
+      tags:
+      - User
+securityDefinitions:
+  ApiKeyAuth:
+    description: Apply "bearer " before token in authorization
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

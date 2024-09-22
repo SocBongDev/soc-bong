@@ -1,6 +1,10 @@
 package common
 
-import "time"
+import (
+	"time"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type BaseEntity struct {
 	Id        int       `json:"id"`
@@ -9,8 +13,9 @@ type BaseEntity struct {
 }
 
 type FindResponse[T any] struct {
-	Data []T   `json:"data"`
-	Page int64 `json:"page"`
+	Data     []T   `json:"data"`
+	Page     int64 `json:"page"`
+	PageSize int64 `json:"pageSize"`
 }
 
 type Pagination struct {
@@ -40,23 +45,30 @@ func (p *Pagination) GetOffset() int64 {
 	return (p.GetPage() - 1) * p.GetPageSize()
 }
 
+// SortField represents a field to sort by and its order
+type SortField struct {
+	// @Description The field name to sort by
+	// @Example name
+	Field string `json:"field"`
+
+	// @Description The sort order (asc or desc)
+	// @Enum asc,ASC,desc,DESC
+	// @Example ASC
+	Order string `json:"order" validate:"oneof=asc ASC desc DESC"`
+}
+
 type Sorter struct {
-	Sort   string `query:"sort"   validate:"oneof=asc ASC desc DESC"`
-	SortBy string `query:"sortBy"`
+	// @Description List of fields to sort by
+	SortFields []SortField `json:"sortFields"`
 }
 
-func (s *Sorter) GetSort() string {
-	if s.Sort == "" {
-		s.Sort = "DESC"
-	}
+var BaseExcludeFields []string = []string{"Id", "CreatedAt", "UpdatedAt"}
 
-	return s.Sort
-}
+var (
+	DefaultSortVal   = "created_at DESC"
+	DefaultSortOrder = "DESC"
+)
 
-func (s *Sorter) GetSortBy() string {
-	if s.SortBy == "" {
-		s.SortBy = "created_at"
-	}
-
-	return s.SortBy
+type APIHandler interface {
+	RegisterRoute(fiber.Router)
 }

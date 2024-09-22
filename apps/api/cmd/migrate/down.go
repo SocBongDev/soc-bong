@@ -1,11 +1,11 @@
 package migrate
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/database"
+	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/spf13/cobra"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
@@ -25,22 +25,25 @@ func DownCmd() *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			log.Println("Migrating down", steps)
+			logger.Info("Migrating down", steps)
 			cfg, err := config.New()
 			if err != nil {
-				log.Fatalln("config.New err:", err)
+				logger.Error("config.New err", "err", err)
+				panic(err)
 			}
 
 			m, err := database.NewMigrator(&cfg.DatabaseSecret)
 			if err != nil {
-				log.Fatalln("database.NewMigrator err: ", err)
+				logger.Error("database.NewMigrator err", "err", err)
+				panic(err)
 			}
 
 			if err := m.Down(steps); err != nil {
-				log.Fatal("Down failed: ", err)
+				logger.Error("Down failed", "err", err)
+				panic(err)
 			}
 
-			log.Println("Migrate down success!")
+			logger.Info("Migrate down success!")
 		},
 	}
 
