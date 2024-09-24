@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { statusChange } from '$lib/store'
 	import dayjs from 'dayjs'
+	import DefaultIcon from './DefaultIcon.svelte'
 	export let data: any
 
 	export let date: string
-	export let studentId: string
+	export let studentId: string | undefined
 	export let classId: string
 	export let monthPicked: number
 	export let yearPicked: number
-
+	export const trackADay: any[] = []
 	let isDropdownOpen: boolean = false
 
 	type attendedStatus = 'attended' | 'absented' | 'excused' | 'dayoff' | 'holiday'
-
+	let active: string | null = ''
 	type statusType = {
 		name: attendedStatus
 		color: string
@@ -29,7 +30,22 @@
 
 	$: activeStatus = status[0]
 
-	let active: string | null = ''
+	$: activeTrackStatus = ''
+
+	$: {
+		const selectedDate = dayjs(`${yearPicked}-${monthPicked}-${date}`).format('YYYY-MM-DD')
+		statusChange.subscribe((values) => {
+			const statusFind = values.find(
+				(status) =>
+					dayjs(status.date).format('YYYY-MM-DD') == selectedDate && status.studentId == studentId
+			)
+			if (statusFind) {
+				activeTrackStatus = statusFind.attendedStatus
+			} else {
+				activeTrackStatus = ''
+			}
+		})
+	}
 
 	function handleDropdownClick() {
 		isDropdownOpen = !isDropdownOpen
@@ -37,6 +53,7 @@
 
 	function handleChangeState(index: number) {
 		activeStatus = status[index]
+		activeTrackStatus = activeStatus.name;
 		statusChange.update((status) => {
 			let id = data?.id
 			if (!id) {
@@ -100,6 +117,40 @@
 			isDropdownOpen = false
 		}
 	}
+
+	function getAttendanceLetter(
+		active: string | null,
+		data: any,
+		activeTrackStatus?: string | null
+	) {
+		const attendedStatus = data?.attendedStatus
+
+		// Prioritize the activeTrackStatus, since it represents the latest change
+		if (activeTrackStatus) {
+			return status.find((s) => s.name === activeTrackStatus)?.letter || 'default'
+		}
+
+		// if (attendedStatus === 'attended' || activeTrackStatus === 'attended') {
+		// 	return status[1].letter
+		// }
+		if (active !== '') {
+			return active
+		}
+		switch (data?.attendedStatus) {
+			case 'attended':
+				return status[1].letter
+			case 'absented':
+				return status[0].letter
+			case 'excused':
+				return status[2].letter
+			case 'dayoff':
+				return status[3].letter
+			case 'holiday':
+				return status[4].letter
+			default:
+				return 'default'
+		}
+	}
 </script>
 
 <div class="dropdown" on:focusout={handleDropdownFocusLoss}>
@@ -107,24 +158,12 @@
 		class="btn btn-square btn-xs align-middle active:bg-slate-500"
 		on:click={handleDropdownClick}
 	>
-		{#if active == '' && data && data.attendedStatus == 'attended'}
-			<span class="max-h-full w-fit">{status[1].letter}</span>
-		{:else if active == '' && data && data.attendedStatus == 'absented'}
-			<span class="max-h-full w-fit">{status[0].letter}</span>
-		{:else if active == '' && data && data.attendedStatus == 'excused'}
-			<span class="max-h-full w-fit">{status[2].letter}</span>
-		{:else if active == '' && data && data.attendedStatus == 'dayoff'}
-			<span class="max-h-full w-fit">{status[3].letter}</span>
-		{:else if active == '' && data && data.attendedStatus == 'holiday'}
-			<span class="max-h-full w-fit">{status[4].letter}</span>
-		{:else if active == ''}
-			<svg class="w-10 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-				><path
-					d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"
-				/></svg
-			>
+		{#if getAttendanceLetter(active, data, activeTrackStatus) == 'default'}
+			<DefaultIcon />
 		{:else}
-			<span class="max-h-full w-fit">{active}</span>
+			<span class="max-h-full w-fit">
+				{getAttendanceLetter(active, data, activeTrackStatus)}
+			</span>
 		{/if}
 	</button>
 	<ul
