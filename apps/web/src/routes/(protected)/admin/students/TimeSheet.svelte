@@ -1,5 +1,5 @@
 <script lang="ts">
-	import LegendIcon from '~icons/ic/outline-watch-later'
+	import TrackerIcon from '~icons/fluent-mdl2/trackers'
 	import ExportIcon from '~icons/mdi/export'
 	import ClickDropdown from '$lib/components/ClickDropdown.svelte'
 	import dayjs from 'dayjs'
@@ -16,6 +16,9 @@
 	let yearPicked: number = parseInt(inputValue.split('-')[0], 10)
 	let monthPicked: number = parseInt(inputValue.split('-')[1], 10)
 	let statusArray: AttendedStatus[] = []
+	import utc from 'dayjs/plugin/utc'
+
+	dayjs.extend(utc)
 	const token = localStorage.getItem('access_token')
 
 	const unsubscribe = statusChange.subscribe((value) => {
@@ -29,7 +32,6 @@
 	export let data: PageData
 	let classId = get(classIdStore) || 1
 	let studentList: StudentProps[] = data.students.data ?? []
-
 	let attendances: any = data.attendances.Data ?? []
 	const studentIds =
 		studentList && studentList.map((student: any) => student.id).sort((a: any, b: any) => b - a)
@@ -189,7 +191,7 @@
 								attendedAt: status.date,
 								attendedStatus: status.attendedStatus,
 								classId: status.classId && parseInt(status.classId),
-								studentId: status.studentId
+								studentId: status.studentId && parseInt(status.studentId)
 							}
 						])
 					})
@@ -255,6 +257,120 @@
 		}
 	}
 
+	async function handleTrackAttendancesDay() {
+		let date = dayjs('2024-10-02').utc().local().format('YYYY-MM-DD')
+		if (!statusArray.length) {
+			//Case 1: Create new att for all students when no elements in statusChange
+			const newAttendances: AttendedStatus[] = studentList
+				.map((student, index) => {
+					const attendancesIndex = attendances[`${index}`]?.attendances.find((att: any) => {
+						const attendedDate = dayjs(String(Object(att).attendedAt))
+							.utc()
+							.local()
+							.format('YYYY-MM-DD')
+						return attendedDate === date
+					})
+
+					if (!attendancesIndex) {
+						return {
+							date: date,
+							studentId: student?.id?.toString(),
+							attendedStatus: 'attended',
+							classId: classId.toString()
+						}
+					} else if (attendancesIndex.attendedStatus !== 'attended') {
+						return {
+							date,
+							studentId: attendancesIndex.studentId,
+							attendedStatus: 'attended',
+							classId: classId.toString(),
+							id: attendancesIndex?.id
+						}
+					}
+					return null
+				})
+				.filter((att) => att !== null) as AttendedStatus[]
+
+			if (newAttendances.length === 0) {
+				Notify({
+					type: 'success',
+					id: crypto.randomUUID(),
+					description: `Các học sinh ở ngày ${dayjs(date).utc().local().format('DD')} tháng ${dayjs(
+						date
+					)
+						.utc()
+						.local()
+						.format('MM')} đã được điểm danh đầy đủ và hệ thống đã ghi lại!`
+				})
+			}
+
+			statusChange.update((status) => [...status, ...newAttendances])
+		} else {
+			statusChange.update((existingStatus) => {
+				const updatedStatus: AttendedStatus[] = studentList
+					.map((student, index) => {
+						const existingRecord = existingStatus.find(
+							(record) =>
+								record.studentId === student.id &&
+								dayjs(record.date).utc().local().format('YYYY-MM-DD') === date
+						)
+
+						const attendanceForDay = attendances[`${index}`]?.attendances.find((att: any) => {
+							const attendedDate = dayjs(String(Object(att).attendedAt))
+								.utc()
+								.local()
+								.format('YYYY-MM-DD')
+							return attendedDate === date
+						})
+						// If there is already an existing record marked as 'attended', skip it
+						if (attendanceForDay && attendanceForDay.attendedStatus === 'attended') {
+							return null // Skip this record
+						}
+						if (existingRecord) {
+							// If there is an existing record for this student, update the status for today
+							return {
+								...existingRecord,
+								attendedStatus: attendanceForDay ? 'attended' : existingRecord.attendedStatus,
+								id: attendanceForDay?.id || existingRecord.id // Retain the same ID or use the found one
+							}
+						} else if (attendanceForDay) {
+							// If no existing record, but attendance is found for today, create a new one
+							return {
+								date,
+								studentId: student.id?.toString(),
+								attendedStatus: 'attended',
+								classId: classId.toString(),
+								id: attendanceForDay?.id
+							}
+						} else {
+							// If no existing record and no attendance found for today, create a default record
+							return {
+								date,
+								studentId: student.id?.toString(),
+								attendedStatus: 'attended', // Or set to a different default if needed
+								classId: classId.toString()
+							}
+						}
+					})
+					.filter((att) => att !== null) as AttendedStatus[]
+
+				const mergedStatus = [
+					...existingStatus.filter((record) => {
+						return !studentList.some((student) => {
+							return (
+								student.id == record.studentId &&
+								dayjs(record.date).utc().local().format('YYYY-MM-DD') == date
+							)
+						})
+					}),
+					...updatedStatus
+				]
+
+				return mergedStatus
+			})
+		}
+	}
+
 	onMount(() => {
 		loading = true
 		let datePicked = dayjs(inputValue).format('MM-YYYY')
@@ -275,7 +391,7 @@
 	}
 </script>
 
-<div class="h-full w-full flex flex-col justify-start gap-4">
+<div class="relative flex h-full w-full flex-col justify-start gap-4">
 	<div class="row-span-full mt-1 grid grid-cols-5 px-2">
 		{#each status as { name, color, letter } (name)}
 			<div class="flex items-center gap-1">
@@ -325,12 +441,20 @@
 					<ExportIcon class="h-4 w-4" />
 					Export
 				</button>
+
+				<button
+					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-semibold"
+					on:click={handleTrackAttendancesDay}
+				>
+					<TrackerIcon class="h-4 w-4" />
+					Track Attended A Day
+				</button>
 			</div>
 		</div>
 	</div>
 	{#if loading}
-		<div class="my-4 w-full h-full flex justify-center items-center">
-			<span class="loading loading-infinity loading-lg"></span>
+		<div class="my-4 flex h-full w-full items-center justify-center">
+			<span class="loading loading-infinity loading-lg" />
 		</div>
 	{:else}
 		<table class="table">
@@ -432,7 +556,7 @@
 		<div class="join mt-auto self-center">
 			<a
 				class={data.students.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-				href={`/admin?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
+				href={`/admin/students?page=${data.students.page - 1}&pageSize=${data.students.pageSize}`}
 			>
 				<button class="btn join-item">«</button>
 			</a>
@@ -442,17 +566,17 @@
 				data.students.data.length === 0
 					? 'pointer-events-none cursor-default opacity-40'
 					: ''}
-				href={`/admin?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
+				href={`/admin/students?page=${data.students.page + 1}&pageSize=${data.students.pageSize}`}
 			>
 				<button class="btn join-item">»</button>
 			</a>
 		</div>
 
 		{#if statusArray.length > 0}
-			<div class="absolute bottom-10 left-1/2 w-1/2 -translate-x-1/2" transition:fade>
+			<div class="absolute bottom-6 left-1/2 w-1/2 -translate-x-1/2" transition:fade>
 				<div class="alert flex justify-between rounded-full bg-white py-2.5 text-sm shadow">
 					<div class="flex w-1/2 items-center gap-3">
-						<span>Đã sửa <strong>{statusArray.length}</strong> ngày</span>
+						<span>Đã điểm danh <strong>{statusArray.length}</strong> ngày</span>
 						<button
 							class="btn btn-outline btn-sm rounded border-2 bg-white normal-case"
 							on:click={clearStatusChanges}>Huỷ thay đổi</button
