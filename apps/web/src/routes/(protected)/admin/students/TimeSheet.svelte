@@ -32,7 +32,7 @@
 	export let data: PageData
 	let classId = get(classIdStore) || 1
 	let studentList: StudentProps[] = data.students.data ?? []
-	let attendances: any = data.attendances.Data ?? []
+	let attendances: any = data.attendances ?? []
 	const studentIds =
 		studentList && studentList.map((student: any) => student.id).sort((a: any, b: any) => b - a)
 	attendances = studentIds && studentIds?.map((id: any) => attendances[id])
@@ -107,11 +107,12 @@
 				}
 			)
 			const preAttendances = await response.json()
-			attendances = preAttendances?.Data
+
+			
 			const studentIds = studentList
-				.map((student: any) => student.id)
-				.sort((a: any, b: any) => b - a)
-			attendances = studentIds.map((id: any) => attendances[id])
+			.map((student: any) => student.id)
+			.sort((a: any, b: any) => b - a)
+			attendances = studentIds.map((id: any) => preAttendances[id])
 		} catch (err) {
 			console.error('Error load student attendances data: ', err)
 		} finally {
