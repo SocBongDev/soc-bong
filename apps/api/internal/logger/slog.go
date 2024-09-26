@@ -142,7 +142,15 @@ func (l *SlogLogger) Log(ctx context.Context, level slog.Leveler, msg string, ar
 }
 
 func (l *SlogLogger) LogAttrs(ctx context.Context, level slog.Leveler, msg string, args ...any) {
-	panic("not implemented") // TODO: Implement
+	// Get caller information
+	pc, _, _, _ := runtime.Caller(3) // Skip one frame to get the actual caller
+
+	// Create a Record with the correct caller information
+	r := slog.NewRecord(time.Now(), level.Level(), msg, pc)
+	r.Add(args...)
+
+	// Log the record
+	_ = l.logger.Handler().Handle(ctx, r)
 }
 
 func (l *SlogLogger) Warn(msg string, args ...any) {
