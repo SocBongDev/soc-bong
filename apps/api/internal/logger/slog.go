@@ -5,6 +5,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"runtime"
+	"time"
 
 	"github.com/mdobak/go-xerrors"
 )
@@ -16,7 +18,9 @@ const (
 )
 
 type (
-	SlogLogger struct{}
+	SlogLogger struct {
+		logger *slog.Logger
+	}
 	ctxKey     string
 	stackFrame struct {
 		Func   string `json:"func"`
@@ -104,46 +108,67 @@ func fmtErr(err error) slog.Value {
 func NewSlogLogger(name string, options ...Option) *SlogLogger {
 	cfg := newConfig(options)
 	h := &ContextHandler{Handler: slog.NewJSONHandler(os.Stdout, cfg.HandlerOptions), logger: cfg.logger(name)}
-	slog.SetDefault(slog.New(h))
-	return &SlogLogger{}
+	logger := slog.New(h)
+	slog.SetDefault(logger)
+	return &SlogLogger{logger: logger}
 }
 
 func (l *SlogLogger) Debug(msg string, args ...any) {
-	slog.Debug(msg, args...)
+	l.DebugContext(context.Background(), msg, args...)
 }
 
 func (l *SlogLogger) DebugContext(ctx context.Context, msg string, args ...any) {
-	slog.DebugContext(ctx, msg, args...)
+	l.log(ctx, slog.LevelDebug, msg, args...)
 }
 
 func (l *SlogLogger) Error(msg string, args ...any) {
-	slog.Error(msg, args...)
+	l.ErrorContext(context.Background(), msg, args...)
 }
 
 func (l *SlogLogger) ErrorContext(ctx context.Context, msg string, args ...any) {
-	slog.ErrorContext(ctx, msg, args...)
+	l.log(ctx, slog.LevelError, msg, args...)
 }
 
 func (l *SlogLogger) Info(msg string, args ...any) {
-	slog.Info(msg, args...)
+	l.InfoContext(context.Background(), msg, args...)
 }
 
 func (l *SlogLogger) InfoContext(ctx context.Context, msg string, args ...any) {
-	slog.InfoContext(ctx, msg, args...)
+	l.log(ctx, slog.LevelInfo, msg, args...)
 }
 
 func (l *SlogLogger) Log(ctx context.Context, level slog.Leveler, msg string, args ...any) {
-	slog.Log(ctx, level.Level(), msg, args...)
+	l.log(ctx, level.Level(), msg, args...)
 }
 
 func (l *SlogLogger) LogAttrs(ctx context.Context, level slog.Leveler, msg string, args ...any) {
-	panic("not implemented") // TODO: Implement
+	// Get caller information
+	pc, _, _, _ := runtime.Caller(3) // Skip three frame to get the actual caller
+
+	// Create a Record with the correct caller information
+	r := slog.NewRecord(time.Now(), level.Level(), msg, pc)
+	r.Add(args...)
+
+	// Log the record
+	_ = l.logger.Handler().Handle(ctx, r)
 }
 
 func (l *SlogLogger) Warn(msg string, args ...any) {
-	slog.Warn(msg, args...)
+	l.WarnContext(context.Background(), msg, args...)
 }
 
 func (l *SlogLogger) WarnContext(ctx context.Context, msg string, args ...any) {
-	slog.WarnContext(ctx, msg, args...)
+	l.log(ctx, slog.LevelWarn, msg, args...)
+}
+
+func (l *SlogLogger) log(ctx context.Context, level slog.Level, msg string, args ...any) {
+	// Get caller information
+	pc, _, _, _ := runtime.Caller(3) // Skip three frames to get the actual caller
+
+	// Create a Record with the correct caller information
+	r := slog.NewRecord(time.Now(), level, msg, pc)
+	r.Add(args...)
+
+	// Log the record
+	_ = l.logger.Handler().Handle(ctx, r)
 }
