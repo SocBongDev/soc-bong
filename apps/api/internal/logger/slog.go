@@ -143,7 +143,7 @@ func (l *SlogLogger) Log(ctx context.Context, level slog.Leveler, msg string, ar
 
 func (l *SlogLogger) LogAttrs(ctx context.Context, level slog.Leveler, msg string, args ...any) {
 	// Get caller information
-	pc, _, _, _ := runtime.Caller(3) // Skip one frame to get the actual caller
+	pc, _, _, _ := runtime.Caller(3) // Skip three frame to get the actual caller
 
 	// Create a Record with the correct caller information
 	r := slog.NewRecord(time.Now(), level.Level(), msg, pc)
@@ -163,7 +163,7 @@ func (l *SlogLogger) WarnContext(ctx context.Context, msg string, args ...any) {
 
 func (l *SlogLogger) log(ctx context.Context, level slog.Level, msg string, args ...any) {
 	// Get caller information
-	pc, _, _, _ := runtime.Caller(3) // Skip two frames to get the actual caller
+	pc, _, _, _ := runtime.Caller(3) // Skip three frames to get the actual caller
 
 	// Create a Record with the correct caller information
 	r := slog.NewRecord(time.Now(), level, msg, pc)
