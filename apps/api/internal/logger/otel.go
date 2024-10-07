@@ -81,10 +81,12 @@ type config struct {
 }
 
 func newConfig(options []Option) *config {
-	c := &config{HandlerOptions: &slog.HandlerOptions{
-		AddSource:   true,
-		ReplaceAttr: replaceAttr,
-	}}
+	c := &config{
+		HandlerOptions: &slog.HandlerOptions{
+			AddSource:   true,
+			ReplaceAttr: replaceAttr,
+		},
+	}
 	for _, opt := range options {
 		c = opt.apply(c)
 	}

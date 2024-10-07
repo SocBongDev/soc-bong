@@ -68,28 +68,33 @@ func ValidateJWT(audience, domain string, opts ...JWTMiddlewareOption) fiber.Han
 
 		authHeader := c.Get("Authorization")
 		if authHeaderParts := strings.Fields(authHeader); len(authHeaderParts) > 0 && strings.ToLower(authHeaderParts[0]) != "bearer" {
+			logger.ErrorContext(ctx, "authn.ValidateJWT err", "err", invalidJWTErrorMessage)
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": invalidJWTErrorMessage})
 		}
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == "" {
+			logger.ErrorContext(ctx, "authn.ValidateJWT err", "err", missingJWTErrorMessage, "authHeader", authHeader)
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": missingJWTErrorMessage})
 		}
 
-		token, err := jwtValidator.ValidateToken(c.Context(), tokenString)
+		token, err := jwtValidator.ValidateToken(ctx, tokenString)
 		if err != nil {
-			logger.ErrorContext(ctx, "Encountered error while validating JWT", "err", err)
+			logger.ErrorContext(ctx, "Encountered error while validating JWT", "err", err, "tokenString", tokenString)
 			if errors.Is(err, jwtmiddleware.ErrJWTMissing) {
+				logger.ErrorContext(ctx, "authn.ValidateJWT err", "err", missingJWTErrorMessage, "tokenString", tokenString)
 				return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": missingJWTErrorMessage})
 			}
 			if errors.Is(err, jwtmiddleware.ErrJWTInvalid) {
+				logger.ErrorContext(ctx, "authn.ValidateJWT err", "err", invalidJWTErrorMessage, "token", token)
 				return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": invalidJWTErrorMessage})
 			}
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": "Internal server error"})
+			return fiber.ErrInternalServerError
 		}
 
 		validatedClaims, ok := token.(*validator.ValidatedClaims)
 		if !ok {
+			logger.ErrorContext(ctx, "authn.ValidateJWT err", "err", "Invalid token claims", "token", token)
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "Invalid token claims"})
 		}
 

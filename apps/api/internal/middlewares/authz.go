@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"slices"
 
@@ -16,7 +15,6 @@ const (
 	missingJWTErrorMessage       = "Requires authentication"
 	invalidJWTErrorMessage       = "Bad credentials"
 	permissionDeniedErrorMessage = "Permission denied"
-	internalServerErrorMessage   = "Internal Server Error"
 )
 
 type ErrorMessage struct {
@@ -49,33 +47,19 @@ func (c CustomClaims) HasPermissions(expectedClaims []string) bool {
 	return true
 }
 
-func WriteJSON(rw http.ResponseWriter, status int, data interface{}) error {
-	js, err := json.Marshal(data)
-	if err != nil {
-		return err
-	}
-
-	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(status)
-	_, err = rw.Write(js)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func ValidatePermissions(expectedClaims []string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		ctx := c.UserContext()
 		token, ok := c.Locals(jwtmiddleware.ContextKey{}).(*EnhancedValidatedClaims)
 		if !ok {
+			logger.ErrorContext(ctx, "authz.ValidatePermissions invalid token err", "err", "Invalid token")
 			return c.Status(http.StatusUnauthorized).JSON(ErrorMessage{Message: "Invalid token"})
 		}
 		claims := token.CustomClaims.(*CustomClaims)
 		if !claims.HasPermissions(expectedClaims) {
 			errorMessage := ErrorMessage{Message: permissionDeniedErrorMessage}
 			if err := c.Status(http.StatusForbidden).JSON(errorMessage); err != nil {
-				logger.ErrorContext(ctx, "Failed to write error message", "err", err)
+				logger.ErrorContext(ctx, "authz.ValidatePermissions err", "err", err)
 			}
 			return nil
 		}
