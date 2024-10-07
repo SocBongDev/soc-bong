@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 
     auth0_user_id TEXT NOT NULL,
     
-    agency_id INTEGER DEFAULT 1 NOT NULL,
+    agency_id INTEGER NOT NULL,
 
     FOREIGN KEY (agency_id) REFERENCES agencies(id)
 );
