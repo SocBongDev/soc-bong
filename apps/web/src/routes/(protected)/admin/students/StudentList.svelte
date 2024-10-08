@@ -13,7 +13,7 @@
 
 	export let data: PageData
 	let isChecked: string[] = []
-	let classId = get(classIdStore) || 1;
+	let classId = get(classIdStore) || 1
 	let isCheckedAll = false
 	let loading = false
 	let studentList = {
@@ -114,7 +114,7 @@
 	}
 
 	async function batchDelete() {
-		loading = true;
+		loading = true
 		try {
 			const ids = isChecked.map((el) => Number(el))
 			const res = await fetch(`${PUBLIC_API_SERVER_URL}/students`, {
@@ -139,7 +139,7 @@
 			console.error('Batch Delete error', e)
 			Notify({ type: 'error', id: crypto.randomUUID(), description: 'Lỗi từ phía server' })
 		} finally {
-			loading = false;
+			loading = false
 		}
 	}
 
@@ -201,18 +201,18 @@
 				{/each}
 			</select>
 		{:else}
-			<select class="select select-ghost disabled h-fit min-h-0 w-fit max-w-xs font-bold">
+			<select class="disabled select select-ghost h-fit min-h-0 w-fit max-w-xs font-bold">
 				<option value="1">Không tồn tại lớp nào</option>
 			</select>
 		{/if}
 	</div>
 
 	{#if loading}
-		<div class="my-4 w-full h-full flex justify-center items-center">
-			<span class="loading loading-infinity loading-lg"></span>
+		<div class="my-4 flex h-full w-full items-center justify-center">
+			<span class="loading loading-infinity loading-lg" />
 		</div>
 	{:else}
-		<table class="-mt-8 table">
+		<table class="table -mt-8">
 			<thead>
 				<tr class="text-center">
 					<th>

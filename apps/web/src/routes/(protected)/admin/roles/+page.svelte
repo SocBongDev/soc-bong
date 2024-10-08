@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { SvelteComponent } from 'svelte'
-    import RefreshIcon from '~icons/ri/refresh-line'
-    import PlusIcon from '~icons/ic/round-add'
-    import { invalidate } from '$app/navigation'
+	import RefreshIcon from '~icons/ri/refresh-line'
+	import PlusIcon from '~icons/ic/round-add'
+	import { invalidate } from '$app/navigation'
 	import RolesList from './RolesList.svelte'
 	import AddRole from './AddRole.svelte'
 	import type { PageData } from './$types'
-    let drawerToggleRef: HTMLInputElement
+	let drawerToggleRef: HTMLInputElement
 
 	export let data: PageData
-    function refreshData() {
+	function refreshData() {
 		invalidate('app:students')
 	}
 
@@ -25,12 +25,7 @@
 </script>
 
 <div class="drawer drawer-end h-full">
-	<input
-		id="my-drawer"
-		type="checkbox"
-		class="drawer-toggle"
-		bind:this={drawerToggleRef}
-	/>
+	<input id="my-drawer" type="checkbox" class="drawer-toggle" bind:this={drawerToggleRef} />
 	<div class="drawer-content">
 		<header class="mb-5 flex items-center justify-between">
 			<div class="flex items-center gap-5">
@@ -45,7 +40,7 @@
 				</button>
 			</div>
 
-				<!-- <button
+			<!-- <button
 					class="btn btn-primary btn-sm rounded normal-case active:!translate-y-1"
 					on:click={() => {
                         console.log('click')
@@ -61,7 +56,7 @@
 		<div class="tabs tab-lg w-full">
 			<ul class="tabs tab-lg w-full border-b border-gray-400">
 				{#each tabData as item}
-					<li class={` tab ${activeTabValue === item.value ? 'tab-bordered tab-active' : ''}`}>
+					<li class={` tab ${activeTabValue === item.value ? 'tab-active tab-bordered' : ''}`}>
 						<span
 							class="mb-1 font-bold"
 							on:click={() => {
@@ -77,7 +72,7 @@
 
 		<div class="mt-4 h-full">
 			{#if activeTabValue === 0}
-				<RolesList data={data}/>
+				<RolesList {data} />
 			{:else if activeTabValue === 1}
 				<AddRole />
 			{/if}

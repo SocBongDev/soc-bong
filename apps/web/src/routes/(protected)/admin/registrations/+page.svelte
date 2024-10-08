@@ -35,13 +35,12 @@
 		reset()
 	}
 	const token = localStorage.getItem('access_token')
-	
-	
+
 	var agencyOptions = data?.agencies?.data?.map((el) => ({
 		label: el.name,
 		value: el.id ? el.id.toString() : '1'
 	}))
-	
+
 	const defaultFormValues = {
 		studentClass: 'seed',
 		studentName: '',
@@ -51,7 +50,6 @@
 		agencyId: parseInt(agencyOptions[0]?.value || '1'),
 		note: undefined
 	}
-
 
 	const registrationSchema: {
 		name: string
@@ -247,7 +245,7 @@
 			refreshData()
 			resetDefaultForm()
 			Notify({
-				type: "success",
+				type: 'success',
 				id: crypto.randomUUID(),
 				description: isNew ? 'Tạo đăng kí thành công!' : 'Cập nhật đăng kí thành công!'
 			})
@@ -462,7 +460,9 @@
 								>
 								<td on:click={() => show(registration.id)}>{registration.parentName}</td>
 								<td on:click={() => show(registration.id)}>{registration.phoneNumber}</td>
-								<td on:click={() => show(registration.id)}>{formatAgencyName(registration.agencyId)}</td>
+								<td on:click={() => show(registration.id)}
+									>{formatAgencyName(registration.agencyId)}</td
+								>
 								{#if registration.note === null}
 									<td on:click={() => show(registration.id)} />
 								{:else}
@@ -529,7 +529,7 @@
 			{/if}
 		</div>
 	</div>
-	<div class="drawer-side z-10 place-items-center h-full">
+	<div class="drawer-side z-10 h-full place-items-center">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}

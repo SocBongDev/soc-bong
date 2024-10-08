@@ -34,7 +34,6 @@
 
 	function handleToggleCollapse() {
 		setCollapseMenu(!collapseMenu)
-		console.log('check collapseMenu: ', collapseMenu)
 	}
 
 	const sidebarData: SidebarData[] = [
@@ -64,16 +63,18 @@
 
 <aside
 	id="layout-sidebar"
-	class="fixed left-0 top-0 z-10 h-screen w-64 sm:translate-x-0 transition-transform { collapseMenu ? 'translate-x-0' : '-translate-x-full'}"
+	class="fixed left-0 top-0 z-10 h-screen w-64 transition-transform sm:translate-x-0 {collapseMenu
+		? 'translate-x-0'
+		: '-translate-x-full'}"
 	aria-label="Sidebar"
 >
 	<div class="flex h-full flex-col justify-between overflow-y-auto bg-gray-50 px-3 py-4">
 		<slot name="header" />
 		<div class="h-full w-full">
 			<div class="flex flex-row items-center justify-end gap-4 px-2 sm:hidden">
-				<button 
+				<button
 					class="ml-3 mt-2 inline-flex items-center rounded-lg p-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-					on:click={handleToggleCollapse}	
+					on:click={handleToggleCollapse}
 				>
 					<CloseIcon />
 				</button>

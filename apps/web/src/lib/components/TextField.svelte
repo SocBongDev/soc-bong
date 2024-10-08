@@ -12,9 +12,9 @@
 	<input
 		{name}
 		type="text"
-		class="peer w-full bg-neutral-100 px-4 pb-2.5 pt-1 font-normal text-black focus:bg-neutral-200 focus:outline-none disabled:hover:cursor-not-allowed disabled:select-none"
+		class="peer w-full bg-neutral-100 px-4 pb-2.5 pt-1 font-normal text-black focus:bg-neutral-200 focus:outline-none disabled:select-none disabled:hover:cursor-not-allowed"
 		bind:value
-		disabled={disabled}
+		{disabled}
 	/>
 	<label
 		class="label bg-neutral-100 px-4 py-1 text-neutral-500 peer-focus:bg-neutral-200 peer-focus:text-black"

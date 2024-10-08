@@ -38,7 +38,7 @@
 	function openSidebar() {
 		SidebarContext.update((context) => ({
 			...context,
-			collapseMenu: true,
+			collapseMenu: true
 		}))
 	}
 </script>
@@ -50,7 +50,7 @@
 	type="button"
 	class="ml-3 mt-2 inline-flex items-center rounded-lg p-2 text-sm text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 sm:hidden"
 	on:click={openSidebar}
-	>
+>
 	<span class="sr-only">Open sidebar</span>
 	<svg
 		class="h-6 w-6"
@@ -79,7 +79,7 @@
 			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 			<ul
 				tabindex="0"
-				class="menu dropdown-content rounded-box menu-sm bg-base-100 z-50 mt-3 w-60 p-2 shadow"
+				class="menu dropdown-content rounded-box menu-sm z-50 mt-3 w-60 bg-base-100 p-2 shadow"
 			>
 				<li class="disabled p-2">
 					<a class="justify-between rounded" href="/">

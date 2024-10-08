@@ -211,7 +211,7 @@
 	>
 		<header class="flex w-full flex-row items-center justify-start gap-x-16 md:max-w-2xl">
 			<button
-				class="btn btn-sm btn-circle btn-outline btn-primary btn-square group"
+				class="group btn btn-square btn-circle btn-primary btn-outline btn-sm"
 				on:click={goBack}
 			>
 				<ArrowLeftIcon class="transition group-hover:-translate-x-1" /></button
