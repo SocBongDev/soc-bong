@@ -10,14 +10,14 @@ export interface NotificationMessage {
 export interface AttendedStatus {
 	id?: string
 	date?: string
-	attendedStatus: 'attended' | 'absented' | 'excused' | 'dayoff' | 'holiday' | 'unknown';
-	classId?: string,
-	studentId?: string,
+	attendedStatus: 'attended' | 'absented' | 'excused' | 'dayoff' | 'holiday' | 'unknown'
+	classId?: string
+	studentId?: string
 }
 
-export const classIdStore = writable<number | null>(1);
+export const classIdStore = writable<number | null>(1)
 
-export const userRoleStore = writable<string | null>("");
+export const userRoleStore = writable<string | null>('')
 
 export const notifications = writable<Array<NotificationMessage>>([])
 
@@ -48,10 +48,9 @@ export const openDialog = writable(false)
 
 export const statusChange = writable<Array<AttendedStatus>>([])
 
-
 interface ISidebarContext {
-	collapseMenu: boolean;
-	setCollapseMenu: (v: boolean) => void;
+	collapseMenu: boolean
+	setCollapseMenu: (v: boolean) => void
 }
 
 export const collapseMenu = writable(false)
@@ -61,7 +60,7 @@ export const SidebarContext = writable<ISidebarContext>({
 	setCollapseMenu: (v) => {
 		SidebarContext.update((context) => ({
 			...context,
-			collapseMenu: v,
-		}));
+			collapseMenu: v
+		}))
 	}
 })

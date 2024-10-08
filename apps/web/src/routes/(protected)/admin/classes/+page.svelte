@@ -57,8 +57,8 @@
 	}))
 
 	var teacherOptions = data?.users.data?.map((el) => ({
-		label: el.first_name + " " + el.last_name,
-		value: el.auth0_user_id ? el.auth0_user_id : " "
+		label: el.first_name + ' ' + el.last_name,
+		value: el.auth0_user_id ? el.auth0_user_id : ' '
 	}))
 
 	function formatAgencyName(agencyId: number) {
@@ -69,10 +69,8 @@
 	}
 
 	function formatTeacherName(auth0_user_id: string) {
-		const teacher = data.users.data.find( 
-			(el) => (el.auth0_user_id) === auth0_user_id
-		)
-		return teacher ? (teacher?.first_name + " " + teacher?.last_name) : "N/A" 
+		const teacher = data.users.data.find((el) => el.auth0_user_id === auth0_user_id)
+		return teacher ? teacher?.first_name + ' ' + teacher?.last_name : 'N/A'
 	}
 
 	const { form, errors, setInitialValues, reset } = createForm({
@@ -80,7 +78,7 @@
 		extend: validator({ schema }),
 		transform: (values: any) => ({
 			...values,
-			agencyId: parseInt(values.agencyId, 10),
+			agencyId: parseInt(values.agencyId, 10)
 		}),
 		onSubmit: save
 	})
@@ -243,7 +241,7 @@
 			refreshData()
 			resetDefaultForm()
 			Notify({
-				type: "success",
+				type: 'success',
 				id: crypto.randomUUID(),
 				description: isNew ? 'Tạo lớp học thành công!' : 'Cập nhật lớp học thành công!'
 			})
@@ -446,7 +444,8 @@
 								</th>
 								<th on:click={() => show(classroom.id)}>{classroom.name}</th>
 								<td on:click={() => show(classroom.id)}>{formatClasses(classroom.grade || '')}</td>
-								<td on:click={() => show(classroom.id)}>{formatTeacherName(classroom.teacherId)}</td>
+								<td on:click={() => show(classroom.id)}>{formatTeacherName(classroom.teacherId)}</td
+								>
 								<td on:click={() => show(classroom.id)}>{formatAgencyName(classroom.agencyId)}</td>
 
 								<td on:click={() => show(classroom.id)}>
@@ -478,11 +477,13 @@
 				</a>
 			</div>
 			{#if isChecked.length > 0}
-				<div class="absolute bottom-20 left-1/2 min-w-fit w-1/2 -translate-x-1/2" transition:fade>
+				<div class="absolute bottom-20 left-1/2 w-1/2 min-w-fit -translate-x-1/2" transition:fade>
 					<div class="alert flex justify-between rounded-full bg-white py-2.5 text-sm shadow">
 						<div class="flex w-1/2 items-center gap-3">
-							<div class="w-full"> 
-								<span class="w-fit">Đã chọn <strong class="w-fit">{isChecked.length}</strong> dòng</span>
+							<div class="w-full">
+								<span class="w-fit"
+									>Đã chọn <strong class="w-fit">{isChecked.length}</strong> dòng</span
+								>
 							</div>
 							<button
 								class="btn btn-outline btn-sm rounded border-2 bg-white normal-case"
@@ -505,7 +506,7 @@
 			{/if}
 		</div>
 	</div>
-	<div class="drawer-side z-10 place-items-center h-full">
+	<div class="drawer-side z-10 h-full place-items-center">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}

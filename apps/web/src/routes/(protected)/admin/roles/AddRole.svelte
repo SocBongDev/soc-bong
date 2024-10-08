@@ -25,7 +25,7 @@
 			<div
 				class="mt-2 grid h-full grid-cols-3 place-items-center rounded-xl border border-black/10 bg-black/5 p-4"
 			>
-				<div class="card group w-fit min-w-[9rem] rounded-xl p-4 shadow-md hover:bg-black">
+				<div class="group card w-fit min-w-[9rem] rounded-xl p-4 shadow-md hover:bg-black">
 					<figure>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -46,7 +46,7 @@
 					</div>
 				</div>
 
-				<div class="card group w-fit min-w-[9rem] rounded-xl p-4 shadow-md hover:bg-black">
+				<div class="group card w-fit min-w-[9rem] rounded-xl p-4 shadow-md hover:bg-black">
 					<figure>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +67,7 @@
 					</div>
 				</div>
 
-				<div class="card group w-fit min-w-[9rem] rounded-xl p-4 shadow-md hover:bg-black">
+				<div class="group card w-fit min-w-[9rem] rounded-xl p-4 shadow-md hover:bg-black">
 					<figure>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -90,7 +90,7 @@
 			</div>
 			<h1 class="mt-2 text-xl font-bold">2. Tạo thêm vai trò</h1>
 			<div class="mt-2 h-fit rounded-xl border border-black/10 bg-black/5 p-4">
-				<div class="flex flex-col gap-1 justify-start">
+				<div class="flex flex-col justify-start gap-1">
 					<label for="role">Role: </label>
 					<div class="flex flex-row items-center justify-start gap-4">
 						<input name="role" class="input border focus:border-black focus:outline-none" />

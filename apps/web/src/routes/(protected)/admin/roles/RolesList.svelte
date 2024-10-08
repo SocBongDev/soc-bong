@@ -86,9 +86,7 @@
 							</label>
 						</th>
 						<th on:click={() => console.log(role.id)}>{role.id}</th>
-						<td on:click={() => console.log(role.id)}
-							>{role.name}</td
-						>
+						<td on:click={() => console.log(role.id)}>{role.name}</td>
 						<td on:click={() => console.log(role.id)}>{role.description}</td>
 						<td on:click={() => console.log(role.id)}>
 							<div class="px-2">

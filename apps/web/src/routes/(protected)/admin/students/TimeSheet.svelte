@@ -108,10 +108,9 @@
 			)
 			const preAttendances = await response.json()
 
-			
 			const studentIds = studentList
-			.map((student: any) => student.id)
-			.sort((a: any, b: any) => b - a)
+				.map((student: any) => student.id)
+				.sort((a: any, b: any) => b - a)
 			attendances = studentIds.map((id: any) => preAttendances[id])
 		} catch (err) {
 			console.error('Error load student attendances data: ', err)
@@ -417,7 +416,7 @@
 					{/each}
 				</select>
 			{:else}
-				<select class="select select-ghost disabled h-fit min-h-0 w-fit max-w-xs font-bold">
+				<select class="disabled select select-ghost h-fit min-h-0 w-fit max-w-xs font-bold">
 					<option value="1">Không tồn tại lớp nào</option>
 				</select>
 			{/if}

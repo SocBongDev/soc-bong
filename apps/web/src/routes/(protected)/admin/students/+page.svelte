@@ -537,7 +537,7 @@
 		<div class="tabs tab-lg w-full">
 			<ul class="tabs tab-lg w-full border-b border-gray-400">
 				{#each tabData as item}
-					<li class={` tab ${activeTabValue === item.value ? 'tab-bordered tab-active' : ''}`}>
+					<li class={` tab ${activeTabValue === item.value ? 'tab-active tab-bordered' : ''}`}>
 						<span
 							class="mb-1 font-bold"
 							on:click={() => {
@@ -560,7 +560,7 @@
 		</div>
 	</div>
 
-	<div class="drawer-side z-10 place-items-center h-full">
+	<div class="drawer-side z-10 h-full place-items-center">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}
