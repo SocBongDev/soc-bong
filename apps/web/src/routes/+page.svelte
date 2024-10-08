@@ -21,12 +21,12 @@
 </script>
 
 <div class="flex h-screen w-full flex-col items-center justify-center gap-4">
-	<button class="btn btn-primary btn-block group max-w-xs" on:click={() => login()}>
+	<button class="group btn btn-primary btn-block max-w-xs" on:click={() => login()}>
 		<span class="capitalize">Đăng Nhập</span>
 		<ArrowRightIcon class="transition group-hover:translate-x-2" /></button
 	>
 
-	<button class="btn btn-primary btn-block group max-w-xs" on:click={() => signup()}>
+	<button class="group btn btn-primary btn-block max-w-xs" on:click={() => signup()}>
 		<span class="capitalize">Đăng Kí Tài Khoản</span>
 		<ArrowRightIcon class="transition group-hover:translate-x-2" /></button
 	>

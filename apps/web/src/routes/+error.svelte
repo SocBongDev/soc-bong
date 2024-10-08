@@ -12,7 +12,7 @@
 
 	onMount(() => {
 		timeoutId = setTimeout(function () {
-			if(isAuthenticated()) {
+			if (isAuthenticated()) {
 				goto('/admin/registrations')
 			} else {
 				goto('/')
@@ -27,13 +27,12 @@
 	})
 
 	function handleGoBack() {
-		if(isAuthenticated()) {
+		if (isAuthenticated()) {
 			goto('/admin/registrations')
 		} else {
 			goto('/')
 		}
 	}
-
 </script>
 
 <svelte:head>
@@ -61,10 +60,7 @@
 		</p>
 	</div>
 
-	<button
-		on:click={handleGoBack}
-		class="btn btn-primary group"
-	>
+	<button on:click={handleGoBack} class="group btn btn-primary">
 		Trở về trang chủ
 		<ArrowRightIcon class="transition group-hover:translate-x-2" />
 	</button>

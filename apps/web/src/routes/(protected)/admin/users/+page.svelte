@@ -445,7 +445,7 @@
 		</div>
 	</div>
 
-	<div class="drawer-side z-10 place-items-center h-full">
+	<div class="drawer-side z-10 h-full place-items-center">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}

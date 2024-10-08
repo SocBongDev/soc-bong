@@ -53,7 +53,7 @@
 
 	function handleChangeState(index: number) {
 		activeStatus = status[index]
-		activeTrackStatus = activeStatus.name;
+		activeTrackStatus = activeStatus.name
 		statusChange.update((status) => {
 			let id = data?.id
 			if (!id) {
@@ -163,7 +163,7 @@
 		{/if}
 	</button>
 	<ul
-		class="dropdown-content menu bg-base-100 rounded-box z-10 p-2 shadow"
+		class="menu dropdown-content rounded-box z-10 bg-base-100 p-2 shadow"
 		style:visibility={isDropdownOpen ? 'visible' : 'hidden'}
 	>
 		{#each status as { name, color, letter }, index (letter)}

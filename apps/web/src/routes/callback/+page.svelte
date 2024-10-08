@@ -12,8 +12,8 @@
 			const decodedToken = JSON.parse(atob(access_token.split('.')[1]))
 			const permissions = decodedToken.permissions || []
 			const roles = decodedToken['user/roles']
-			localStorage.setItem("role", roles[0])
-			localStorage.setItem("user_id", decodedToken.sub)
+			localStorage.setItem('role', roles[0])
+			localStorage.setItem('user_id', decodedToken.sub)
 			userRoleStore.set(roles[0])
 			//define the minimum required permissions here:
 			const requiredPermission = ['read:registrations']

@@ -157,7 +157,7 @@
 			refreshData()
 			resetDefaultForm()
 			Notify({
-				type: "success",
+				type: 'success',
 				id: crypto.randomUUID(),
 				description: isNew ? 'Tạo cơ sở thành công!' : 'Cập nhật cơ sở thành công!'
 			})
@@ -179,7 +179,7 @@
 
 		try {
 			const res = await fetch(`${PUBLIC_API_SERVER_URL}/agencies/${id}`, {
-				method: "GET",
+				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${token}`,
 					'Content-Type': 'application/json',
@@ -387,7 +387,9 @@
 			<div class="join mt-auto self-center">
 				<a
 					class={data?.agencies?.page === 1 ? 'pointer-events-none cursor-default opacity-40' : ''}
-					href={`/admin/agencies?page=${data?.agencies?.page - 1}&pageSize=${data?.agencies?.pageSize}`}
+					href={`/admin/agencies?page=${data?.agencies?.page - 1}&pageSize=${
+						data?.agencies?.pageSize
+					}`}
 				>
 					<button class="btn join-item">«</button>
 				</a>
@@ -397,7 +399,9 @@
 					data?.agencies?.data.length === 0
 						? 'pointer-events-none cursor-default opacity-40'
 						: ''}
-					href={`/admin/agencies?page=${data?.agencies?.page + 1}&pageSize=${data?.agencies?.pageSize}`}
+					href={`/admin/agencies?page=${data?.agencies?.page + 1}&pageSize=${
+						data?.agencies?.pageSize
+					}`}
 				>
 					<button class="btn join-item">»</button>
 				</a>
@@ -428,7 +432,7 @@
 			{/if}
 		</div>
 	</div>
-	<div class="drawer-side z-10 place-items-center h-full">
+	<div class="drawer-side z-10 h-full place-items-center">
 		<label for="my-drawer" class="drawer-overlay" />
 		<div class="flex h-full w-1/2 flex-col bg-white">
 			{#if loading}
