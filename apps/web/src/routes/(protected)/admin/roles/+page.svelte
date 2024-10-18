@@ -1,11 +1,10 @@
 <script lang="ts">
-	import type { SvelteComponent } from 'svelte'
 	import RefreshIcon from '~icons/ri/refresh-line'
-	import PlusIcon from '~icons/ic/round-add'
 	import { invalidate } from '$app/navigation'
 	import RolesList from './RolesList.svelte'
 	import AddRole from './AddRole.svelte'
 	import type { PageData } from './$types'
+	import { KeyboardEventHandler } from 'svelte/elements'
 	let drawerToggleRef: HTMLInputElement
 
 	export let data: PageData
@@ -18,9 +17,16 @@
 		{ name: 'Tạo mới vai trò', section: 'newRole', value: 1 }
 	]
 
-	let activeTabValue: number = 0
+	let activeTabValue = 0
 	function handleClick(tabValue: number) {
 		activeTabValue = tabValue
+	}
+
+	function handleKeydown(event: KeyboardEvent, tabValue: number) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault()
+			handleClick(tabValue)
+		}
 	}
 </script>
 
@@ -39,18 +45,6 @@
 					<RefreshIcon />
 				</button>
 			</div>
-
-			<!-- <button
-					class="btn btn-primary btn-sm rounded normal-case active:!translate-y-1"
-					on:click={() => {
-                        console.log('click')
-						// recordData = null
-						// show()
-					}}
-				>
-					<PlusIcon />
-					Thêm mới
-				</button> -->
 		</header>
 
 		<div class="tabs tab-lg w-full">
@@ -58,6 +52,9 @@
 				{#each tabData as item}
 					<li class={` tab ${activeTabValue === item.value ? 'tab-active tab-bordered' : ''}`}>
 						<span
+							role="button"
+							tabindex="0"
+							on:keydown={(event) => handleKeydown(event, item.value)}
 							class="mb-1 font-bold"
 							on:click={() => {
 								handleClick(item.value)
