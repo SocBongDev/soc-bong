@@ -6,14 +6,15 @@
 	import { redirect } from '@sveltejs/kit'
 	import { PUBLIC_AUTH0_CALLBACK_URL } from '$env/static/public'
 	import { Notify, userRoleStore } from '$lib/store'
+	import { role, userId } from '$lib/store/session'
 
 	function hasRequiredPermission(access_token: string): boolean {
 		try {
 			const decodedToken = JSON.parse(atob(access_token.split('.')[1]))
 			const permissions = decodedToken.permissions || []
 			const roles = decodedToken['user/roles']
-			localStorage.setItem('role', roles[0])
-			localStorage.setItem('user_id', decodedToken.sub)
+			role.set(roles[0])
+			userId.set(decodedToken.sub)
 			userRoleStore.set(roles[0])
 			//define the minimum required permissions here:
 			const requiredPermission = ['read:registrations']
