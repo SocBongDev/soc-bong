@@ -2,7 +2,6 @@ import { z } from 'zod'
 
 export const CreateUserSchema = z
 	.object({
-		// address: z.string().nonempty({ message: 'Địa chỉ không được bỏ trống' }),
 		phone_number: z
 			.string()
 			.regex(/^\d+$/, { message: 'Số điện thoại không được chứ ký tự khác ngoài chữ số' })
@@ -17,7 +16,7 @@ export const CreateUserSchema = z
 				/^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])(?=.*[0-9])(?=.*[a-zA-Z]).{8,72}$/,
 				'Mật khẩu cần có cả chữ viết hoa, viết thường, số và kí tự đặc biệt và có độ dài tối thiểu là 8'
 			),
-		//
+
 		confirmPassword: z
 			.string()
 			.regex(

@@ -1,4 +1,3 @@
-// import type { Registration, Agency } from '$lib'
 import type { PageLoad } from './$types'
 import type { AgencyProps, UserProps } from '$lib/common/type'
 import { PUBLIC_API_SERVER_URL } from '$env/static/public'
