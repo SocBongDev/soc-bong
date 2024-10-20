@@ -1,7 +1,7 @@
 import { getSession, isAuthenticated } from '$lib/services/auth'
 import { redirect } from '@sveltejs/kit'
 
-export async function load({ params, parent, url, data }) {
+export async function load({ url }) {
 	if (url.pathname.startsWith('/')) {
 		const session = getSession()
 		if (session) {

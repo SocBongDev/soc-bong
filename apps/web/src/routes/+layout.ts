@@ -8,7 +8,7 @@ import {
 export const ssr = false
 export const prerender = true
 
-export async function load({ params, parent, url }) {
+export async function load() {
 	const options = {
 		clientID: PUBLIC_AUTH0_CLIENT_ID,
 		domain: PUBLIC_AUTH0_DOMAIN,
