@@ -4,7 +4,6 @@
 	import RolesList from './RolesList.svelte'
 	import AddRole from './AddRole.svelte'
 	import type { PageData } from './$types'
-	import { KeyboardEventHandler } from 'svelte/elements'
 	let drawerToggleRef: HTMLInputElement
 
 	export let data: PageData
