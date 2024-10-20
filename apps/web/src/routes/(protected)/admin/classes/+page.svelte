@@ -44,11 +44,6 @@
 		agencyId: 1,
 		createdAt: dayjs().format('dd/MM/YYYY'),
 		updatedAt: dayjs().format('dd/MM/YYYY')
-		// address: '',
-		// phone: '',
-		// email: '',
-		// createdAt: dayjs().format('dd/MM/YYYY'),
-		// updatedAt: dayjs().format('dd/MM/YYYY')
 	}
 
 	var agencyOptions = data?.agencies?.data?.map((el) => ({
@@ -235,7 +230,6 @@
 				})
 			}
 		})
-		// note: all 4 fields need to be unique when insert
 		try {
 			const res = await request
 			refreshData()
@@ -520,7 +514,7 @@
 			{/if}
 			<header class="relative flex flex-shrink-0 items-center justify-between px-7 py-6">
 				<h4 class="text-lg font-bold">{isNew ? 'Tạo mới' : 'Chỉnh sửa'}</h4>
-				<div class="tooltip tooltip-warning tooltip-left" data-tip="Xóa">
+				<div class="tooltip tooltip-left tooltip-warning" data-tip="Xóa">
 					<button
 						class="btn btn-circle btn-ghost btn-sm active:!translate-y-1"
 						on:click={() => {

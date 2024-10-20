@@ -4,6 +4,9 @@
 	import LogoutIcon from '~icons/ri/logout-circle-line'
 	import ProfileIcon from '~icons/gg/profile'
 	import { dialogProps, Notify, openDialog, SidebarContext } from '$lib/store'
+	import { accessToken } from '$lib/store/session'
+	import { get } from 'svelte/store'
+	import { clearSession } from '$lib/services/auth'
 
 	let modalRef: HTMLDialogElement | undefined
 	$: if ($openDialog) {
@@ -13,10 +16,8 @@
 	}
 
 	async function handleSignOut() {
-		if (localStorage.getItem('access_token')) {
-			localStorage.removeItem('access_token')
-			localStorage.removeItem('id_token')
-			localStorage.removeItem('expires_at')
+		if (get(accessToken)) {
+			clearSession()
 			return goto('/')
 		} else {
 			Notify({
@@ -83,7 +84,7 @@
 			>
 				<li class="disabled p-2">
 					<a class="justify-between rounded" href="/">
-						<div class="tooltip tooltip-info tooltip-top p-0" data-tip="Tính năng đang phát triển">
+						<div class="tooltip tooltip-top tooltip-info p-0" data-tip="Tính năng đang phát triển">
 							<span class="flex items-center gap-2">
 								<ProfileIcon />
 								Thông tin cá nhân
