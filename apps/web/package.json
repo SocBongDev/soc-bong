@@ -16,18 +16,17 @@
 	},
 	"dependencies": {
 		"@felte/validator-zod": "^1.0.17",
-		"@types/auth0-js": "^9.21.6",
 		"auth0-js": "^9.26.1",
 		"dayjs": "^1.11.9",
 		"felte": "^1.2.12",
 		"zod": "^3.22.2"
 	},
 	"devDependencies": {
-		"@types/auth0-js": "^9.21.6",
 		"@iconify/json": "^2.2.102",
 		"@playwright/test": "^1.28.1",
-		"@sveltejs/adapter-auto": "^2.0.0",
+		"@sveltejs/adapter-vercel": "^5.4.5",
 		"@sveltejs/kit": "^1.20.4",
+		"@types/auth0-js": "^9.21.6",
 		"@types/node": "^20.6.3",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@typescript-eslint/parser": "^5.45.0",
