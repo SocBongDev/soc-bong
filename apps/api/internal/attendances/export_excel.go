@@ -56,7 +56,7 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 		return err
 	}
 
-	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp.Data)
+	buf, err := h.excelGenerator.ExportClassAttendances(month, year, attendanceResp.Data, h.config)
 	if err != nil {
 		logger.ErrorContext(ctx, "f.WriteToBuffer err", "err", err)
 		return fiber.ErrInternalServerError
