@@ -12,8 +12,8 @@
 	}
 
 	const tabData = [
-		{ name: 'Danh sách vai trò đã có', section: 'roleList', value: 0 },
-		{ name: 'Tạo mới vai trò', section: 'newRole', value: 1 }
+		{ name: 'Danh sách vai trò đã có', section: 'roleList', value: 0, isDisabled: false }
+		// { name: 'Tạo mới vai trò', section: 'newRole', value: 1, isDisabled: true }
 	]
 
 	let activeTabValue = 0
@@ -69,8 +69,8 @@
 		<div class="mt-4 h-full">
 			{#if activeTabValue === 0}
 				<RolesList {data} />
-			{:else if activeTabValue === 1}
-				<AddRole />
+				<!-- {:else if activeTabValue === 1}
+				<AddRole /> -->
 			{/if}
 		</div>
 	</div>
