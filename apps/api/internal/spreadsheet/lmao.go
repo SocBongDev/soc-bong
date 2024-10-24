@@ -55,7 +55,8 @@ func (e *ExcelGenerator) setupTemplate() error {
 	}
 	logger.Info("Current working directory", "dir", dir)
 
-	templatePath := filepath.Join(dir, "./internal/spreadsheet/template.xlsx")
+	templatePath := filepath.Join(dir, "/apps/api/internal/spreadsheet/template.xlsx")
+
 	f, err := excelize.OpenFile(templatePath)
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile err", "err", err)
