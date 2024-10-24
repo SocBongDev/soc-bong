@@ -3,6 +3,8 @@ package spreadsheet
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
@@ -47,15 +49,15 @@ func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendance
 }
 
 func (e *ExcelGenerator) setupTemplate() error {
-	// dir, err := os.Getwd()
-	// if err != nil {
-	// 	logger.Error("ExportClassAttendancesError.writeDataToExcel.OpenFile Error getting path", "err", err)
-	// }
-	// logger.Info("Current working directory", "dir", dir)
+	dir, err := os.Getwd()
+	if err != nil {
+		logger.Error("ExportClassAttendancesError.writeDataToExcel.OpenFile Error getting path", "err", err)
+	}
+	logger.Info("Current working directory", "dir", dir)
 
-	// templatePath := filepath.Join(dir, "./internal/spreadsheet/template.xlsx")
+	templatePath := filepath.Join(dir, "/apps/api/internal/spreadsheet/template.xlsx")
 
-	f, err := excelize.OpenFile("./apps/api/insternal/spreadsheet/template.xlsx")
+	f, err := excelize.OpenFile(templatePath)
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile err", "err", err)
 		return err
