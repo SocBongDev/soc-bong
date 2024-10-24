@@ -227,7 +227,9 @@
 
 	async function handleExportAttendances() {
 		const response = await fetch(
-			`${PUBLIC_API_SERVER_URL}/attendances/${classId}/export-excel?period=${`0${monthPicked}-${yearPicked}`}`,
+			`${PUBLIC_API_SERVER_URL}/attendances/${classId}/export-excel?period=${`${
+				monthPicked < 10 ? `0${monthPicked}` : monthPicked
+			}-${yearPicked}`}`,
 			{
 				method: 'GET',
 				headers: {

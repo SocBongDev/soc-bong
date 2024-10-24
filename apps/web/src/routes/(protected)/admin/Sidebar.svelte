@@ -83,10 +83,11 @@
 				{#each sidebarData as { children, icon, isDisabled, name } (crypto.randomUUID())}
 					<li class={isDisabled ? 'disabled' : ''}>
 						<a
-							class="{!isDisabled ? 'active' : 'pointer-events-none'} rounded {$page.url
-								.pathname === `/admin/${name}`
-								? 'my-2 !translate-x-2 !border !bg-white !text-black'
-								: 'bg-black'}"
+							class={!isDisabled
+								? $page.url.pathname === `/admin/${name}`
+									? 'active my-2 !translate-x-2 !border !bg-white !text-black'
+									: 'bg-black text-white hover:bg-slate-200 active:bg-slate-800'
+								: 'pointer-events-none border disabled:bg-slate-400'}
 							href="/admin/{name}"
 							on:click={handleToggleCollapse}
 						>
