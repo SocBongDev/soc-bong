@@ -57,6 +57,7 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	}
 	logger.Info("ExportClassAttendances.setupTemplate ", "path", templatePath)
 	f, err := excelize.OpenFile(templatePath)
+  
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile err", "err", err)
 		return err
