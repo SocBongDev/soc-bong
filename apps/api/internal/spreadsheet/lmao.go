@@ -50,7 +50,7 @@ func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendance
 
 func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	var templatePath = ""
-	if config.Env == "production" {
+	if config.Env == "prod" {
 		templatePath = "../internal/spreadsheet/template.xlsx"
 	} else {
 		templatePath = "./internal/spreadsheet/template.xlsx"
