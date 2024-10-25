@@ -3,6 +3,7 @@ package spreadsheet
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
@@ -49,9 +50,15 @@ func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendance
 }
 
 func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
-	var templatePath = ""
+	dir, err := os.Getwd()
+	if err != nil {
+		logger.Error("ExportClassAttendances.setupTemplate get dir err", "err", err)
+		return err;
+	}
+	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
+	templatePath := ""
 	if config.Env == "prod" {
-		templatePath = "../internal/spreadsheet/template.xlsx"
+		templatePath = "/var/task/internal/spreadsheet/template.xlsx"
 	} else {
 		templatePath = "./internal/spreadsheet/template.xlsx"
 	}
