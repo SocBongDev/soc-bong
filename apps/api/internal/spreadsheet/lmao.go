@@ -58,9 +58,10 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	}
 	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
 	
-	checkDir := path.Join(dir, "/bootstrap")
+	checkVarsDir := "../"
+	checkOutVarDir := "../../"
 	// Read the files in the current directory
-	files, err := os.ReadDir(checkDir)
+	files, err := os.ReadDir(checkVarsDir)
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile read dir err", "err", err)
 	}
