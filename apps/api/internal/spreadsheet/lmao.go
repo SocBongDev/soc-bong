@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
@@ -56,9 +55,8 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 		logger.Error("ExportClassAttendances.setupTemplate get dir err", "err", err)
 	}
 	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
-	checkOutVarDir := filepath.Join(dir, "../../tmp")
 	// Read the files in the current directory
-	files, err := os.ReadDir(checkOutVarDir)
+	files, err := os.ReadDir(dir)
 
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile read dir err", "err", err)
