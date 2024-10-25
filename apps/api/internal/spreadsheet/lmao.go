@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
@@ -54,31 +54,29 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	dir, err := os.Getwd()
 	if err != nil {
 		logger.Error("ExportClassAttendances.setupTemplate get dir err", "err", err)
-		return err;
+		return err
 	}
 	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
-	
-	checkVarsDir := "../"
-	// checkOutVarDir := "../../"
+
 	// Read the files in the current directory
-	files, err := os.ReadDir(checkVarsDir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile read dir err", "err", err)
 	}
 	// List the files
 	for _, file := range files {
-		fmt.Println(file.Name())
+		fmt.Println("check all files: ", file.Name())
 	}
-	
+
 	templatePath := ""
 	if config.Env == "prod" {
-		templatePath = path.Join(dir, "/internal/spreadsheet/template.xlsx")
+		templatePath = filepath.Join(dir, "apps", "api", "internal", "spreadsheet", "template.xlsx")
 	} else {
 		templatePath = "./internal/spreadsheet/template.xlsx"
 	}
 	logger.Info("ExportClassAttendances.setupTemplate ", "path", templatePath)
 	f, err := excelize.OpenFile(templatePath)
-  
+
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile err", "err", err)
 		return err
