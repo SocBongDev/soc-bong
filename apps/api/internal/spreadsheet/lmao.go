@@ -59,7 +59,7 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
 	
 	checkVarsDir := "../"
-	checkOutVarDir := "../../"
+	// checkOutVarDir := "../../"
 	// Read the files in the current directory
 	files, err := os.ReadDir(checkVarsDir)
 	if err != nil {
