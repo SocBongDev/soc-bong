@@ -56,7 +56,8 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	}
 	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
 	// Read the files in the current directory
-	files, err := os.ReadDir(dir)
+	checkInsideTaskDir := filepath.Join(dir, "bootstrap")
+	files, err := os.ReadDir(checkInsideTaskDir)
 
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile read dir err", "err", err)
