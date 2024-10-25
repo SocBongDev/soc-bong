@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path"
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
@@ -56,9 +57,19 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 		return err;
 	}
 	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
+	
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile read dir err", "err", err)
+	}
+	// List the files
+	for _, file := range files {
+		fmt.Println(file.Name())
+	}
+	
 	templatePath := ""
 	if config.Env == "prod" {
-		templatePath = "/var/task/internal/spreadsheet/template.xlsx"
+		templatePath = path.Join(dir, "/internal/spreadsheet/template.xlsx")
 	} else {
 		templatePath = "./internal/spreadsheet/template.xlsx"
 	}
