@@ -30,7 +30,7 @@
   ],
   "functions": {
     "api/index.go": {
-      "includeFiles": "internal/spreadsheet/template.xlsx"
+      "includeFiles": "public/template.xlsx"
     }
   }
 }
