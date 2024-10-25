@@ -112,6 +112,7 @@ func (a *App) ApiV1(api fiber.Router) {
 			excel,
 			studentRepo,
 			spreadsheet.NewExcelGenerator(),
+			a.config,
 		),
 		classes.New(classRepo),
 		registrations.New(registrationRepo),

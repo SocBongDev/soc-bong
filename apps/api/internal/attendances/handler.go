@@ -3,6 +3,7 @@ package attendances
 import (
 	"github.com/SocBongDev/soc-bong/internal/classes"
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/middlewares"
 	"github.com/SocBongDev/soc-bong/internal/spreadsheet"
 	"github.com/SocBongDev/soc-bong/internal/students"
@@ -15,6 +16,7 @@ type AttendanceHandler struct {
 	spreadsheet    spreadsheet.SpreadSheet
 	excelGenerator *spreadsheet.ExcelGenerator
 	studentRepo    students.StudentRepository
+	config         *config.Config
 }
 
 func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
@@ -41,6 +43,6 @@ func (h *AttendanceHandler) RegisterRoute(group fiber.Router) {
 	)
 }
 
-func New(repo AttendanceRepository, classRepo classes.ClassRepository, spreadsheet spreadsheet.SpreadSheet, studentRepo students.StudentRepository, eg *spreadsheet.ExcelGenerator) common.APIHandler {
-	return &AttendanceHandler{repo: repo, classRepo: classRepo, spreadsheet: spreadsheet, studentRepo: studentRepo, excelGenerator: eg}
+func New(repo AttendanceRepository, classRepo classes.ClassRepository, spreadsheet spreadsheet.SpreadSheet, studentRepo students.StudentRepository, eg *spreadsheet.ExcelGenerator, config *config.Config) common.APIHandler {
+	return &AttendanceHandler{repo: repo, classRepo: classRepo, spreadsheet: spreadsheet, studentRepo: studentRepo, excelGenerator: eg, config: config}
 }

@@ -3,27 +3,30 @@ package spreadsheet
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
 	"github.com/SocBongDev/soc-bong/internal/common"
+	"github.com/SocBongDev/soc-bong/internal/config"
 	"github.com/SocBongDev/soc-bong/internal/entities"
 	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/xuri/excelize/v2"
 )
 
 type ExcelGenerator struct {
-	file *excelize.File
+	file   *excelize.File
+	config *config.Config
 }
 
 func NewExcelGenerator() *ExcelGenerator {
-	return &ExcelGenerator{file: excelize.NewFile()}
+	return &ExcelGenerator{file: excelize.NewFile(), config: &config.Config{}}
 }
 
-func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendances map[int]entities.AttendanceResponse) (*bytes.Buffer, error) {
+func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendances map[int]entities.AttendanceResponse, config *config.Config) (*bytes.Buffer, error) {
 	defer e.file.Close()
 
-	if err := e.setupTemplate(); err != nil {
+	if err := e.setupTemplate(config); err != nil {
 		logger.Error("ExportClassAttendances.setupTemplate err", "err", err)
 		return nil, err
 	}
@@ -46,16 +49,22 @@ func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendance
 	return e.file.WriteToBuffer()
 }
 
-func (e *ExcelGenerator) setupTemplate() error {
-	// dir, err := os.Getwd()
-	// if err != nil {
-	// 	logger.Error("ExportClassAttendancesError.writeDataToExcel.OpenFile Error getting path", "err", err)
-	// }
-	// logger.Info("Current working directory", "dir", dir)
-
-	// templatePath := filepath.Join(dir, "./internal/spreadsheet/template.xlsx")
-
-	f, err := excelize.OpenFile("./apps/api/insternal/spreadsheet/template.xlsx")
+func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
+	dir, err := os.Getwd()
+	if err != nil {
+		logger.Error("ExportClassAttendances.setupTemplate get dir err", "err", err)
+		return err;
+	}
+	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
+	templatePath := ""
+	if config.Env == "prod" {
+		templatePath = "/var/task/internal/spreadsheet/template.xlsx"
+	} else {
+		templatePath = "./internal/spreadsheet/template.xlsx"
+	}
+	logger.Info("ExportClassAttendances.setupTemplate ", "path", templatePath)
+	f, err := excelize.OpenFile(templatePath)
+  
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile err", "err", err)
 		return err
