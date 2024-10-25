@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/SocBongDev/soc-bong/internal/apperr"
@@ -67,6 +68,12 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	for _, file := range files {
 		fmt.Println("check all files: ", file.Name())
 	}
+
+	_, b, _, _ := runtime.Caller(0)
+
+	// Root folder of this project
+	Root := filepath.Join(filepath.Dir(b), "../..")
+	logger.Info("Check Root", "info", Root)
 
 	templatePath := ""
 	if config.Env == "prod" {
