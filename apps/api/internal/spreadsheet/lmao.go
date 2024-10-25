@@ -56,29 +56,25 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 
 	// Root folder of this project
 	Root := filepath.Join(filepath.Dir(b), "../..")
+	rootInInternal := filepath.Join(filepath.Dir(b), "../")
 	logger.Info("Check Root", "info", Root)
+	logger.Info("Check RootInInternal", "info", rootInInternal)
 
-	err := filepath.Walk(Root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		// Print full path
-		fmt.Println("Path:", path)
-
-		// Print file/directory information
-		fmt.Println("Name:", info.Name())
-		fmt.Println("Is Directory:", info.IsDir())
-		fmt.Println("Size:", info.Size())
-		fmt.Println("Permissions:", info.Mode())
-		fmt.Println("Modification Time:", info.ModTime())
-
-		return nil
-	})
-
+	files, err := os.ReadDir(Root)
 	if err != nil {
-		logger.Error("ExportClassAttendances.writeDataToExcel.ReadDir err", "err", err)
+		logger.Error("ExportClassAttendances.writeDataToExcel.ReadDir root err", "err", err)
+	}
+	for _, f := range files {
+		fmt.Println("check file: ", f.Name())
+	}
 
+	filesInternals, er := os.ReadDir(rootInInternal)
+	if er != nil {
+		logger.Error("ExportClassAttendances.writeDataToExcel.ReadDir root internal err", "err", er)
+	}
+
+	for _, f := range filesInternals {
+		fmt.Println("check fileInternal: ", f.Name())
 	}
 
 	templatePath := ""
