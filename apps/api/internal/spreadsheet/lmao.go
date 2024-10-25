@@ -3,7 +3,6 @@ package spreadsheet
 import (
 	"bytes"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -58,16 +57,30 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	// Root folder of this project
 	Root := filepath.Join(filepath.Dir(b), "../..")
 	logger.Info("Check Root", "info", Root)
-	fileSystem := os.DirFS(Root)
 
-	fs.WalkDir(fileSystem, ".", func(path string, d fs.DirEntry, err error) error {
+	err := filepath.Walk(Root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			logger.Error("ExportClassAttendances.setup Walkdir err", "err", err)
+			return err
 		}
-		fmt.Println("check path:", path)
+
+		// Print full path
+		fmt.Println("Path:", path)
+
+		// Print file/directory information
+		fmt.Println("Name:", info.Name())
+		fmt.Println("Is Directory:", info.IsDir())
+		fmt.Println("Size:", info.Size())
+		fmt.Println("Permissions:", info.Mode())
+		fmt.Println("Modification Time:", info.ModTime())
+
 		return nil
 	})
-	
+
+	if err != nil {
+		logger.Error("ExportClassAttendances.writeDataToExcel.ReadDir err", "err", err)
+
+	}
+
 	templatePath := ""
 	if config.Env == "prod" {
 		templatePath = filepath.Join(Root, "template.xlsx")
