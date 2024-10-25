@@ -56,7 +56,7 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 		logger.Error("ExportClassAttendances.setupTemplate get dir err", "err", err)
 	}
 	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
-	checkOutVarDir := filepath.Join(dir, "../../tmp/")
+	checkOutVarDir := filepath.Join(dir, "../../tmp")
 	// Read the files in the current directory
 	files, err := os.ReadDir(checkOutVarDir)
 
