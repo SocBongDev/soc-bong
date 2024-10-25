@@ -56,23 +56,21 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 		logger.Error("ExportClassAttendances.setupTemplate get dir err", "err", err)
 	}
 	logger.Info("ExportClassAttendances.setupTemplate check dir", "dir", dir)
-
-	// List all files in the working directory and subdirectories
-	err = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			logger.Error("check filepath walk err", "err", err)
-		}
-		logger.Info("ExportClassAttendances.setupTemplate file path", "path", path)
-		return nil
-	})
+	checkOutVarDir := filepath.Join(dir, "../../")
+	// Read the files in the current directory
+	files, err := os.ReadDir(checkOutVarDir)
 
 	if err != nil {
-		logger.Error("ExportClassAttendances.setupTemplate filepath walk err", "err", err)
+		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile read dir err", "err", err)
+	}
+	// List the files
+	for _, file := range files {
+		fmt.Println("check all files: ", file.Name())
 	}
 
 	templatePath := ""
 	if config.Env == "prod" {
-		templatePath = filepath.Join(dir, "internal", "spreadsheet", "template.xlsx")
+		templatePath = "../internal/spreadsheet/template.xlsx"
 	} else {
 		templatePath = "./internal/spreadsheet/template.xlsx"
 	}
