@@ -51,10 +51,28 @@ func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendance
 	return e.file.WriteToBuffer()
 }
 
+func printDirStructure(root string) {
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		fmt.Println("check path: ", path)
+		return nil
+	})
+	if err != nil {
+		fmt.Printf("Error walking the path %q: %v\n", root, err)
+	}
+}
+
 func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 	_, b, _, _ := runtime.Caller(0)
-
+	dir, err := os.Getwd()
+	if err != nil {
+		logger.Error("ExportClassAttendances.ReadDirGetwd err", "err", err)
+	}
 	// Root folder of this project
+	printDirStructure(b)
+	printDirStructure(dir)
 	Root := filepath.Join(filepath.Dir(b), "../..")
 	rootInInternal := filepath.Join(filepath.Dir(b), "../")
 	logger.Info("Check Root", "info", Root)
@@ -79,7 +97,7 @@ func (e *ExcelGenerator) setupTemplate(config *config.Config) error {
 
 	templatePath := ""
 	if config.Env == "prod" {
-		templatePath = filepath.Join(Root, "template.xlsx")
+		templatePath = filepath.Join(Root, "/internal/spreadsheet/template.xlsx")
 	} else {
 		templatePath = "./internal/spreadsheet/template.xlsx"
 	}
