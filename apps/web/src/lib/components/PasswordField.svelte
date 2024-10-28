@@ -5,8 +5,7 @@
 	export let required = false
 	export let value: string | undefined = undefined
 	export let error: string[] | null = null
-	export let disabled: boolean = false
-	let isPasswordField = name === 'password' || name === 'confirmPassword'
+	export let disabled = false
 	let isShow = false
 
 	function handleInput(e: Event) {
