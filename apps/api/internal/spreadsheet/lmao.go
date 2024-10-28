@@ -2,6 +2,7 @@ package spreadsheet
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 	"github.com/SocBongDev/soc-bong/internal/logger"
 	"github.com/xuri/excelize/v2"
 )
+
+//go:embed template.xlsx
+var templateFS embed.FS
 
 type ExcelGenerator struct {
 	file *excelize.File
@@ -47,7 +51,13 @@ func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendance
 }
 
 func (e *ExcelGenerator) setupTemplate() error {
-	f, err := excelize.OpenFile("./internal/spreadsheet/template.xlsx")
+	data, err := templateFS.ReadFile("template.xlsx")
+	if err != nil {
+		logger.Error("ExportClassAttendances.setupTemplate.ReadFile err", "err", err)
+		return err
+	}
+
+	f, err := excelize.OpenReader(bytes.NewReader(data))
 	if err != nil {
 		logger.Error("ExportClassAttendances.writeDataToExcel.OpenFile err", "err", err)
 		return err
