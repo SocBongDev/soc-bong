@@ -16,7 +16,7 @@
 	} from '$env/static/public'
 	import type { PageData } from './$types'
 	import type { UserProps } from '$lib/common/type'
-	import { dialogProps, Notify, openDialog } from '$lib/store'
+	import { Notify } from '$lib/store'
 
 	let scrollClass = ''
 	let loading = false
