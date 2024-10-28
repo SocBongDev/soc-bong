@@ -51,7 +51,7 @@ func (e *ExcelGenerator) ExportClassAttendances(month, year int, classAttendance
 }
 
 func (e *ExcelGenerator) setupTemplate() error {
-	data, err := templateFS.ReadFile("internal/spreadsheet/template.xlsx")
+	data, err := templateFS.ReadFile("template.xlsx")
 	if err != nil {
 		logger.Error("ExportClassAttendances.setupTemplate.ReadFile err", "err", err)
 		return err
