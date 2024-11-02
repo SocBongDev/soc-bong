@@ -13,7 +13,8 @@
 
 	export let data: PageData
 	let isChecked: string[] = []
-	let classId = get(classIdStore) || 1
+	let classId =
+		get(classIdStore) ?? ((data.classes.data.length > 0 && data.classes.data[0].id) as number)
 	let isCheckedAll = false
 	let loading = false
 	let studentList = {
@@ -171,9 +172,11 @@
 
 	onMount(() => {
 		loading = true
-		if ($classIdStore) {
-			classId = $classIdStore
+		if (classId) {
 			loadStudentData(classId)
+		} else {
+			studentList.data = []
+			loading = false
 		}
 	})
 
@@ -283,8 +286,10 @@
 						{/if}
 					{/each}
 				{:else}
-					<tr class="flex h-12 w-full flex-row items-center justify-center border-none">
-						<p class="w-full text-base font-medium">Không có dữ liệu...</p>
+					<tr class="h-12 w-full items-center justify-center border-none">
+						<td class="w-full text-center text-base font-medium" colspan="10">
+							Không có dữ liệu...
+						</td>
 					</tr>
 				{/if}
 			</tbody>
