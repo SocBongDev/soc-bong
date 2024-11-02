@@ -46,9 +46,16 @@
 		}
 	}
 
-	let activeTabValue: number = 1
+	let activeTabValue = 1
 	function handleClick(tabValue: number) {
 		activeTabValue = tabValue
+	}
+
+	function handleKeydown(event: KeyboardEvent, tabValue: number) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault()
+			handleClick(tabValue)
+		}
 	}
 
 	var agencyOptions = data?.agencies?.data?.map((el) => ({
@@ -106,32 +113,38 @@
 
 	const studentSchema: {
 		name: string
+		viName: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
 		options?: { label: string; value: string | boolean }[]
 	}[] = [
 		{
 			name: 'firstName',
+			viName: 'Họ',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'lastName',
+			viName: 'Tên',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'enrolledAt',
+			viName: 'Ngày nhập học',
 			type: 'date',
 			required: false
 		},
 		{
 			name: 'dob',
+			viName: 'Ngày tháng năm sinh',
 			type: 'date',
 			required: false
 		},
 		{
 			name: 'gender', //boolean
+			viName: 'Giới tính',
 			type: 'select',
 			required: true,
 			options: [
@@ -141,42 +154,50 @@
 		},
 		{
 			name: 'ethnic',
+			viName: 'Dân tộc',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'birthPlace',
+			viName: 'Nơi sinh',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'tempAddress',
+			viName: 'Địa chỉ tạm trú',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'permanentAddressProvince',
+			viName: 'Tỉnh thường trú',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'permanentAddressDistrict',
+			viName: 'Tỉnh thường trú',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'permanentAddressCommune',
+			viName: 'Xã thường trú',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'agencyId',
+			viName: 'Cơ sở trường học',
 			type: 'select',
 			required: true,
 			options: agencyOptions
 		},
 		{
 			name: 'classId',
+			viName: 'Lớp học',
 			type: 'select',
 			required: true,
 			options: classOptions
@@ -185,77 +206,92 @@
 
 	const parentSchema: {
 		name: string
+		viName: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
 		options?: { label: string; value: string | boolean }[]
 	}[] = [
 		{
 			name: 'fatherName',
+			viName: 'Tên cha',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'fatherDob',
+			viName: 'Ngày sinh của cha',
 			type: 'date',
 			required: false
 		},
 		{
 			name: 'fatherBirthPlace',
+			viName: 'Nơi sinh của cha',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'fatherOccupation',
+			viName: 'Nghề nghiệp của cha',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'motherName',
+			viName: 'Tên mẹ',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'motherDob',
+			viName: 'Ngày tháng năm sinh của mẹ',
 			type: 'date',
 			required: false
 		},
 		{
 			name: 'motherOccupation',
+			viName: 'Nghệ nghiệp của mẹ',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'motherBirthPlace',
+			viName: 'Nơi sinh của mẹ',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'parentLandLord',
+			viName: 'Chủ nhà',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'fatherPhoneNumber',
+			viName: 'Số điện thoại của cha',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'motherPhoneNumber',
+			viName: 'Số điện thoại của mẹ',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'parentZalo',
+			viName: 'số Zalo đại diện',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'parentRoi',
+			viName: 'Thu nhập gia đình',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'parentResRegistration',
+			viName: 'Đăng kí Res của phụ huynh',
 			type: 'text',
 			required: false
 		}
@@ -490,7 +526,6 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div class="drawer drawer-end h-full">
 	<input
 		id="my-drawer"
@@ -539,6 +574,9 @@
 				{#each tabData as item}
 					<li class={` tab ${activeTabValue === item.value ? 'tab-active tab-bordered' : ''}`}>
 						<span
+							role="button"
+							tabindex="0"
+							on:keydown={(event) => handleKeydown(event, item.value)}
 							class="mb-1 font-bold"
 							on:click={() => {
 								handleClick(item.value)
@@ -603,23 +641,23 @@
 				<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
 					<h1 class="text-xl font-bold">1. Thông tin học sinh</h1>
 
-					{#each studentSchema as { type, name, required, options } (name)}
+					{#each studentSchema as { type, name, viName, required, options } (name)}
 						{#if type === 'text'}
-							<TextField error={$errors[name]} {name} {required} />
+							<TextField error={$errors[name]} {name} {viName} {required} />
 						{:else if type === 'select'}
-							<SelectField error={$errors[name]} {name} {options} {required} />
+							<SelectField error={$errors[name]} {name} {viName} {options} {required} />
 						{:else if type === 'date'}
-							<DateField error={$errors[name]} {name} {required} />
+							<DateField error={$errors[name]} {name} {viName} {required} />
 						{/if}
 					{/each}
 					<h1 class="text-xl font-bold">2. Thông tin Phụ huynh học sinh</h1>
-					{#each parentSchema as { type, name, required, options } (name)}
+					{#each parentSchema as { type, name, viName, required, options } (name)}
 						{#if type === 'text'}
-							<TextField error={$errors[name]} {name} {required} />
+							<TextField error={$errors[name]} {name} {viName} {required} />
 						{:else if type === 'select'}
-							<SelectField error={$errors[name]} {name} {options} {required} />
+							<SelectField error={$errors[name]} {name} {viName} {options} {required} />
 						{:else if type === 'date'}
-							<DateField error={$errors[name]} {name} {required} />
+							<DateField error={$errors[name]} {name} {viName} {required} />
 						{/if}
 					{/each}
 				</form>
