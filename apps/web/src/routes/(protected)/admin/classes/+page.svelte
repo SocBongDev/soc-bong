@@ -80,17 +80,20 @@
 
 	const classesSchema: {
 		name: string
+		viName: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
 		options?: { label: string; value: string }[]
 	}[] = [
 		{
 			name: 'name',
+			viName: 'Tên lớp học',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'grade',
+			viName: 'Cấp bậc lớp học',
 			type: 'select',
 			required: true,
 			options: [
@@ -102,12 +105,14 @@
 		},
 		{
 			name: 'teacherId',
+			viName: 'Giáo viên phụ trách lớp',
 			type: 'select',
 			required: true,
 			options: teacherOptions
 		},
 		{
 			name: 'agencyId',
+			viName: 'Cơ sở lớp học đang mở',
 			type: 'select',
 			required: true,
 			options: agencyOptions
@@ -422,34 +427,45 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each data.classes.data as classroom (classroom.id)}
-						{#if classroom.id}
-							<tr class="hover cursor-pointer">
-								<th>
-									<label>
-										<input
-											id={classroom.id?.toString()}
-											type="checkbox"
-											class="checkbox checkbox-sm rounded"
-											on:click={handleCheck}
-											checked={isChecked.includes(classroom.id?.toString())}
-										/>
-									</label>
-								</th>
-								<th on:click={() => show(classroom.id)}>{classroom.name}</th>
-								<td on:click={() => show(classroom.id)}>{formatClasses(classroom.grade || '')}</td>
-								<td on:click={() => show(classroom.id)}>{formatTeacherName(classroom.teacherId)}</td
-								>
-								<td on:click={() => show(classroom.id)}>{formatAgencyName(classroom.agencyId)}</td>
+					{#if data.classes.data.length > 0}
+						{#each data.classes.data as classroom (classroom.id)}
+							{#if classroom.id}
+								<tr class="hover cursor-pointer">
+									<th>
+										<label>
+											<input
+												id={classroom.id?.toString()}
+												type="checkbox"
+												class="checkbox checkbox-sm rounded"
+												on:click={handleCheck}
+												checked={isChecked.includes(classroom.id?.toString())}
+											/>
+										</label>
+									</th>
+									<th on:click={() => show(classroom.id)}>{classroom.name}</th>
+									<td on:click={() => show(classroom.id)}>{formatClasses(classroom.grade || '')}</td
+									>
+									<td on:click={() => show(classroom.id)}
+										>{formatTeacherName(classroom.teacherId)}</td
+									>
+									<td on:click={() => show(classroom.id)}>{formatAgencyName(classroom.agencyId)}</td
+									>
 
-								<td on:click={() => show(classroom.id)}>
-									<div class="px-2">
-										<ArrowRightIcon />
-									</div>
-								</td>
-							</tr>
-						{/if}
-					{/each}
+									<td on:click={() => show(classroom.id)}>
+										<div class="px-2">
+											<ArrowRightIcon />
+										</div>
+									</td>
+								</tr>
+							{/if}
+						{/each}
+					{:else}
+						<tr class="h-12 w-full items-center justify-center border-none">
+							<td class="w-full text-center text-base font-medium" colspan="10">
+								Không có dữ liệu...
+							</td>
+						</tr>
+					{/if}
 				</tbody>
 			</table>
 
@@ -514,7 +530,7 @@
 			{/if}
 			<header class="relative flex flex-shrink-0 items-center justify-between px-7 py-6">
 				<h4 class="text-lg font-bold">{isNew ? 'Tạo mới' : 'Chỉnh sửa'}</h4>
-				<div class="tooltip tooltip-left tooltip-warning" data-tip="Xóa">
+				<div class="tooltip tooltip-warning tooltip-left" data-tip="Xóa">
 					<button
 						class="btn btn-circle btn-ghost btn-sm active:!translate-y-1"
 						on:click={() => {
@@ -541,13 +557,13 @@
 				on:scroll={(e) => handleContentScroll(e.currentTarget)}
 			>
 				<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
-					{#each classesSchema as { type, name, required, options } (name)}
+					{#each classesSchema as { type, name, viName, required, options } (name)}
 						{#if type === 'text'}
-							<TextField error={$errors[name]} {name} {required} />
+							<TextField error={$errors[name]} {name} {viName} {required} />
 						{:else if type === 'select'}
-							<SelectField error={$errors[name]} {name} {options} {required} />
+							<SelectField error={$errors[name]} {name} {viName} {options} {required} />
 						{:else if type === 'date'}
-							<DateField error={$errors[name]} {name} {required} />
+							<DateField error={$errors[name]} {name} {viName} {required} />
 						{/if}
 					{/each}
 				</form>
