@@ -2,6 +2,7 @@
 	import Error from './FloatingLabel/Error.svelte'
 
 	export let name: string
+	export let viName: string
 	export let required = false
 	export let value: string | undefined = undefined
 	export let error: string[] | null = null
@@ -37,7 +38,7 @@
 					? "-ml-px -mt-0.5 after:text-xs after:text-red-500 after:content-['_*']"
 					: ''}"
 			>
-				{name}
+				{viName}
 			</span>
 		</label>
 		<button
