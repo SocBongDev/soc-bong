@@ -229,7 +229,13 @@
 		isCheckedAll = false
 	}
 
-	async function batchDelete() {}
+	async function batchDelete() {
+		Notify({
+			type: 'error',
+			id: crypto.randomUUID(),
+			description: 'Phía máy chủ đang phát triển chức năng này!'
+		})
+	}
 
 	function handleContentScroll(panel: HTMLElement) {
 		const heightDiff = panel.scrollHeight - panel.offsetHeight
@@ -248,6 +254,7 @@
 
 	const userSchema: {
 		name: string
+		viName: string
 		type: 'text' | 'date' | 'select' | 'password'
 		required: boolean
 		options?: { label: string; value: string }[]
@@ -255,38 +262,45 @@
 	}[] = [
 		{
 			name: 'email',
+			viName: 'email',
 			type: 'text',
 			required: false,
 			disabled: true
 		},
 		{
 			name: 'first_name',
+			viName: 'Họ',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'last_name',
+			viName: 'Tên',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'dob',
+			viName: 'Ngày tháng năm sinh',
 			type: 'date',
 			required: true
 		},
 		{
 			name: 'phone_number',
+			viName: 'Số điện thoại',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'password',
+			viName: 'Mật khẩu',
 			type: 'password',
 			required: true,
 			disabled: true
 		},
 		{
 			name: 'agencyId',
+			viName: 'Cơ sở',
 			type: 'select',
 			required: true,
 			options: agencyOptions
@@ -486,21 +500,22 @@
 				on:scroll={(e) => handleContentScroll(e.currentTarget)}
 			>
 				<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
-					{#each userSchema as { type, name, required, options, disabled } (name)}
+					{#each userSchema as { type, name, viName, required, options, disabled } (name)}
 						{#if type === 'text'}
-							<TextField error={$errors[name]} {name} {required} {disabled} />
+							<TextField error={$errors[name]} {name} {viName} {required} {disabled} />
 						{:else if type == 'password'}
 							<PasswordField
 								error={$errors[name]}
 								{name}
+								{viName}
 								{required}
 								{disabled}
 								bind:value={formData[name]}
 							/>
 						{:else if type === 'select'}
-							<SelectField error={$errors[name]} {name} {options} {required} />
+							<SelectField error={$errors[name]} {name} {viName} {options} {required} />
 						{:else if type === 'date'}
-							<DateField error={$errors[name]} {name} {required} />
+							<DateField error={$errors[name]} {name} {viName} {required} />
 						{/if}
 					{/each}
 				</form>
