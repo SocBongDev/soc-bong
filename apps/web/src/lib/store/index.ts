@@ -15,7 +15,7 @@ export interface AttendedStatus {
 	studentId?: string
 }
 
-export const classIdStore = writable<number | null>(1)
+export const classIdStore = writable<number | null>(null)
 
 export const userRoleStore = writable<string | null>('')
 
