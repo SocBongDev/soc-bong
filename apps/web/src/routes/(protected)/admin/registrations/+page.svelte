@@ -53,17 +53,20 @@
 
 	const registrationSchema: {
 		name: string
+		viName: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
 		options?: { label: string; value: string }[]
 	}[] = [
 		{
 			name: 'studentName',
+			viName: 'Tên học sinh',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'studentClass',
+			viName: 'Cấp lớp học sinh',
 			type: 'select',
 			required: true,
 			options: [
@@ -75,26 +78,31 @@
 		},
 		{
 			name: 'studentDob',
+			viName: 'Ngày tháng năm sinh',
 			type: 'date',
 			required: true
 		},
 		{
 			name: 'parentName',
+			viName: 'Tên phụ huynh',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'phoneNumber',
+			viName: 'Số điện thoại',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'note',
+			viName: 'Ghi chú',
 			type: 'text',
 			required: false
 		},
 		{
 			name: 'agencyId',
+			viName: 'Cơ sở sẽ theo học',
 			type: 'select',
 			required: true,
 			options: agencyOptions
@@ -570,13 +578,13 @@
 				on:scroll={(e) => handleContentScroll(e.currentTarget)}
 			>
 				<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
-					{#each registrationSchema as { type, name, required, options } (name)}
+					{#each registrationSchema as { type, name, viName, required, options } (name)}
 						{#if type === 'text'}
-							<TextField error={$errors[name]} {name} {required} />
+							<TextField error={$errors[name]} {name} {viName} {required} />
 						{:else if type === 'select'}
-							<SelectField error={$errors[name]} {name} {options} {required} />
+							<SelectField error={$errors[name]} {name} {viName} {options} {required} />
 						{:else if type === 'date'}
-							<DateField error={$errors[name]} {name} {required} />
+							<DateField error={$errors[name]} {name} {viName} {required} />
 						{/if}
 					{/each}
 				</form>
