@@ -2,6 +2,7 @@ package attendances
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 
 	"github.com/SocBongDev/soc-bong/internal/logger"
@@ -63,8 +64,10 @@ func (h *AttendanceHandler) ExportExcel(c *fiber.Ctx) error {
 	}
 
 	c.Set("Content-Type", "application/octet-stream")
-	c.Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s-%d-%d.xlsx", attendanceResp.Class.Name, month, year))
 	c.Set("Content-Transfer-Encoding", "binary")
 	c.Set("Expires", "0")
+	filename := fmt.Sprintf("%s-%d-%d.xlsx", attendanceResp.Class.Name, month, year)
+	encodedFilename := url.QueryEscape(filename)
+	c.Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"; filename*=UTF-8''%s`, filename, encodedFilename))
 	return c.SendStream(buf)
 }
