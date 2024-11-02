@@ -207,27 +207,32 @@
 
 	const agencySchema: {
 		name: string
+		viName: string
 		type: 'text' | 'date' | 'select'
 		required: boolean
 		options?: { label: string; value: string }[]
 	}[] = [
 		{
 			name: 'name',
+			viName: 'Tên Cơ Sở',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'address',
+			viName: 'Địa chỉ',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'phone',
+			viName: 'Số điện thoại cơ sở',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'email',
+			viName: 'email',
 			type: 'text',
 			required: true
 		}
@@ -445,7 +450,7 @@
 			{/if}
 			<header class="relative flex flex-shrink-0 items-center justify-between px-7 py-6">
 				<h4 class="text-lg font-bold">{isNew ? 'Tạo mới' : 'Chỉnh sửa'}</h4>
-				<div class="tooltip tooltip-left tooltip-warning" data-tip="Xóa">
+				<div class="tooltip tooltip-warning tooltip-left" data-tip="Xóa">
 					<button
 						class="btn btn-circle btn-ghost btn-sm active:!translate-y-1"
 						on:click={() => {
@@ -472,13 +477,13 @@
 				on:scroll={(e) => handleContentScroll(e.currentTarget)}
 			>
 				<form class="flex flex-col gap-8 text-sm" id="upsertForm" use:form>
-					{#each agencySchema as { type, name, required, options } (name)}
+					{#each agencySchema as { type, name, viName, required, options } (name)}
 						{#if type === 'text'}
-							<TextField error={$errors[name]} {name} {required} />
+							<TextField error={$errors[name]} {name} {viName} {required} />
 						{:else if type === 'select'}
-							<SelectField error={$errors[name]} {name} {options} {required} />
+							<SelectField error={$errors[name]} {name} {viName} {options} {required} />
 						{:else if type === 'date'}
-							<DateField error={$errors[name]} {name} {required} />
+							<DateField error={$errors[name]} {name} {viName} {required} />
 						{/if}
 					{/each}
 				</form>
