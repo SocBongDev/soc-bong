@@ -72,42 +72,50 @@
 
 	const userSchema: {
 		name: string
+		viName: string
 		type: 'text' | 'date' | 'select' | 'password'
 		required: boolean
 		options?: { label: string; value: string }[]
 	}[] = [
 		{
 			name: 'first_name',
+			viName: 'Họ',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'last_name',
+			viName: 'Tên',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'dob',
+			viName: 'Ngày tháng năm sinh',
 			type: 'date',
 			required: true
 		},
 		{
 			name: 'phone_number',
+			viName: 'Số điện thoại',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'email',
+			viName: 'email',
 			type: 'text',
 			required: true
 		},
 		{
 			name: 'password',
+			viName: 'Mật khẩu',
 			type: 'password',
 			required: true
 		},
 		{
 			name: 'confirmPassword',
+			viName: 'Xác nhận mật khẩu',
 			type: 'password',
 			required: true
 		}
@@ -223,15 +231,21 @@
 			on:scroll={(e) => handleContentScroll(e.currentTarget)}
 		>
 			<form class="grid grid-cols-1 gap-4 text-sm" id="signupForm" use:form>
-				{#each userSchema as { type, name, required, options } (name)}
+				{#each userSchema as { type, name, viName, required, options } (name)}
 					{#if type === 'text'}
-						<TextField error={$errors[name]} {name} {required} />
+						<TextField error={$errors[name]} {name} {viName} {required} />
 					{:else if type == 'password'}
-						<PasswordField error={$errors[name]} {name} {required} bind:value={formData[name]} />
+						<PasswordField
+							error={$errors[name]}
+							{name}
+							{viName}
+							{required}
+							bind:value={formData[name]}
+						/>
 					{:else if type === 'select'}
-						<SelectField error={$errors[name]} {name} {options} {required} />
+						<SelectField error={$errors[name]} {name} {viName} {options} {required} />
 					{:else if type === 'date'}
-						<DateField error={$errors[name]} {name} {required} />
+						<DateField error={$errors[name]} {name} {viName} {required} />
 					{/if}
 				{/each}
 			</form>
