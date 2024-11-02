@@ -11,7 +11,7 @@
 	import type { AttendedStatus } from '$lib/store'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	import { get } from 'svelte/store'
-	import type { StudentProps } from '$lib/common/type'
+	import type { ClassesProps, StudentProps } from '$lib/common/type'
 	let inputValue: string = dayjs().format('YYYY-MM') || '07-2024'
 	let yearPicked: number = parseInt(inputValue.split('-')[0], 10)
 	let monthPicked: number = parseInt(inputValue.split('-')[1], 10)
@@ -30,9 +30,10 @@
 	})
 
 	export let data: PageData
-	let classId = get(classIdStore) || 1
+	let classId =
+		get(classIdStore) ?? ((data.classes.data.length > 0 && data.classes.data[0].id) as number)
 	let studentList: StudentProps[] = data.students.data ?? []
-	let attendances: any = data.attendances ?? []
+	let attendances: any = []
 	const studentIds =
 		studentList && studentList.map((student: any) => student.id).sort((a: any, b: any) => b - a)
 	attendances = studentIds && studentIds?.map((id: any) => attendances[id])
@@ -72,6 +73,28 @@
 		loading = true
 		let datePicked = dayjs(inputValue).format('MM-YYYY')
 		loadAttendancesData(classId, datePicked)
+	}
+
+	const formatClasses = async (classId: number): Promise<ClassesProps> => {
+		try {
+			const response = await fetch(`${PUBLIC_API_SERVER_URL}/classes/${classId}`, {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${token}`,
+					'Content-Type': 'application/json'
+				}
+			})
+			const classesData = await response.json()
+			return classesData
+		} catch (err) {
+			console.error('Error fetch class: ', err)
+			Notify({
+				type: 'error',
+				id: crypto.randomUUID(),
+				description: 'Có lỗi khi lấy lớp học, vui lòng thử lại'
+			})
+			throw `Có lỗi khi lấy lớp học, vui lòng thử lại: ${err}`
+		}
 	}
 
 	async function loadStudentData(classId: number) {
@@ -119,6 +142,28 @@
 		}
 	}
 
+	onMount(() => {
+		loading = true
+		let datePicked = dayjs(inputValue).format('MM-YYYY')
+		if ($classIdStore || classId) {
+			loadStudentData(classId)
+			loadAttendancesData(classId, datePicked)
+		} else {
+			studentList = []
+			attendances = []
+			loading = false
+		}
+	})
+
+	export function refreshStudentAttendances() {
+		loading = true
+		let datePicked = dayjs(inputValue).format('MM-YYYY')
+		if (classId) {
+			loadStudentData(classId)
+			loadAttendancesData(classId, datePicked)
+		}
+	}
+
 	async function handleInput(event: any) {
 		const value = (event.target as HTMLInputElement).value
 		inputValue = value
@@ -163,104 +208,107 @@
 	}
 
 	async function batchUpdate() {
-		if (statusArray.length > 0) {
-			const updatePromises = statusArray.map((status) => {
-				if (status?.id) {
-					return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
-						method: 'PATCH',
-						headers: {
-							Authorization: `Bearer ${token}`,
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify([
-							{
-								id: status.id,
-								attendedStatus: status.attendedStatus
-							}
-						])
-					})
-				} else {
-					return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
-						method: 'POST',
-						headers: {
-							Authorization: `Bearer ${token}`,
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify([
-							{
-								attendedAt: status.date,
-								attendedStatus: status.attendedStatus,
-								classId: status.classId && parseInt(status.classId),
-								studentId: status.studentId && parseInt(status.studentId)
-							}
-						])
-					})
-				}
-			})
+		loading = true
+		try {
+			if (statusArray.length > 0) {
+				const updatePromises = statusArray.map((status) => {
+					if (status?.id) {
+						return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
+							method: 'PATCH',
+							headers: {
+								Authorization: `Bearer ${token}`,
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify([
+								{
+									id: status.id,
+									attendedStatus: status.attendedStatus
+								}
+							])
+						})
+					} else {
+						return fetch(`${PUBLIC_API_SERVER_URL}/attendances`, {
+							method: 'POST',
+							headers: {
+								Authorization: `Bearer ${token}`,
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify([
+								{
+									attendedAt: status.date,
+									attendedStatus: status.attendedStatus,
+									classId: status.classId && parseInt(status.classId),
+									studentId: status.studentId && parseInt(status.studentId)
+								}
+							])
+						})
+					}
+				})
 
-			try {
 				await Promise.all(updatePromises)
 				Notify({
 					type: 'success',
 					id: crypto.randomUUID(),
 					description: `Đã cập nhật điểm danh thành công cho ${statusArray.length} ngày`
 				})
-			} catch (error) {
+			} else {
 				Notify({
 					type: 'error',
 					id: crypto.randomUUID(),
 					description: 'Lỗi không thể thực hiện chức năng này'
 				})
 			}
-			resetStatusArray()
-			await refreshData()
-		} else {
-			resetStatusArray()
-			refreshData()
+		} catch (error) {
 			Notify({
 				type: 'error',
 				id: crypto.randomUUID(),
 				description: 'Lỗi không thể thực hiện chức năng này'
 			})
+		} finally {
+			loading = false
+			resetStatusArray()
+			await refreshData()
 		}
 	}
 
 	async function handleExportAttendances() {
-		const response = await fetch(
-			`${PUBLIC_API_SERVER_URL}/attendances/${classId}/export-excel?period=${`${
-				monthPicked < 10 ? `0${monthPicked}` : monthPicked
-			}-${yearPicked}`}`,
-			{
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${token}`,
-					Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+		try {
+			const response = await fetch(
+				`${PUBLIC_API_SERVER_URL}/attendances/${classId}/export-excel?period=${`${
+					monthPicked < 10 ? `0${monthPicked}` : monthPicked
+				}-${yearPicked}`}`,
+				{
+					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${token}`,
+						Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+					}
 				}
+			)
+			if (response.ok) {
+				const blob = await response.blob()
+				// Handle the blob, e.g., download the file or process it further
+				const url = window.URL.createObjectURL(blob)
+				const a = document.createElement('a')
+				a.style.display = 'none'
+				a.href = url
+				a.download = `${(await formatClasses(classId))?.name}-${monthPicked}-${yearPicked}.xlsx` // Specify the file name you want to save as
+				document.body.appendChild(a)
+				a.click()
+				window.URL.revokeObjectURL(url)
 			}
-		)
-		if (response.ok) {
-			const blob = await response.blob()
-			// Handle the blob, e.g., download the file or process it further
-			const url = window.URL.createObjectURL(blob)
-			const a = document.createElement('a')
-			a.style.display = 'none'
-			a.href = url
-			a.download = `Workbook-${classId}-.xlsx` // Specify the file name you want to save as
-			document.body.appendChild(a)
-			a.click()
-			window.URL.revokeObjectURL(url)
-		} else {
+		} catch (e) {
 			Notify({
 				type: 'error',
 				id: crypto.randomUUID(),
 				description: 'Đã có lỗi xảy ra khi thực hiện tải xuống!'
 			})
-			console.error('Failed to fetch the .xlsx file:', response.statusText)
+			console.error('Failed to fetch the .xlsx file:', e)
 		}
 	}
 
 	async function handleTrackAttendancesDay() {
-		let date = dayjs('2024-10-02').utc().local().format('YYYY-MM-DD')
+		let date = dayjs().utc().local().format('YYYY-MM-DD')
 		if (!statusArray.length) {
 			//Case 1: Create new att for all students when no elements in statusChange
 			const newAttendances: AttendedStatus[] = studentList
@@ -372,29 +420,10 @@
 			})
 		}
 	}
-
-	onMount(() => {
-		loading = true
-		let datePicked = dayjs(inputValue).format('MM-YYYY')
-		if ($classIdStore) {
-			classId = $classIdStore
-			loadStudentData(classId)
-			loadAttendancesData(classId, datePicked)
-		}
-	})
-
-	export function refreshStudentAttendances() {
-		loading = true
-		let datePicked = dayjs(inputValue).format('MM-YYYY')
-		if (classId) {
-			loadStudentData(classId)
-			loadAttendancesData(classId, datePicked)
-		}
-	}
 </script>
 
 <div class="relative flex h-full w-full flex-col justify-start gap-4">
-	<div class="row-span-full mt-1 grid grid-cols-5 px-2">
+	<div class="row-span-full mt-1 grid grid-cols-3 px-2 lg:grid-cols-5">
 		{#each status as { name, color, letter } (name)}
 			<div class="flex items-center gap-1">
 				<div class={`h-5 w-5 ${color} rounded-full border border-black/50`} />
@@ -403,8 +432,10 @@
 			</div>
 		{/each}
 	</div>
-	<div class="mt-2 flex justify-between">
-		<div class="flex items-center justify-start">
+	<div
+		class="mt-2 flex flex-col justify-center gap-2 lg:flex-row lg:items-center lg:justify-between"
+	>
+		<div class="flex items-center justify-start gap-2">
 			{#if data.classes?.data.length > 0}
 				<select
 					on:change={handleSelectClassId}
@@ -434,22 +465,24 @@
 			</div>
 		</div>
 
-		<div class="flex items-center justify-end gap-2">
+		<div class="flex gap-2 lg:items-center lg:justify-end">
 			<div class="group-button flex w-fit items-center gap-2">
 				<button
-					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-semibold"
+					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-semibold disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
 					on:click={handleExportAttendances}
+					disabled={!classId || studentList.length === 0 || attendances.length === 0}
 				>
 					<ExportIcon class="h-4 w-4" />
-					Export
+					Xuất Excel
 				</button>
 
 				<button
-					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-semibold"
+					class="flex w-fit items-center justify-center gap-1.5 rounded border border-gray-400 bg-gray-300 px-1.5 py-0.5 text-center text-sm font-semibold disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
 					on:click={handleTrackAttendancesDay}
+					disabled={!classId || studentList.length === 0 || attendances.length === 0}
 				>
 					<TrackerIcon class="h-4 w-4" />
-					Track Attended A Day
+					Điểm danh hôm nay
 				</button>
 			</div>
 		</div>
@@ -482,9 +515,11 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#if studentList.length === 0}
-					<tr class="hover cursor-pointer text-center">
-						<td class="max-w-xs px-0">Không có dữ liệu</td>
+				{#if studentList.length === 0 || !classId}
+					<tr class="h-12 w-full items-center justify-center border-none">
+						<td class="w-full text-center text-base font-medium" colspan="10">
+							Không có dữ liệu...
+						</td>
 					</tr>
 				{:else}
 					{#each studentList as student, id (id)}
