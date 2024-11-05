@@ -4,7 +4,7 @@
 	import { createForm } from 'felte'
 	import { validator } from '@felte/validator-zod'
 	import { CreateClassesSchema as schema } from './validate'
-	import { dialogProps, Notify, openDialog } from '$lib/store'
+	import { classIdStore, dialogProps, Notify, openDialog } from '$lib/store'
 	import dayjs from 'dayjs'
 	import { PUBLIC_API_SERVER_URL } from '$env/static/public'
 	import { invalidate } from '$app/navigation'
@@ -261,6 +261,7 @@
 
 	function refreshData() {
 		invalidate('app:classes')
+		$classIdStore = null
 	}
 
 	async function loadData(id: number, signal: AbortSignal) {
